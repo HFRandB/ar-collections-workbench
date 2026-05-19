@@ -86,7 +86,7 @@ On each run the script loads existing `progress.csv` and **skips rows already ma
 | **pyautogui failsafe** | Moving mouse to top-left corner of screen immediately pauses the script |
 | **Operation delay** | `DELAY = 1.0` seconds between each UI action (configurable constant) |
 | **`--dry-run` flag** | Logs what it would do without clicking PermaBlock |
-| **SAP window focus** | Script brings SAP GUI window to foreground before each interaction using `pyautogui.getWindowsWithTitle` / `subprocess` |
+| **SAP window focus** | Script brings SAP GUI window to foreground before each interaction using `osascript` (AppleScript via `subprocess`) — e.g. `tell application "SAP GUI" to activate` |
 
 ---
 
