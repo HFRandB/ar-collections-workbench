@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AR Collections — 2026-08-03</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"72","72full",Arial,sans-serif;background:#F5F6F7;color:#1C2B33;min-height:100vh;display:flex;flex-direction:column}
+.header{background:linear-gradient(135deg,#1C2B33 0%,#0070F2 100%);color:#fff;padding:32px 48px}
+.header h1{font-size:26px;font-weight:700}
+.header p{opacity:.8;font-size:13px;margin-top:6px}
+.header .date{font-size:12px;opacity:.7;margin-top:4px}
+.tiles{display:flex;gap:24px;padding:48px;flex-wrap:wrap;flex:1;align-items:flex-start;justify-content:center}
+.tile{background:#fff;border:1px solid #E0E0E0;border-radius:12px;padding:36px 32px;flex:1;min-width:240px;max-width:340px;
+  text-decoration:none;color:#1C2B33;transition:all .2s;cursor:pointer;display:flex;flex-direction:column;gap:14px}
+.tile:hover{box-shadow:0 8px 32px rgba(0,0,0,.12);transform:translateY(-3px);border-color:#0070F2}
+.tile-icon{font-size:42px;line-height:1}
+.tile-title{font-size:19px;font-weight:700}
+.tile-desc{font-size:13px;color:#6A6D70;line-height:1.6}
+.tile-badge{display:inline-flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.badge-tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.footer{text-align:center;padding:16px;font-size:11px;color:#9DA0A4;border-top:1px solid #E0E0E0;background:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>AR Collections Workbench</h1>
+  <p>Greater China — CC0038 · CC0073 · CC0074</p>
+  <div class="date">Report date: 2026-08-03 &nbsp;·&nbsp; 889 past-due accounts</div>
+</div>
+<div class="tiles">
+  <a class="tile" href="AR_Summary_2026-08-03.html" target="_blank">
+    <div class="tile-icon">📊</div>
+    <div class="tile-title">Summary</div>
+    <div class="tile-desc">AR overview by entity — total past due, EHF global exposure, term risk / EHF / order block counts per company code.</div>
+    <div class="tile-badge">
+      <span class="badge-tag" style="background:#FFEAEA;color:#BB0000">Term Risk</span>
+      <span class="badge-tag" style="background:#E0F5F5;color:#007373">EHF Impact</span>
+      <span class="badge-tag" style="background:#FFF0E5;color:#8B3A00">OB Risk</span>
+    </div>
+  </a>
+  <a class="tile" href="AR_Activity_2026-08-03.html" target="_blank">
+    <div class="tile-icon">📈</div>
+    <div class="tile-title">Activity</div>
+    <div class="tile-desc">Daily edit tracking — bar chart of updates per day, full edit log with filters by date, field, and entity. Export to CSV.</div>
+    <div class="tile-badge">
+      <span class="badge-tag" style="background:#F0E8FF;color:#5C3D8F">FC Month</span>
+      <span class="badge-tag" style="background:#F0E8FF;color:#5C3D8F">Payment Process</span>
+      <span class="badge-tag" style="background:#F0E8FF;color:#5C3D8F">Current Status</span>
+    </div>
+  </a>
+  <a class="tile" href="AR_Worklist_2026-08-03.html" target="_blank">
+    <div class="tile-icon">📋</div>
+    <div class="tile-title">Worklist</div>
+    <div class="tile-desc">Full account worklist — 889 accounts with inline editing, dunning, FDL letters, unblock requests, and data refresh from Excel / SharePoint.</div>
+    <div class="tile-badge">
+      <span class="badge-tag" style="background:#E8F3FF;color:#0064D9">889 Accounts</span>
+      <span class="badge-tag" style="background:#E6F9F0;color:#188918">✉ Dunning</span>
+      <span class="badge-tag" style="background:#FFF0E5;color:#8B3A00">🔓 Unblock</span>
+    </div>
+  </a>
+</div>
+<div class="footer">AR Collections Daily Worklist &nbsp;·&nbsp; 2026-08-03 &nbsp;·&nbsp; Source: /Documents/daily work/ar reports</div>
+</body>
+</html>
