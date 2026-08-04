@@ -206,7 +206,9 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
     </div>
     <div class="ds-actions">
       <button class="ds-refresh-btn" id="ds-refresh-btn" onclick="dsRecalc()" disabled>⟳ Refresh Worklist</button>
-      <div class="ds-progress" id="ds-progress">Processing…</div>
+      <div class="ds-progress-step" id="ds-progress">⏳ Processing…</div>
+      <div class="ds-progress-bar-wrap" id="ds-bar-wrap"><div class="ds-progress-bar" id="ds-bar"></div></div>
+      <span class="ds-progress-pct" id="ds-pct"></span>
       <div class="ds-status" id="ds-proc-status"></div>
     </div>
   </div>
@@ -1680,41 +1682,66 @@ async function dsRecalc() {
   loadXLSX(async function() { await _dsRecalcInner(); });
 }
 async function _dsRecalcInner() {
-  const btn = document.getElementById('ds-refresh-btn');
-  const prog= document.getElementById('ds-progress');
-  const stat= document.getElementById('ds-proc-status');
-  btn.disabled = true; prog.style.display='inline'; stat.textContent='';
+  const btn  = document.getElementById('ds-refresh-btn');
+  const step = document.getElementById('ds-progress');
+  const bar  = document.getElementById('ds-bar');
+  const barW = document.getElementById('ds-bar-wrap');
+  const pct  = document.getElementById('ds-pct');
+  const stat = document.getElementById('ds-proc-status');
+  const yield_ = (ms=0) => new Promise(r => setTimeout(r, ms));
+
+  btn.disabled = true;
+  step.style.display = 'inline'; barW.style.display = 'block';
+  stat.textContent = ''; stat.style.color = '#6A6D70';
+
+  const setProgress = async (msg, percent) => {
+    step.textContent = '⏳ ' + msg;
+    if(bar) { bar.style.width = percent + '%'; }
+    if(pct) { pct.textContent = percent + '%'; }
+    await yield_(15);  // yield to browser so it can repaint
+  };
 
   try {
-    const setMsg = m => { prog.textContent = m; };
+    let p38new={}, p73new={}, p74new={};
 
-    let p38new={},p73new={},p74new={};
-    if(DS['master']){
-      setMsg('Parsing Master Report…');
-      const all=dsBuildFromMasterSheet(DS['master']);
-      p38new=all['0038']||{}; p73new=all['0073']||{}; p74new=all['0074']||{};
+    if(DS['master']) {
+      await setProgress('Parsing Master Report — reading rows…', 10);
+      const all = dsBuildFromMasterSheet(DS['master']);
+      await setProgress('Parsing Master Report — CC0038 done…', 35);
+      p38new = all['0038']||{}; p73new = all['0073']||{}; p74new = all['0074']||{};
+      await setProgress('Parsing Master Report — all CCs done', 50);
     } else {
-      setMsg('Parsing CC0038…'); if(DS['0038']) p38new=dsBuildFromSheet(DS['0038'],'0038');
-      setMsg('Parsing CC0073…'); if(DS['0073']) p73new=dsBuildFromSheet(DS['0073'],'0073');
-      setMsg('Parsing CC0074…'); if(DS['0074']) p74new=dsBuildFromSheet(DS['0074'],'0074');
+      if(DS['0038']) { await setProgress('Parsing CC0038 (China)…', 15); p38new = dsBuildFromSheet(DS['0038'],'0038'); }
+      if(DS['0073']) { await setProgress('Parsing CC0073 (Taiwan)…', 35); p73new = dsBuildFromSheet(DS['0073'],'0073'); }
+      if(DS['0074']) { await setProgress('Parsing CC0074 (HK)…', 50); p74new = dsBuildFromSheet(DS['0074'],'0074'); }
     }
 
-    setMsg('Parsing contacts…');
+    if(DS['dun']) {
+      await setProgress('Parsing dunning contacts…', 60);
+    }
     const ctNew = DS['dun'] ? dsBuildContacts(DS['dun']) : null;
 
-    setMsg('Rebuilding worklist…');
-    // Small async yield so UI can update
-    await new Promise(r => setTimeout(r, 10));
+    await setProgress('Calculating EHF & risk flags…', 70);
+    await yield_(10);
+
+    await setProgress('Building account cards…', 80);
+    await yield_(10);
 
     rebuildCards(p38new, p73new, p74new, ctNew);
 
-    prog.style.display='none';
-    const total = Object.values({...p38new,...p73new,...p74new}).filter(d=>d.total_pd>0).length;
-    stat.textContent = '✓ Worklist updated — ' + total + ' accounts loaded';
+    await setProgress('Updating summary & filters…', 95);
+    updateIncomeBar();
+    await yield_(10);
+
+    // Done
+    step.style.display = 'none'; barW.style.display = 'none'; pct.textContent = '';
+    const total = Object.values(Object.assign({},p38new,p73new,p74new)).filter(d=>d.total_pd>0).length;
+    stat.textContent = '✓ Loaded ' + total + ' accounts successfully';
     stat.style.color = '#188918';
+
   } catch(err) {
-    prog.style.display='none';
-    stat.textContent = 'Error: ' + err.message;
+    step.style.display = 'none'; barW.style.display = 'none'; pct.textContent = '';
+    stat.textContent = '✗ Error: ' + err.message;
     stat.style.color = '#BB0000';
     console.error(err);
   }
@@ -3668,41 +3695,66 @@ async function dsRecalc() {
   loadXLSX(async function() { await _dsRecalcInner(); });
 }
 async function _dsRecalcInner() {
-  const btn = document.getElementById('ds-refresh-btn');
-  const prog= document.getElementById('ds-progress');
-  const stat= document.getElementById('ds-proc-status');
-  btn.disabled = true; prog.style.display='inline'; stat.textContent='';
+  const btn  = document.getElementById('ds-refresh-btn');
+  const step = document.getElementById('ds-progress');
+  const bar  = document.getElementById('ds-bar');
+  const barW = document.getElementById('ds-bar-wrap');
+  const pct  = document.getElementById('ds-pct');
+  const stat = document.getElementById('ds-proc-status');
+  const yield_ = (ms=0) => new Promise(r => setTimeout(r, ms));
+
+  btn.disabled = true;
+  step.style.display = 'inline'; barW.style.display = 'block';
+  stat.textContent = ''; stat.style.color = '#6A6D70';
+
+  const setProgress = async (msg, percent) => {
+    step.textContent = '⏳ ' + msg;
+    if(bar) { bar.style.width = percent + '%'; }
+    if(pct) { pct.textContent = percent + '%'; }
+    await yield_(15);  // yield to browser so it can repaint
+  };
 
   try {
-    const setMsg = m => { prog.textContent = m; };
+    let p38new={}, p73new={}, p74new={};
 
-    let p38new={},p73new={},p74new={};
-    if(DS['master']){
-      setMsg('Parsing Master Report…');
-      const all=dsBuildFromMasterSheet(DS['master']);
-      p38new=all['0038']||{}; p73new=all['0073']||{}; p74new=all['0074']||{};
+    if(DS['master']) {
+      await setProgress('Parsing Master Report — reading rows…', 10);
+      const all = dsBuildFromMasterSheet(DS['master']);
+      await setProgress('Parsing Master Report — CC0038 done…', 35);
+      p38new = all['0038']||{}; p73new = all['0073']||{}; p74new = all['0074']||{};
+      await setProgress('Parsing Master Report — all CCs done', 50);
     } else {
-      setMsg('Parsing CC0038…'); if(DS['0038']) p38new=dsBuildFromSheet(DS['0038'],'0038');
-      setMsg('Parsing CC0073…'); if(DS['0073']) p73new=dsBuildFromSheet(DS['0073'],'0073');
-      setMsg('Parsing CC0074…'); if(DS['0074']) p74new=dsBuildFromSheet(DS['0074'],'0074');
+      if(DS['0038']) { await setProgress('Parsing CC0038 (China)…', 15); p38new = dsBuildFromSheet(DS['0038'],'0038'); }
+      if(DS['0073']) { await setProgress('Parsing CC0073 (Taiwan)…', 35); p73new = dsBuildFromSheet(DS['0073'],'0073'); }
+      if(DS['0074']) { await setProgress('Parsing CC0074 (HK)…', 50); p74new = dsBuildFromSheet(DS['0074'],'0074'); }
     }
 
-    setMsg('Parsing contacts…');
+    if(DS['dun']) {
+      await setProgress('Parsing dunning contacts…', 60);
+    }
     const ctNew = DS['dun'] ? dsBuildContacts(DS['dun']) : null;
 
-    setMsg('Rebuilding worklist…');
-    // Small async yield so UI can update
-    await new Promise(r => setTimeout(r, 10));
+    await setProgress('Calculating EHF & risk flags…', 70);
+    await yield_(10);
+
+    await setProgress('Building account cards…', 80);
+    await yield_(10);
 
     rebuildCards(p38new, p73new, p74new, ctNew);
 
-    prog.style.display='none';
-    const total = Object.values({...p38new,...p73new,...p74new}).filter(d=>d.total_pd>0).length;
-    stat.textContent = '✓ Worklist updated — ' + total + ' accounts loaded';
+    await setProgress('Updating summary & filters…', 95);
+    updateIncomeBar();
+    await yield_(10);
+
+    // Done
+    step.style.display = 'none'; barW.style.display = 'none'; pct.textContent = '';
+    const total = Object.values(Object.assign({},p38new,p73new,p74new)).filter(d=>d.total_pd>0).length;
+    stat.textContent = '✓ Loaded ' + total + ' accounts successfully';
     stat.style.color = '#188918';
+
   } catch(err) {
-    prog.style.display='none';
-    stat.textContent = 'Error: ' + err.message;
+    step.style.display = 'none'; barW.style.display = 'none'; pct.textContent = '';
+    stat.textContent = '✗ Error: ' + err.message;
     stat.style.color = '#BB0000';
     console.error(err);
   }
@@ -4189,7 +4241,6 @@ function togglePaid(btn,e){e.stopPropagation();var key=btn.dataset.key,bp=btn.da
 function applyPaidToRow(key,bp,isPaid){var btn=document.querySelector('.paid-btn[data-key="'+key+'"]');if(!btn)return;var row=btn.closest('tr');if(!row)return;row.classList.toggle('row-paid',isPaid);var dc=row.querySelector('td:first-child'),badge=dc?dc.querySelector('.paid-badge'):null;if(isPaid&&!badge&&dc)dc.innerHTML+='<span class="paid-badge">Paid</span>';else if(!isPaid&&badge)badge.remove();btn.textContent=isPaid?'✓ Paid':'Mark Paid';btn.classList.toggle('is-paid',isPaid);}
 function calcIncome(){var inc={};Object.entries(editStore).forEach(function(e){var key=e[0],val=e[1];if(!val||val.paid!=='yes')return;var p=key.split('|'),cc=p[0],bp=p[1],doc=p[2],docs=DUN_DOCS[bp]||[],d=docs.find(function(x){return x.doc===doc;});if(!d)return;if(!inc[cc])inc[cc]={amount:0,count:0,currency:d.ccy};inc[cc].amount+=d.pd_amt;inc[cc].count++;});return inc;}
 function updateIncomeBar(){var bar=document.getElementById('income-bar');if(!bar)return;var inc=calcIncome();if(!Object.keys(inc).length){bar.innerHTML='<div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet — use "Mark Paid" in document details</span>';return;}var blocks=Object.entries(inc).map(function(e){var cc=e[0],d=e[1];return '<div class="income-block"><div class="income-label">'+cc+'</div><div class="income-val">'+Math.round(d.amount).toLocaleString()+' <small style="font-size:10px">'+d.currency+'</small></div><div class="income-sub">'+d.count+' doc'+(d.count!==1?'s':'')+' paid</div></div>';});bar.innerHTML='<div class="income-title">💰 Income Collected</div>'+blocks.join('<div class="income-sep"></div>');}
-
 document.addEventListener('DOMContentLoaded',function(){
   var cm=[{cc:'0038',ci:'cards38',ni:'cnt38',l:'CC0038',c:'CNY'},{cc:'0073',ci:'cards73',ni:'cnt73',l:'CC0073',c:'TWD'},{cc:'0074',ci:'cards74',ni:'cnt74',l:'CC0074',c:'HKD'}];
   cm.forEach(function(m){var r=PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});var e=document.getElementById(m.ci);if(e)e.innerHTML=r.map(function(p){return buildCardHTML(p.bp,p,m.l,m.c);}).join('');var n=document.getElementById(m.ni);if(n)n.textContent=r.length+' past-due accounts';});
