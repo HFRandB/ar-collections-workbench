@@ -1250,26 +1250,39 @@ function dsDrop(e) {
 function dsFileSelect(e) { dsHandleFiles([...e.target.files]); }
 
 function dsDetectSlot(name) {
-  const n = name.toLowerCase();
+  const n = name.toLowerCase().replace(/[_\s-]/g,'');
+  // Dunning contacts
   if (n.includes('dunning') || n.includes('contact')) return 'dun';
-  if (n.includes('master')) return 'master';
-  if (n.includes('0038') || n.includes('cn ') || n.includes('china')) return '0038';
-  if (n.includes('0073') || n.includes('cc0073')) return '0073';
-  if (n.includes('0074') || n.includes('cc0074')) return '0074';
-  // fallback: ask from filename patterns
-  if (n.includes('038')) return '0038';
-  if (n.includes('073')) return '0073';
-  if (n.includes('074')) return '0074';
-  return null;
+  // Master report — any variation of "master" in filename
+  if (n.includes('master') || n.includes('masterreport')) return 'master';
+  // Specific CC codes
+  if (n.includes('cc0038') || n.includes('0038') || n.includes('038')) return '0038';
+  if (n.includes('cc0073') || n.includes('0073') || n.includes('073')) return '0073';
+  if (n.includes('cc0074') || n.includes('0074') || n.includes('074')) return '0074';
+  // AR report keywords — treat as master (combined)
+  if (n.includes('ar') || n.includes('report') || n.includes('gc') || n.includes('collection')) return 'master';
+  // Unknown — ask user
+  return 'ask';
 }
 
 function dsHandleFiles(files) {
-  files.forEach(file => {
-    const slot = dsDetectSlot(file.name);
-    if (!slot) { dsSetStatus('Could not detect file type for: ' + file.name + '. Rename to include 0038/0073/0074 or "dunning".', true); return; }
-    const reader = new FileReader();
-    reader.onload = e => { DS[slot] = e.target.result; dsMarkSlot(slot, file.name); dsCheckReady(); };
+  files.forEach(function(file) {
+    var slot = dsDetectSlot(file.name);
+    if (slot === 'ask') {
+      // Show a quick prompt for user to pick slot
+      var choice = prompt(
+        'Could not auto-detect file type for:\n"' + file.name + '"\n\n' +
+        'Enter the file type:\n  1 = Master Report (all CCs)\n  2 = CC0038 China\n  3 = CC0073 Taiwan\n  4 = CC0074 HK\n  5 = Dunning Contacts',
+        '1'
+      );
+      var slotMap = {'1':'master','2':'0038','3':'0073','4':'0074','5':'dun'};
+      slot = slotMap[choice ? choice.trim() : '1'] || 'master';
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) { DS[slot] = e.target.result; dsMarkSlot(slot, file.name); dsCheckReady(); };
+    reader.onerror = function() { dsSetStatus('Failed to read file: ' + file.name, true); };
     reader.readAsArrayBuffer(file);
+    dsSetStatus('Reading ' + file.name + '…', false);
   });
 }
 
@@ -1283,6 +1296,8 @@ function dsMarkSlot(slot, fname) {
 
 function dsCheckReady() {
   const anyAR = DS['master'] || DS['0038'] || DS['0073'] || DS['0074'];
+  // Debug: show what's loaded
+  if(anyAR) dsSetStatus('File loaded — click ⟳ Refresh Worklist to apply', false);
   document.getElementById('ds-refresh-btn').disabled = !anyAR;
   const loaded = Object.entries(DS).filter(([,v])=>v).map(([k])=>k);
   document.getElementById('ds-loaded-summary').textContent =
