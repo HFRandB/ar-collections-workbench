@@ -146,6 +146,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
 @media(max-width:768px){.content,.summary-bar,.filter-bar{padding:10px 14px}.amt-box{min-width:85px}}
 @media print{.filter-bar{display:none}.partner-card{break-inside:avoid}.modal-overlay{display:none!important}}
 </style>
+<script async src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js" id="sheetjs-cdn"></script>
 </head>
 <body>
 <div class="page-header">
@@ -1695,6 +1696,16 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
 async function dsRecalc() {
   loadXLSX(async function() { await _dsRecalcInner(); });
 }
+
+function loadXLSX(cb) {
+  if (typeof XLSX !== 'undefined') { cb(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
+  s.onload = function() { cb(); };
+  s.onerror = function() { alert('Could not load SheetJS library. Please check your internet connection.'); };
+  document.head.appendChild(s);
+}
+
 async function _dsRecalcInner() {
   const btn  = document.getElementById('ds-refresh-btn');
   const step = document.getElementById('ds-progress');
