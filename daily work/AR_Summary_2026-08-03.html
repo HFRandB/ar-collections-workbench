@@ -1248,13 +1248,23 @@ function dsBuildFromSheet(buf, cc) {
 }
 
 
-function dsBuildFromMasterSheet(buf) {
+async function dsBuildFromMasterSheet(buf, onProgress) {
   var wb=XLSX.read(buf,{type:'array',cellDates:false});
   var ws=wb.Sheets[wb.SheetNames[0]];
   var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
   if(rows.length<3) return {};
   var all={'0038':{},'0073':{},'0074':{}};
-  for(var i=2;i<rows.length;i++){
+  var total = rows.length - 2;
+  var CHUNK = 300;  // process 300 rows then yield
+
+  for(var i=2; i<rows.length; i++) {
+    // Yield every CHUNK rows so browser can repaint
+    if((i-2) % CHUNK === 0) {
+      var pct = Math.round(10 + ((i-2)/total)*55);  // 10%→65%
+      if(onProgress) onProgress('Parsing rows ' + (i-1) + ' / ' + total + '…', pct);
+      await new Promise(function(r){setTimeout(r,0);});
+    }
+
     var row=rows[i],cc=String(row[2]||'').trim();
     if(!all[cc]) continue;
     var bp=String(row[13]||'').trim(),bpName=String(row[14]||'').trim();
