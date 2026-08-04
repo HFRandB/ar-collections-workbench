@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>AR Summary — 2026-08-03</title>
+<title>AR Daily Worklist — 2026-08-03</title>
 <style>
 :root{--blue:#0070F2;--dark:#1C2B33;--bg:#F5F6F7;--card:#fff;--bdr:#E0E0E0;
   --crit:#BB0000;--high:#E76500;--med:#E9730C;--low:#188918;--ehf:#007373;--term:#6600CC}
@@ -146,8 +146,21 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
 @media(max-width:768px){.content,.summary-bar,.filter-bar{padding:10px 14px}.amt-box{min-width:85px}}
 @media print{.filter-bar{display:none}.partner-card{break-inside:avoid}.modal-overlay{display:none!important}}
 </style>
+<script>
+// SheetJS loaded lazily — only needed for drag-and-drop recalc
+var _xlsxLoaded = false;
+function loadXLSX(cb) {
+  if (typeof XLSX !== 'undefined') { cb(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
+  s.onload = function() { _xlsxLoaded = true; cb(); };
+  s.onerror = function() { alert('Could not load SheetJS. Check internet connection.'); };
+  document.head.appendChild(s);
+}
+</script>
 </head>
 <body>
+
 <div class="page-header">
   <div class="header-left"><h1>AR Collections Daily Worklist</h1><p>Accounts Receivable · Past Due Follow-up · EHF Assessment · Termination Risk</p></div>
   <div class="header-right"><strong>2026-08-03</strong><br>CC0038 China · CC0073 Taiwan · CC0074 HK<br><span style="opacity:.7;font-size:11px">Source: /Documents/daily work/ar reports</span></div>
@@ -155,11 +168,11 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
 
 
 <!-- Data Source Panel -->
-<div class="nav-bar">
-  <a href="AR_Summary_2026-08-03.html" class="nav-link" id="nav-summary" class="nav-link active">📊 Summary</a>
-  <a href="AR_Activity_2026-08-03.html" class="nav-link" id="nav-activity">📈 Activity</a>
-  <a href="AR_Worklist_2026-08-03.html" class="nav-link" id="nav-worklist">📋 Worklist</a>
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('worklist',this)">📋 Worklist</button>
 </div>
+<div class="tab-pane active" id="tab-summary">
   <!-- Summary KPIs -->
   <div class="summary-bar">
   <div class="sum-block"><div class="sum-label">CC0038 — SAP China</div><div class="sum-value" style="color:#BB0000" id="s38-pd">—</div><div class="sum-sub" id="s38-sub">—</div><div class="sum-tags"><span class="risk-tag term-tag" id="s38-term">— Term Risk</span><span class="risk-tag ehf-tag" id="s38-ehf">— EHF Impact</span></div></div>
@@ -184,8 +197,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
 
 
   <!-- Activity + Risk dashboard grid -->
-  <div class="income-bar" id="income-bar"><div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet</span></div>
-<div class="dash-grid">
+  <div class="dash-grid">
     <!-- Risk Overview card -->
     <div class="dash-card">
       <div class="dash-card-header">
@@ -199,8 +211,295 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
   </div>
 </div>
 
-<script>
+<div class="tab-pane" id="tab-activity">
+  <div class="dash-grid">
+    <div class="dash-card" style="grid-column:span 2">
+      <div class="dash-card-header">
+        Daily Edit Activity
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:10px;font-weight:400;color:#9DA0A4">Today highlighted in blue</span>
+          <button onclick="exportActivityCSV()" style="padding:2px 8px;background:#fff;color:#0070F2;border:1px solid #0070F2;border-radius:5px;cursor:pointer;font-size:10px">Export</button>
+        </div>
+      </div>
+      <div class="dash-card-body" style="padding:10px 16px 6px">
+        <div id="dash-act-tiles" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px"></div>
+        <div id="dash-chart" style="display:flex;align-items:flex-end;gap:3px;height:90px;overflow-x:auto"></div>
+        <div id="dash-chart-labels" style="display:flex;gap:3px;margin-top:2px;font-size:9px;color:#9DA0A4"></div>
+      </div>
+    </div>
+    <!-- Recent edits log card -->
+    <div class="dash-card" style="grid-column:1/-1">
+      <div class="dash-card-header">
+        Recent Edit Log
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="dash-filter-date" onchange="renderDashLog()" style="font-size:10px;padding:2px 6px;border:1px solid var(--bdr);border-radius:4px;outline:none"><option value="">All Dates</option></select>
+          <select id="dash-filter-field" onchange="renderDashLog()" style="font-size:10px;padding:2px 6px;border:1px solid var(--bdr);border-radius:4px;outline:none">
+            <option value="">All Fields</option>
+            <option value="fc">FC Month</option>
+            <option value="cpp">Payment Process</option>
+            <option value="status">Current Status</option>
+          </select>
+          <select id="dash-filter-cc" onchange="renderDashLog()" style="font-size:10px;padding:2px 6px;border:1px solid var(--bdr);border-radius:4px;outline:none">
+            <option value="">All Entities</option>
+            <option value="CC0038">CC0038</option><option value="CC0073">CC0073</option><option value="CC0074">CC0074</option>
+          </select>
+          <button onclick="clearActivityLog()" style="padding:2px 8px;background:#fff;color:#BB0000;border:1px solid #BB0000;border-radius:5px;cursor:pointer;font-size:10px">Clear</button>
+          <button onclick="exportActivityCSV()" style="padding:2px 8px;background:#fff;color:#0070F2;border:1px solid #0070F2;border-radius:5px;cursor:pointer;font-size:10px">Export CSV</button>
+        </div>
+      </div>
+      <div style="overflow:auto;max-height:280px">
+        <table class="dash-act-table">
+          <thead><tr>
+            <th>#</th><th>Date</th><th>Time</th><th>Entity</th>
+            <th>BP#</th><th>Doc#</th><th>Field</th><th>Old Value</th><th>New Value</th>
+          </tr></thead>
+          <tbody id="dash-log-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
+<div class="tab-pane" id="tab-worklist">
+  <div id="ds-panel">
+  <div id="ds-toggle" onclick="toggleDSPanel(this)" class="open">
+    <span>📂 Data Source</span>
+    <span class="ds-arrow">▼</span>
+    <span id="ds-loaded-summary" style="font-weight:400;color:#6A6D70;margin-left:4px">— drop your Master Report Excel to update with your own data</span>
+  </div>
+  <div id="ds-body" class="open">
+    <div class="ds-grid">
+      <!-- Drop zone -->
+      <div class="ds-drop-zone" id="ds-dropzone"
+           ondragover="dsDragOver(event)" ondragleave="dsDragLeave(event)" ondrop="dsDrop(event)"
+           onclick="document.getElementById('ds-file-input').click()">
+        <input type="file" id="ds-file-input" multiple accept=".xlsx" onchange="dsFileSelect(event)" onclick="event.stopPropagation()">
+        <div class="ds-drop-icon">📥</div>
+        <div class="ds-drop-title">Drop Excel files here or click to browse</div>
+        <div class="ds-drop-sub">Drop <strong>Master Report_GC_YYYYMM.xlsx</strong> here to load your own data<br>Supports: Master Report (all CCs) · individual CC reports · dunning contacts</div>
+        <div class="ds-slots" id="ds-slots">
+          <span class="ds-slot" id="slot-master">Master Report —</span>
+          <span class="ds-slot" id="slot-0038">CC0038 —</span>
+          <span class="ds-slot" id="slot-0073">CC0073 —</span>
+          <span class="ds-slot" id="slot-0074">CC0074 —</span>
+          <span class="ds-slot" id="slot-dun">Contacts —</span>
+        </div>
+      </div>
+      <!-- SharePoint URL -->
+      <div class="ds-sp-section">
+        <div class="ds-sp-title">Or load from SharePoint / URL</div>
+        <div class="ds-sp-row">
+          <select id="sp-slot">
+            <option value="master">Master Report (all CCs)</option>
+            <option value="0038">CC0038 AR Report</option>
+            <option value="0073">CC0073 AR Report</option>
+            <option value="0074">CC0074 AR Report</option>
+            <option value="dun">Dunning Contacts</option>
+          </select>
+        </div>
+        <div class="ds-sp-row">
+          <input type="text" id="sp-url" placeholder="Paste SharePoint / direct download URL…">
+          <button class="ds-sp-btn" onclick="dsLoadURL()">Load</button>
+        </div>
+        <div class="ds-err" id="sp-error"></div>
+      </div>
+    </div>
+    <div class="ds-actions">
+      <button class="ds-refresh-btn" id="ds-refresh-btn" onclick="dsRecalc()" disabled>⟳ Refresh Worklist</button>
+      <div class="ds-progress" id="ds-progress">Processing…</div>
+      <div class="ds-status" id="ds-proc-status"></div>
+    </div>
+  </div>
+</div>
+
+  <div class="filter-bar">
+  <span class="filter-label">Entity</span>
+  <button class="active" data-group="section" onclick="setSection('all',this)">All</button>
+  <button data-group="section" onclick="setSection('CC0038',this)">CC0038 China</button>
+  <button data-group="section" onclick="setSection('CC0073',this)">CC0073 Taiwan</button>
+  <button data-group="section" onclick="setSection('CC0074',this)">CC0074 HK</button>
+  <span class="filter-sep"></span>
+  <span class="filter-label">Priority</span>
+  <button data-group="priority" onclick="togglePriority('CRITICAL',this)">Critical &gt;365d</button>
+  <button data-group="priority" onclick="togglePriority('HIGH',this)">High &gt;90d</button>
+  <span class="filter-sep"></span>
+  <span class="filter-label">Risk</span>
+  <button id="btnTerm" onclick="toggleRisk('term',this)">⚠ Term Risk</button>
+  <button id="btnEhf"  onclick="toggleRisk('ehf',this)">EHF Impact</button>
+  <button id="btnOb" onclick="toggleRisk('ob',this)">⛔ OB Risk</button>
+  <span class="filter-sep"></span>
+  <select class="collector-select" id="collectorSelect" onchange="setCollector(this)">
+    <option value="">All Collectors</option>
+    <option value="Bo Hao Chen">Bo Hao Chen</option>
+    <option value="Fan Huang">Fan Huang</option>
+    <option value="Lei Zhang">Lei Zhang</option>
+    <option value="Limin Lu">Limin Lu</option>
+    <option value="Sailin Ma">Sailin Ma</option>
+    <option value="Shixi Hu">Shixi Hu</option>
+    <option value="Wenjing Jiang">Wenjing Jiang</option>
+    <option value="Yan Hai">Yan Hai</option>
+    <option value="Yun Gao">Yun Gao</option>
+  </select>
+  <select class="collector-select" id="customerSelect" onchange="setCustomer(this)">
+    <option value="">All Customers</option>
+      <option value="AESC (Hong Kong) Co., Limited">AESC (Hong Kong) Co., Limited</option>
+      <option value="AUO Corporation">AUO Corporation</option>
+      <option value="BOE Technology Group Co., Ltd.">BOE Technology Group Co., Ltd.</option>
+      <option value="BYD Company Limited">BYD Company Limited</option>
+      <option value="Beijing Aircraft Maintenance&Engineering">Beijing Aircraft Maintenance&Engineering</option>
+      <option value="CHINT ELECTRICS (HONG KONG) LIMITED">CHINT ELECTRICS (HONG KONG) LIMITED</option>
+      <option value="CNRC International Limited">CNRC International Limited</option>
+      <option value="COFCO Corporation">COFCO Corporation</option>
+      <option value="Chery Global Innovations (Hong Kong)">Chery Global Innovations (Hong Kong)</option>
+      <option value="Chicony Electronics Co., Ltd.">Chicony Electronics Co., Ltd.</option>
+      <option value="China COSCO Shipping Corporation Limited">China COSCO Shipping Corporation Limited</option>
+      <option value="China Datacom Corporation Limited">China Datacom Corporation Limited</option>
+      <option value="China Hi-Tech Holding Company Limited">China Hi-Tech Holding Company Limited</option>
+      <option value="China Natinal Heavy Duty Truck Group">China Natinal Heavy Duty Truck Group</option>
+      <option value="China National Offshore Oil Corp.">China National Offshore Oil Corp.</option>
+      <option value="China Petroleum & Chemical Corporation">China Petroleum & Chemical Corporation</option>
+      <option value="Contemporary Amperex Technology">Contemporary Amperex Technology</option>
+      <option value="Cooler Master Co., Ltd.">Cooler Master Co., Ltd.</option>
+      <option value="Coretronic Intelligent Cloud Service">Coretronic Intelligent Cloud Service</option>
+      <option value="Deloitte & Touche Consulting Co.">Deloitte & Touche Consulting Co.</option>
+      <option value="Delta Electronics Inc.">Delta Electronics Inc.</option>
+      <option value="EC Healthcare">EC Healthcare</option>
+      <option value="ENNOSTAR Inc.">ENNOSTAR Inc.</option>
+      <option value="Foreverwin Electronic & Information">Foreverwin Electronic & Information</option>
+      <option value="GLORY WHEEL ENTERPRISE Co., LTD">GLORY WHEEL ENTERPRISE Co., LTD</option>
+      <option value="Geely International(Hong Kong) Limited">Geely International(Hong Kong) Limited</option>
+      <option value="Guoxuan High-tech (HK) Limited">Guoxuan High-tech (HK) Limited</option>
+      <option value="Haier Kaaosi Co., Ltd.">Haier Kaaosi Co., Ltd.</option>
+      <option value="Harbin Pharmaceutical Group Holding">Harbin Pharmaceutical Group Holding</option>
+      <option value="Hisense (Hong Kong) Company Limited">Hisense (Hong Kong) Company Limited</option>
+      <option value="Hisense (Hongkong) Middle East - Africa">Hisense (Hongkong) Middle East - Africa</option>
+      <option value="Hisense Group Holding Co. Ltd">Hisense Group Holding Co. Ltd</option>
+      <option value="Hisense International (Hong Kong) Europe">Hisense International (Hong Kong) Europe</option>
+      <option value="Inventec Corporation">Inventec Corporation</option>
+      <option value="LC Future Center Limited">LC Future Center Limited</option>
+      <option value="LIESHENG HK LIMITED">LIESHENG HK LIMITED</option>
+      <option value="Lenovo HK Services Ltd">Lenovo HK Services Ltd</option>
+      <option value="Nan Shan Life Insurance Co., Ltd.">Nan Shan Life Insurance Co., Ltd.</option>
+      <option value="Nine Dragons Paper Industries (Dongguan)">Nine Dragons Paper Industries (Dongguan)</option>
+      <option value="Q BURGER GROUP CO LTD">Q BURGER GROUP CO LTD</option>
+      <option value="Qisda Corporation">Qisda Corporation</option>
+      <option value="SAIC HK Limited">SAIC HK Limited</option>
+      <option value="SANY Group Co.,Ltd.">SANY Group Co.,Ltd.</option>
+      <option value="SAP (China) Co., Ltd.">SAP (China) Co., Ltd.</option>
+      <option value="SAP Asia Pte. Ltd.">SAP Asia Pte. Ltd.</option>
+      <option value="SAP Hong Kong Co. Ltd.">SAP Hong Kong Co. Ltd.</option>
+      <option value="SAP SE">SAP SE</option>
+      <option value="Shandong Energy Digital Technology">Shandong Energy Digital Technology</option>
+      <option value="Shanghai Fin-shine Technology Co., Ltd.">Shanghai Fin-shine Technology Co., Ltd.</option>
+      <option value="Shanghai Zhenhua Port Machinery">Shanghai Zhenhua Port Machinery</option>
+      <option value="Shenzhen Mindray Bio-Medical Electronics">Shenzhen Mindray Bio-Medical Electronics</option>
+      <option value="Sinbon Electronics Company Ltd.">Sinbon Electronics Company Ltd.</option>
+      <option value="Sino Administration Services Limited">Sino Administration Services Limited</option>
+      <option value="Taiwan Semiconductor Manufacturing">Taiwan Semiconductor Manufacturing</option>
+      <option value="Tianjin Ting Yu Consulting">Tianjin Ting Yu Consulting</option>
+      <option value="United Microelectronics Corporation">United Microelectronics Corporation</option>
+      <option value="WIK Far East Ltd">WIK Far East Ltd</option>
+      <option value="Wistron Corporation">Wistron Corporation</option>
+      <option value="XCMG International Trading Corporation">XCMG International Trading Corporation</option>
+      <option value="Xiaomi Communications Co., Ltd.">Xiaomi Communications Co., Ltd.</option>
+      <option value="Xiaomi H.K. Limited">Xiaomi H.K. Limited</option>
+      <option value="YAGEO CORPORATION">YAGEO CORPORATION</option>
+      <option value="Zhejiang Geely Holding Group Co., Ltd.">Zhejiang Geely Holding Group Co., Ltd.</option>
+    <option value="Aijing Zeng">Aijing Zeng</option>
+<option value="Bo Hao Chen">Bo Hao Chen</option>
+<option value="Chaochao Liu">Chaochao Liu</option>
+<option value="Fan Huang">Fan Huang</option>
+<option value="Jiazhao Guo">Jiazhao Guo</option>
+<option value="Lei Zhang">Lei Zhang</option>
+<option value="Limin Lu">Limin Lu</option>
+<option value="Sailin Ma">Sailin Ma</option>
+<option value="Shixi Hu">Shixi Hu</option>
+<option value="Wenjing Jiang">Wenjing Jiang</option>
+<option value="Yan Hai">Yan Hai</option>
+<option value="Yun Gao">Yun Gao</option>
+  </select>
+  <input class="search-box" type="text" placeholder="Search customer…" oninput="setSearch(this.value)">
+  <button class="export-btn" style="background:#5C3D8F" onclick="openActivityDashboard()">&#128202; Activity</button>
+  <div class="export-wrap" id="exportWrap">
+    <button class="export-btn" onclick="toggleExportMenu(event)">⬇ Export</button>
+    <ul class="export-menu" id="exportMenu">
+      <li onclick="exportCSV()">📄 Export Filtered CSV</li>
+      <li onclick="exportEHFCSV()">📊 Export EHF CSV</li>
+      <li class="export-divider"></li>
+      <li onclick="window.print()">🖨 Print / PDF</li>
+    </ul>
+  </div>
+</div>
+
+  <div class="result-count" id="resultCount"></div>
+
+
+  <div class="content">
+  <div class="section-title">CC0038 — SAP China (CNY) <span class="section-count" id="cnt38">605 past-due accounts</span></div>
+  <div id="cards38"></div>
+  <div class="section-title">CC0073 — SAP Taiwan (TWD) <span class="section-count" id="cnt73">133 past-due accounts</span></div>
+  <div id="cards73"></div>
+  <div class="section-title">CC0074 — SAP Hong Kong (HKD) <span class="section-count" id="cnt74">151 past-due accounts</span></div>
+  <div id="cards74"></div>
+</div>
+
+<!-- Dunning Modal -->
+</div>
+<div class="modal-overlay hidden" id="dunningOverlay">
+  <div class="modal" id="dunningModal">
+    <div class="modal-header">
+      <div><h2 id="dun-title">Dunning Notice</h2><div class="modal-meta" id="dun-meta"></div></div>
+      <button class="modal-close" onclick="closeDunning()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="dun-section">
+        <div class="dun-label">To</div>
+        <div class="dun-to" id="dun-to-chips">
+          <input class="dun-add-email" id="dun-add-input" type="email" placeholder="+ add email" onkeydown="addEmailChip(event)">
+        </div>
+      </div>
+      <div class="dun-section">
+        <div class="dun-label">Subject</div>
+        <input class="dun-subject" id="dun-subject" type="text">
+      </div>
+      <div class="dun-section">
+        <div class="dun-label">Outstanding Overdue Documents</div>
+        <div class="dun-sel-bar">
+          <label><input type="checkbox" id="dun-chk-all" onchange="dunSelAll(this)"> All</label>
+          <span class="dun-sep">|</span>
+          <span class="dun-sel-count" id="dun-sel-count">0 selected</span>
+          <span class="dun-sel-total" id="dun-sel-total"></span>
+          <span class="dun-sep">|</span>
+          <span class="dun-sel-link" onclick="dunSelOD(90)">OD&gt;90d</span>
+          <span class="dun-sel-link" onclick="dunSelOD(365)">OD&gt;365d</span>
+          <span class="dun-sel-link" onclick="dunSelClear()">Clear</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="dun-docs-table">
+            <thead><tr>
+              <th style="width:30px"><input type="checkbox" id="dun-hdr-chk" onchange="dunSelAll(this)"></th>
+              <th>Document #</th><th>Net Due Date</th><th>Days OD</th><th class="num">OD Amount</th><th>Ccy</th>
+            </tr></thead>
+            <tbody id="dun-docs-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="dun-section">
+        <div class="dun-label">Email Body</div>
+        <textarea class="dun-body" id="dun-body"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary"   onclick="dunSendMail()">&#128231; Open in Mail</button>
+      <button class="btn-secondary" onclick="dunCopyAll()">&#128203; Copy Email</button>
+      <button class="btn-secondary" onclick="dunCopyBody()">&#128203; Copy Body</button>
+      <button class="btn-cancel"    onclick="closeDunning()">Cancel</button>
+      <span class="modal-status" id="dun-status"></span>
+    </div>
+  </div>
+</div>
+
+<script>
 // ── Data ──
 
 // ── Edit Store & Activity Log ─────────────────────────────────────────────────
@@ -279,7 +578,6 @@ function refreshDropdowns() {
 }
 
 function refreshCollectorOptions() {
-  if(!document.getElementById('collectorSelect')) return;
   // Show collectors valid under current section + customer filters
   const valid = new Set(
     PARTNERS
@@ -299,7 +597,6 @@ function refreshCollectorOptions() {
 }
 
 function refreshCustomerOptions() {
-  if(!document.getElementById('customerSelect')) return;
   // Show customers valid under current section + collector filters
   const valid = new Set(
     PARTNERS
@@ -373,8 +670,8 @@ function updateSummary() {
     document.getElementById('e'+k+'-qe').textContent   = fmtN(r.eq);
   });
   const tot = a['38'].cnt+a['73'].cnt+a['74'].cnt;
-  (function(){var e=document.getElementById('s-total');if(e)e.textContent=tot;})();
-  (function(){var e=document.getElementById('s-total-sub');if(e)e.textContent='Term Risk: '+(a['38'].tr+a['73'].tr+a['74'].tr)+' · EHF: '+(a['38'].ei+a['73'].ei+a['74'].ei);})();
+  document.getElementById('s-total').textContent = tot;
+  document.getElementById('s-total-sub').textContent = 'Term Risk: '+(a['38'].tr+a['73'].tr+a['74'].tr)+' · EHF: '+(a['38'].ei+a['73'].ei+a['74'].ei);
 }
 
 
@@ -445,7 +742,6 @@ function detCellEdit(el) {
   var _old = editStore[key][field]||'';
   editStore[key][field] = el.value;
   logActivity(key, field, _old, el.value);
-  if(field==='cpp'){var _pv=(el.value.toLowerCase()==='paid'||el.value.toLowerCase()==='paid to cdc'),_wp=editStore[key]&&editStore[key].paid==='yes';if(_pv!==_wp){editStore[key].paid=_pv?'yes':'no';logActivity(key,'paid',_wp?'yes':'no',_pv?'yes':'no');applyPaidToRow(key,bp,_pv);updateIncomeBar();}}
   saveEdits();
   el.closest('.ec').classList.add('dirty');
   var det = document.getElementById('det-' + bp);
@@ -1642,10 +1938,11 @@ function switchTab(tab, btn) {
 }
 
 function renderDashboard() {
-  if(document.getElementById('dash-risk-grid')) renderDashRisk();
-  if(document.getElementById('dash-act-tiles')) renderDashActivityTiles();
-  if(document.getElementById('dash-chart')) renderDashChart();
-  if(document.getElementById('dash-log-body')){renderDashLog();populateDashDateFilter();}
+  renderDashRisk();
+  renderDashActivityTiles();
+  renderDashChart();
+  renderDashLog();
+  populateDashDateFilter();
 }
 
 function renderDashRisk() {
@@ -2001,13 +2298,189 @@ document.querySelectorAll('.partner-card').forEach(function(card) {
 });
 updateSummary();
 renderDashboard();
-
-function togglePaid(btn,e){e.stopPropagation();var key=btn.dataset.key,bp=btn.dataset.bp,wasPaid=editStore[key]&&editStore[key].paid==='yes',nowPaid=!wasPaid;if(!editStore[key])editStore[key]={};editStore[key].paid=nowPaid?'yes':'no';logActivity(key,'paid',wasPaid?'yes':'no',nowPaid?'yes':'no');saveEdits();applyPaidToRow(key,bp,nowPaid);updateIncomeBar();}
-function applyPaidToRow(key,bp,isPaid){var btn=document.querySelector('.paid-btn[data-key="'+key+'"]');if(!btn)return;var row=btn.closest('tr');if(!row)return;row.classList.toggle('row-paid',isPaid);var dc=row.querySelector('td:first-child'),badge=dc?dc.querySelector('.paid-badge'):null;if(isPaid&&!badge&&dc)dc.innerHTML+='<span class="paid-badge">Paid</span>';else if(!isPaid&&badge)badge.remove();btn.textContent=isPaid?'✓ Paid':'Mark Paid';btn.classList.toggle('is-paid',isPaid);}
-function calcIncome(){var inc={};Object.entries(editStore).forEach(function(e){var key=e[0],val=e[1];if(!val||val.paid!=='yes')return;var p=key.split('|'),cc=p[0],bp=p[1],doc=p[2],docs=DUN_DOCS[bp]||[],d=docs.find(function(x){return x.doc===doc;});if(!d)return;if(!inc[cc])inc[cc]={amount:0,count:0,currency:d.ccy};inc[cc].amount+=d.pd_amt;inc[cc].count++;});return inc;}
-function updateIncomeBar(){var bar=document.getElementById('income-bar');if(!bar)return;var inc=calcIncome();if(!Object.keys(inc).length){bar.innerHTML='<div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet — use "Mark Paid" in document details</span>';return;}var blocks=Object.entries(inc).map(function(e){var cc=e[0],d=e[1];return '<div class="income-block"><div class="income-label">'+cc+'</div><div class="income-val">'+Math.round(d.amount).toLocaleString()+' <small style="font-size:10px">'+d.currency+'</small></div><div class="income-sub">'+d.count+' doc'+(d.count!==1?'s':'')+' paid</div></div>';});bar.innerHTML='<div class="income-title">💰 Income Collected</div>'+blocks.join('<div class="income-sep"></div>');}
-
-document.addEventListener('DOMContentLoaded',function(){updateSummary();renderDashboard();updateIncomeBar();});
 </script>
+
+<!-- FDL Modal -->
+<div class="modal-overlay hidden" id="fdlOverlay">
+  <div class="modal" id="fdlModal">
+    <div class="modal-header">
+      <div><h2 id="fdl-title">Final Demand Letter</h2><div class="modal-meta" id="fdl-meta"></div></div>
+      <button class="modal-close" onclick="closeFDL()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Step 1: Select documents -->
+      <div id="fdl-step1">
+        <div class="fdl-section-title" style="font-size:12px;font-weight:700;color:#6A6D70;text-transform:uppercase;margin-bottom:8px">Step 1 — Select Overdue Documents to Include</div>
+        <div class="fdl-sel-bar">
+          <label><input type="checkbox" id="fdl-chk-all" onchange="fdlSelAll(this)"> All</label>
+          <span style="color:#ccc">|</span>
+          <span class="fdl-sel-count" id="fdl-sel-count">0 selected</span>
+          <span class="fdl-sel-total" id="fdl-sel-total"></span>
+          <span style="color:#ccc">|</span>
+          <span class="fdl-sel-link" onclick="fdlSelOD(90)">OD&gt;90d</span>
+          <span class="fdl-sel-link" onclick="fdlSelOD(365)">OD&gt;365d</span>
+          <span class="fdl-sel-link" onclick="fdlSelClear()">Clear</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="fdl-docs-table">
+            <thead><tr>
+              <th style="width:30px"><input type="checkbox" id="fdl-hdr-chk" onchange="fdlSelAll(this)"></th>
+              <th>Document #</th><th>Net Due Date</th><th>Days OD</th><th class="num">OD Amount</th><th>Ccy</th>
+            </tr></thead>
+            <tbody id="fdl-docs-body"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;text-align:right">
+          <button class="btn-primary" onclick="fdlToStep2()" id="fdl-next-btn" disabled>Next: Edit Letter &#8594;</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Edit fields + Preview -->
+      <div id="fdl-step2" class="hidden">
+        <div class="fdl-section-title" style="font-size:12px;font-weight:700;color:#6A6D70;text-transform:uppercase;margin-bottom:8px">Step 2 — Edit Letter Fields</div>
+        <div class="fdl-edit-bar">
+          <div class="fdl-field wide"><label>Customer Name</label><input type="text" id="fdl-customer-name"></div>
+          <div class="fdl-field"><label>ERP #</label><input type="text" id="fdl-erp"></div>
+          <div class="fdl-field"><label>Payment Deadline</label><input type="date" id="fdl-deadline"></div>
+          <div class="fdl-field"><label>Collector Name</label><input type="text" id="fdl-collector-name"></div>
+          <div class="fdl-field"><label>Collector Phone</label><input type="text" id="fdl-collector-phone"></div>
+          <div class="fdl-field wide"><label>Collector Email</label><input type="text" id="fdl-collector-email"></div>
+        </div>
+        <div class="fdl-edit-bar" style="margin-top:-8px">
+          <div class="fdl-field"><label>Date</label><input type="date" id="fdl-date"></div>
+          <div class="fdl-field wide"><label>Customer Address</label><input type="text" id="fdl-address" placeholder="(CC0074 only)"></div>
+          <div class="fdl-field"><label>Attention</label><input type="text" id="fdl-attention" placeholder="(CC0074 only)"></div>
+          <button class="btn-secondary" style="align-self:flex-end;height:32px" onclick="fdlRefreshPreview()">&#8635; Refresh Preview</button>
+        </div>
+
+        <div class="fdl-section-title" style="font-size:12px;font-weight:700;color:#6A6D70;text-transform:uppercase;margin:12px 0 8px">Letter Preview (editable)</div>
+        <div id="fdl-preview-wrap" class="fdl-preview"><!-- filled by JS --></div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:space-between;align-items:center">
+          <button class="btn-secondary" onclick="fdlBack()">&larr; Back</button>
+          <button class="btn-primary" onclick="fdlConfirm()" id="fdl-confirm-btn">&#10003; Confirm &amp; Export PDF</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="font-size:11px;color:#6A6D70">
+      <span id="fdl-status"></span>
+    </div>
+  </div>
+</div>
+
+
+<!-- Unblock Request Modal -->
+<div class="modal-overlay hidden" id="unblockOverlay">
+  <div class="modal" id="unblockModal">
+    <div class="modal-header" style="background:linear-gradient(135deg,#4A2800,#E76500)">
+      <div><h2 id="ub-title">Unblock Request</h2><div class="modal-meta" id="ub-meta"></div></div>
+      <button class="modal-close" onclick="closeUnblock()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Request type -->
+      <div class="ub-section">
+        <div class="ub-label">1. Request Type</div>
+        <div class="ub-type-row">
+          <div class="ub-type-card selected" id="ub-type-standard" onclick="ubSelectType('standard')">
+            <div class="ub-type-title">Standard Unblock</div>
+            <div class="ub-type-desc">With payment plan &nbsp;|&nbsp; &lt;1m EUR → CC RD &nbsp;|&nbsp; ≥1m EUR → CC RD + RCFO</div>
+          </div>
+          <div class="ub-type-card" id="ub-type-ehf" onclick="ubSelectType('ehf')">
+            <div class="ub-type-title">Unblock with EHF Concession</div>
+            <div class="ub-type-desc">No exit criteria &nbsp;|&nbsp; &lt;150k EUR → CC RD &nbsp;|&nbsp; ≥150k EUR → CC RD + RCFO</div>
+          </div>
+        </div>
+        <div class="ub-approver-info" id="ub-approver-info">
+          <strong>Required Approver(s):</strong> <span id="ub-approver-badges"></span>
+          <div style="font-size:11px;color:#6A6D70;margin-top:4px" id="ub-approver-note"></div>
+        </div>
+      </div>
+
+      <!-- Account details -->
+      <div class="ub-section">
+        <div class="ub-label">2. Account Details</div>
+        <div class="ub-grid">
+          <div class="ub-field wide"><label>Customer / Partner Name</label><input type="text" id="ub-customer"></div>
+          <div class="ub-field"><label>ERP ID</label><input type="text" id="ub-erp"></div>
+          <div class="ub-field"><label>Account Type</label>
+            <select id="ub-acct-type"><option>Customer</option><option>Partner</option></select></div>
+          <div class="ub-field"><label>Collector</label><input type="text" id="ub-collector"></div>
+          <div class="ub-field"><label>Entity</label><input type="text" id="ub-entity" readonly></div>
+        </div>
+      </div>
+
+      <!-- New deal summary -->
+      <div class="ub-section">
+        <div class="ub-label">3. New Deal Summary</div>
+        <div class="ub-grid">
+          <div class="ub-field"><label>Opportunity ID</label><input type="text" id="ub-opp-id" placeholder="12345678"></div>
+          <div class="ub-field"><label>Deal Type</label>
+            <select id="ub-deal-type">
+              <option value="">Select…</option>
+              <option>S4 Solution Add-On</option><option>Cloud ERP</option>
+              <option>MA Renewal</option><option>Other</option>
+            </select></div>
+          <div class="ub-field"><label>Contract Value (ACV/TCV)</label><input type="text" id="ub-contract-val" placeholder="e.g. CNY 3M"></div>
+          <div class="ub-field"><label>Contract Term</label><input type="text" id="ub-contract-term" placeholder="e.g. 3 years"></div>
+          <div class="ub-field"><label>Planned Close Date</label><input type="text" id="ub-close-date" placeholder="e.g. September 2026"></div>
+        </div>
+      </div>
+
+      <!-- Open AR table -->
+      <div class="ub-section">
+        <div class="ub-label">4. Open AR & Invoice Details</div>
+        <div style="overflow-x:auto">
+          <table class="ub-table" id="ub-ar-table">
+            <thead><tr>
+              <th>AR LOB</th><th>Document#</th><th>Text</th>
+              <th class="num">AR amount in local currency</th>
+              <th class="num">AR amt in EUR</th>
+              <th class="num">OD days by Month_end</th>
+              <th class="num">OD days by Q-end</th>
+              <th class="num">EHF Impact by M-end</th>
+              <th class="num">EHF Impact by Q-end</th>
+              <th>Payment plan</th>
+            </tr></thead>
+            <tbody id="ub-ar-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Payment history -->
+      <div class="ub-section">
+        <div class="ub-label">5. Open AR & Payment Plan Summary</div>
+        <div class="ub-grid">
+          <div class="ub-field"><label>History of Payment Broken?</label>
+            <select id="ub-pay-broken"><option>No</option><option>Yes</option></select></div>
+          <div class="ub-field wide"><label>If Yes, details</label>
+            <input type="text" id="ub-pay-broken-detail" placeholder="e.g. 2024 MA, CNY 500K, 60 days overdue"></div>
+          <div class="ub-field"><label>Existing approved payment plan?</label>
+            <select id="ub-pay-plan"><option>No</option><option>Yes</option></select></div>
+          <div class="ub-field wide"><label>If Yes, details</label>
+            <input type="text" id="ub-pay-plan-detail" placeholder="e.g. Payment plan for current year's MA accepted June 2026"></div>
+        </div>
+      </div>
+
+      <!-- EHF impact & justification -->
+      <div class="ub-section">
+        <div class="ub-label">6. EHF Impact & Justification</div>
+        <div class="ub-grid">
+          <div class="ub-field wide"><label>Potential EHF Impact</label>
+            <input type="text" id="ub-ehf-impact" placeholder="e.g. CNY 40,000 from EHF (or N/A)"></div>
+          <div class="ub-field wide"><label>Collector's Recommendation / Justification</label>
+            <textarea id="ub-justification" rows="4" placeholder="Provide a concise summary justifying the request…"></textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="ubOpenMail()">&#128231; Open in Mail</button>
+      <button class="btn-secondary" onclick="ubCopyEmail()">&#128203; Copy Email</button>
+      <button class="btn-secondary" onclick="ubPreview()">&#128196; Preview Text</button>
+      <button class="btn-cancel" onclick="closeUnblock()">Cancel</button>
+      <span class="modal-status" id="ub-status"></span>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

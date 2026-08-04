@@ -162,12 +162,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
 </div>
 <div class="income-bar" id="income-bar"><div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet</span></div>
   <div id="ds-panel">
-  <div id="ds-toggle" onclick="toggleDSPanel(this)">
+  <div id="ds-toggle" onclick="toggleDSPanel(this)" class="open">
     <span>📂 Data Source</span>
     <span class="ds-arrow">▼</span>
-    <span id="ds-loaded-summary" style="font-weight:400;color:#6A6D70;margin-left:4px">— click to load / refresh Excel files</span>
+    <span id="ds-loaded-summary" style="font-weight:400;color:#6A6D70;margin-left:4px">— drop your Master Report Excel to update with your own data</span>
   </div>
-  <div id="ds-body">
+  <div id="ds-body" class="open">
     <div class="ds-grid">
       <!-- Drop zone -->
       <div class="ds-drop-zone" id="ds-dropzone"
@@ -176,7 +176,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
         <input type="file" id="ds-file-input" multiple accept=".xlsx" onchange="dsFileSelect(event)" onclick="event.stopPropagation()">
         <div class="ds-drop-icon">📥</div>
         <div class="ds-drop-title">Drop Excel files here or click to browse</div>
-        <div class="ds-drop-sub">cc0038 · cc0073 · cc0074 AR reports + dunning contacts</div>
+        <div class="ds-drop-sub">Drop <strong>Master Report_GC_YYYYMM.xlsx</strong> here to load your own data<br>Supports: Master Report (all CCs) · individual CC reports · dunning contacts</div>
         <div class="ds-slots" id="ds-slots">
           <span class="ds-slot" id="slot-master">Master Report —</span>
           <span class="ds-slot" id="slot-0038">CC0038 —</span>
@@ -1280,7 +1280,7 @@ function dsCheckReady() {
   const loaded = Object.entries(DS).filter(([,v])=>v).map(([k])=>k);
   document.getElementById('ds-loaded-summary').textContent =
     loaded.length ? '— ' + loaded.map(k=>({'0038':'CC0038','0073':'CC0073','0074':'CC0074','dun':'Contacts'}[k])).join(', ') + ' loaded'
-    : '— click to load / refresh Excel files';
+    : '— drop your Master Report Excel to update with your own data';
 }
 
 // ── SharePoint / URL load ────────────────────────────────────────────────────
@@ -3268,7 +3268,7 @@ function dsCheckReady() {
   const loaded = Object.entries(DS).filter(([,v])=>v).map(([k])=>k);
   document.getElementById('ds-loaded-summary').textContent =
     loaded.length ? '— ' + loaded.map(k=>({'0038':'CC0038','0073':'CC0073','0074':'CC0074','dun':'Contacts'}[k])).join(', ') + ' loaded'
-    : '— click to load / refresh Excel files';
+    : '— drop your Master Report Excel to update with your own data';
 }
 
 // ── SharePoint / URL load ────────────────────────────────────────────────────

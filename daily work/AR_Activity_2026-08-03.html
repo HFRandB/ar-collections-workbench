@@ -1094,7 +1094,7 @@ function dsCheckReady() {
   const loaded = Object.entries(DS).filter(([,v])=>v).map(([k])=>k);
   document.getElementById('ds-loaded-summary').textContent =
     loaded.length ? '— ' + loaded.map(k=>({'0038':'CC0038','0073':'CC0073','0074':'CC0074','dun':'Contacts'}[k])).join(', ') + ' loaded'
-    : '— click to load / refresh Excel files';
+    : '— drop your Master Report Excel to update with your own data';
 }
 
 // ── SharePoint / URL load ────────────────────────────────────────────────────
