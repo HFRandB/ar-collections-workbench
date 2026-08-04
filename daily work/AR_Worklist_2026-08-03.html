@@ -1819,7 +1819,12 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
       if (top.length) DUN_DOCS[bp] = top.map(x=>({
         doc: x.doc_num, due: fdN(x.net_due_dt), dpd: Math.round(x.dpd),
         amt: Math.round(x.lc_amt*100)/100,
-        pd_amt: Math.round(x.total_ar_pd*100)/100, ccy: x.lc
+        pd_amt: Math.round(x.total_ar_pd*100)/100, ccy: x.lc,
+        eur_amt: Math.round((x.eur_amt||0)*100)/100,
+        od_me: x.od_me||0, od_qe: x.od_qe||0,
+        ehf_me: Math.round((x.ehf_amt_me||0)*100)/100,
+        ehf_qe: Math.round((x.ehf_amt_qe||0)*100)/100,
+        fc: x.fc||'', cpp: x.cpp||'', status: x.status||''
       }));
     });
   }
