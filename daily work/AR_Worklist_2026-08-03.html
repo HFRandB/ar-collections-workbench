@@ -146,7 +146,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
 @media(max-width:768px){.content,.summary-bar,.filter-bar{padding:10px 14px}.amt-box{min-width:85px}}
 @media print{.filter-bar{display:none}.partner-card{break-inside:avoid}.modal-overlay{display:none!important}}
 </style>
-<script async src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js" id="sheetjs-cdn"></script>
+<script src="xlsx.mini.min.js"></script>
 </head>
 <body>
 <div class="page-header">
@@ -1713,12 +1713,9 @@ async function dsRecalc() {
 }
 
 function loadXLSX(cb) {
+  // xlsx.mini.min.js is loaded synchronously — just call cb immediately
   if (typeof XLSX !== 'undefined') { cb(); return; }
-  var s = document.createElement('script');
-  s.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
-  s.onload = function() { cb(); };
-  s.onerror = function() { alert('Could not load SheetJS library. Please check your internet connection.'); };
-  document.head.appendChild(s);
+  alert('SheetJS not loaded. Make sure xlsx.mini.min.js is in the same folder.');
 }
 
 async function _dsRecalcInner() {
@@ -1746,7 +1743,7 @@ async function _dsRecalcInner() {
 
     if(DS['master']) {
       await setProgress('Parsing Master Report — reading rows…', 10);
-      const all = dsBuildFromMasterSheet(DS['master']);
+      const all = await dsBuildFromMasterSheet(DS['master'], setProgress);
       await setProgress('Parsing Master Report — CC0038 done…', 35);
       p38new = all['0038']||{}; p73new = all['0073']||{}; p74new = all['0074']||{};
       await setProgress('Parsing Master Report — all CCs done', 50);
