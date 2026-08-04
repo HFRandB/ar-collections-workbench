@@ -2142,7 +2142,7 @@ function openUnblock(btn) {
   }
   var tbody = document.getElementById('ub-ar-body');
   if (docs.length) {
-    var totLocal=0, totEUR=0, totEhfMe=0, totEhfQe=0;
+    var totLocal=0, totEUR=0, totEhfMe=0, totEhfQe=0, totEhfMeEur=0, totEhfQeEur=0;
     var rows = docs.map(function(d) {
       totLocal += d.pd_amt;
       var ed = ehfDocMap[d.doc] || {};
@@ -2151,7 +2151,11 @@ function openUnblock(btn) {
       var ehfMe = d.ehf_me !== undefined ? d.ehf_me : (ed.ehf_me !== undefined ? ed.ehf_me : 0);
       var ehfQe = d.ehf_qe !== undefined ? d.ehf_qe : (ed.ehf_qe !== undefined ? ed.ehf_qe : 0);
       var eurAmt = d.eur_amt !== undefined ? d.eur_amt : 0;
+      var fxRatio = (d.amt && eurAmt) ? eurAmt / d.amt : 0;
+      var ehfMeEur = ehfMe>0 && fxRatio>0 ? Math.round(ehfMe*fxRatio*100)/100 : 0;
+      var ehfQeEur = ehfQe>0 && fxRatio>0 ? Math.round(ehfQe*fxRatio*100)/100 : 0;
       totEhfMe += ehfMe; totEhfQe += ehfQe; totEUR += eurAmt;
+      totEhfMeEur += ehfMeEur; totEhfQeEur += ehfQeEur;
       var fmt = function(v){ return v ? v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : ''; };
       var fmtI = function(v){ return v ? Math.round(v).toLocaleString() : '-'; };
       // Get fc/status from DUN_DOCS fields for text column
@@ -2175,8 +2179,8 @@ function openUnblock(btn) {
       +'<td class="num" style="padding:5px 8px">'+totLocal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' '+ccy+'</td>'
       +'<td class="num" style="padding:5px 8px;color:#0064D9;font-weight:700">'+fmt(totEUR)+' EUR</td>'
       +'<td colspan="2"></td>'
-      +'<td class="num" style="padding:5px 8px;color:#007373">'+(totEhfMe>0?Math.round(totEhfMe).toLocaleString():'0.00')+'</td>'
-      +'<td class="num" style="padding:5px 8px;color:#007373">'+(totEhfQe>0?Math.round(totEhfQe).toLocaleString():'0.00')+'</td>'
+      +'<td class="num" style="padding:5px 8px;color:#007373">'+(totEhfMe>0?Math.round(totEhfMe).toLocaleString()+(totEhfMeEur>0?' ('+Math.round(totEhfMeEur).toLocaleString()+' EUR)':''):'0.00')+'</td>'
+      +'<td class="num" style="padding:5px 8px;color:#007373">'+(totEhfQe>0?Math.round(totEhfQe).toLocaleString()+(totEhfQeEur>0?' ('+Math.round(totEhfQeEur).toLocaleString()+' EUR)':''):'0.00')+'</td>'
       +'<td></td>'
       +'</tr>');
     tbody.innerHTML = rows.join('');
