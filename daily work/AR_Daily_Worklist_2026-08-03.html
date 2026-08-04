@@ -1793,6 +1793,9 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
 }
 
 // ── Main recalc entry point ──────────────────────────────────────────────────
+
+function loadXLSX(cb){if(typeof XLSX!=="undefined"){cb();return;}alert("SheetJS not loaded. Make sure xlsx.mini.min.js is in the same folder.");}
+
 async function dsRecalc() {
   loadXLSX(async function() { await _dsRecalcInner(); });
 }
@@ -1821,7 +1824,7 @@ async function _dsRecalcInner() {
 
     if(DS['master']) {
       await setProgress('Parsing Master Report — reading rows…', 10);
-      const all = dsBuildFromMasterSheet(DS['master']);
+      const all = await dsBuildFromMasterSheet(DS['master'], setProgress);
       await setProgress('Parsing Master Report — CC0038 done…', 35);
       p38new = all['0038']||{}; p73new = all['0073']||{}; p74new = all['0074']||{};
       await setProgress('Parsing Master Report — all CCs done', 50);
