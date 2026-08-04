@@ -1622,7 +1622,7 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
   // Rebuild cards HTML
   function topN(pMap, n) {
     return Object.entries(pMap).filter(([,d])=>d.total_pd>0)
-      .sort((a,b)=>b[1].total_pd-a[1].total_pd).slice(0,n);
+      .sort((a,b)=>(a[1].bp_name||'').localeCompare(b[1].bp_name||'')).slice(0,n);
   }
   function renderSection(entries, ccLabel, currency) {
     return entries.map(([bp,d])=>buildCardHTML(bp,d,ccLabel,currency)).join('');
@@ -2183,7 +2183,7 @@ function ubPreview() {
     {cc:'0074', cardsId:'cards74', cntId:'cnt74', label:'CC0074', currency:'HKD'}
   ];
   ccMap.forEach(function(m) {
-    var rows = PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});
+    var rows = PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
     var el = document.getElementById(m.cardsId);
     if (el) el.innerHTML = rows.map(function(p){return buildCardHTML(p.bp,p,m.label,m.currency);}).join('');
     var cnt = document.getElementById(m.cntId);
@@ -3610,7 +3610,7 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
   // Rebuild cards HTML
   function topN(pMap, n) {
     return Object.entries(pMap).filter(([,d])=>d.total_pd>0)
-      .sort((a,b)=>b[1].total_pd-a[1].total_pd).slice(0,n);
+      .sort((a,b)=>(a[1].bp_name||'').localeCompare(b[1].bp_name||'')).slice(0,n);
   }
   function renderSection(entries, ccLabel, currency) {
     return entries.map(([bp,d])=>buildCardHTML(bp,d,ccLabel,currency)).join('');
@@ -4170,7 +4170,7 @@ function ubPreview() {
     {cc:'0074', cardsId:'cards74', cntId:'cnt74', label:'CC0074', currency:'HKD'}
   ];
   ccMap.forEach(function(m) {
-    var rows = PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});
+    var rows = PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
     var el = document.getElementById(m.cardsId);
     if (el) el.innerHTML = rows.map(function(p){return buildCardHTML(p.bp,p,m.label,m.currency);}).join('');
     var cnt = document.getElementById(m.cntId);
@@ -4192,7 +4192,7 @@ function updateIncomeBar(){var bar=document.getElementById('income-bar');if(!bar
 
 document.addEventListener('DOMContentLoaded',function(){
   var cm=[{cc:'0038',ci:'cards38',ni:'cnt38',l:'CC0038',c:'CNY'},{cc:'0073',ci:'cards73',ni:'cnt73',l:'CC0073',c:'TWD'},{cc:'0074',ci:'cards74',ni:'cnt74',l:'CC0074',c:'HKD'}];
-  cm.forEach(function(m){var r=PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});var e=document.getElementById(m.ci);if(e)e.innerHTML=r.map(function(p){return buildCardHTML(p.bp,p,m.l,m.c);}).join('');var n=document.getElementById(m.ni);if(n)n.textContent=r.length+' past-due accounts';});
+  cm.forEach(function(m){var r=PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});var e=document.getElementById(m.ci);if(e)e.innerHTML=r.map(function(p){return buildCardHTML(p.bp,p,m.l,m.c);}).join('');var n=document.getElementById(m.ni);if(n)n.textContent=r.length+' past-due accounts';});
   refreshDropdowns();
   document.querySelectorAll('.partner-card').forEach(function(c){c.classList.toggle('has-term',c.dataset.term==='true');c.classList.toggle('has-ehf',c.dataset.ehf==='true');});
   updateIncomeBar();
