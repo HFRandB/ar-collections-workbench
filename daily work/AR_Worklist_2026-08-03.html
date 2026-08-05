@@ -1564,6 +1564,7 @@ async function dsBuildFromMasterSheet(buf, onProgress) {
     var docNum=String(row[20]||'').trim(),lcAmt=sf(row[23]),lc=String(row[24]||RECALC_CURRENCY[cc]||'').trim();
     var postDt=dsParseDate(row[27]),netDueDt=dsParseDate(row[28]),dpd=sf(row[55]);
     var ehfStatus=String(row[58]||'').trim(),termStatus=String(row[59]||'').trim(),obVal=row[42];
+    var fc=String(row[71]||'').trim().replace(/^'/,''),cpp=String(row[72]||'').trim().replace(/^'/,''),status=String(row[73]||'').trim().replace(/^'/,'');
     if(!bp||!docNum) continue;
     var ehfDueDt=postDt?new Date(postDt.getTime()+30*86400000):null;
     var ehfOdNow=ehfDueDt?Math.max(0,dsDateDays(ehfDueDt,RECALC_TODAY)):0;
@@ -1576,7 +1577,7 @@ async function dsBuildFromMasterSheet(buf, onProgress) {
     if(dpd>0)arPD=lcAmt; if(dpd>0&&dpd<=30)pd0130=lcAmt; if(dpd>30&&dpd<=60)pd3160=lcAmt;
     if(dpd>60&&dpd<=90)pd6190=lcAmt; if(dpd>90)pd90p=lcAmt;
     var pmap=all[cc];
-    if(!pmap[bp])pmap[bp]={bp,bp_name:bpName,cc,lc,collector,sold_to:soldTo,bill_to:billTo,bill_to_name:billToName,is_cdc:false,bill_to:billTo,bill_to_name:billToName,is_cdc:isCdc,
+    if(!pmap[bp])pmap[bp]={bp:bp,bp_name:bpName,cc:cc,lc:lc,collector:collector,sold_to:soldTo,bill_to:billTo,bill_to_name:billToName,is_cdc:false,bill_to:billTo,bill_to_name:billToName,is_cdc:isCdc,
       total_pd:0,pd_01_30:0,pd_31_60:0,pd_61_90:0,pd_90:0,
       ehf_amt_now:0,ehf_amt_me:0,ehf_amt_qe:0,max_dpd:0,
       term_risk:false,ehf_impact:false,ob_risk:false,
@@ -1590,7 +1591,7 @@ async function dsBuildFromMasterSheet(buf, onProgress) {
     var eurAmt=sf(row[65]);
     var odMe=netDueDt?Math.max(0,Math.round((new Date('2026-08-31')-netDueDt)/86400000)):0;
     var odQe=netDueDt?Math.max(0,Math.round((new Date('2026-09-30')-netDueDt)/86400000)):0;
-    var doc={doc_num:docNum,posting_dt:postDt,net_due_dt:netDueDt,lc_amt:lcAmt,lc,
+    var doc={doc_num:docNum,posting_dt:postDt,net_due_dt:netDueDt,lc_amt:lcAmt,lc:lc,
       dpd:Math.round(dpd),total_ar_pd:arPD,pd_01_30:pd0130,pd_31_60:pd3160,pd_61_90:pd6190,pd_90:pd90p,
       ehf_due_dt:ehfDueDt,ehf_od_now:ehfOdNow,ehf_od_me:ehfOdMe,ehf_od_qe:ehfOdQe,
       ehf_amt_now:ehfNow,ehf_amt_me:ehfMe,ehf_amt_qe:ehfQe,ehf_impact:ehfImpact,term_risk:termRisk,
