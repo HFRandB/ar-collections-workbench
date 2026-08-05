@@ -1596,9 +1596,18 @@ async function dsBuildFromMasterSheet(buf, onProgress) {
       ehf_amt_now:ehfNow,ehf_amt_me:ehfMe,ehf_amt_qe:ehfQe,ehf_impact:ehfImpact,term_risk:termRisk,
       eur_amt:Math.round(eurAmt*100)/100, od_me:odMe, od_qe:odQe,
       bill_to:billTo, bill_to_name:billToName, is_cdc:isCdc};
-    if(arPD>0)p.docs.push(doc);
-    if(termRisk)p.term_risk_docs.push(doc);
-    if(ehfImpact)p.ehf_impact_docs.push(doc);
+    if(arPD>0){
+      // Aggregate by doc_num
+      var existing=p.docs.find(function(x){return x.doc_num===docNum;});
+      if(existing){
+        existing.lc_amt+=lcAmt;existing.total_ar_pd+=arPD;
+        existing.eur_amt+=(eurAmt||0);existing.ehf_amt_me+=ehfMe;existing.ehf_amt_qe+=ehfQe;
+        existing.dpd=Math.max(existing.dpd,Math.round(dpd));
+        if(!existing.fc&&fc)existing.fc=fc;if(!existing.cpp&&cpp)existing.cpp=cpp;if(!existing.status&&(row[73]))existing.status=String(row[73]||'').trim().replace(/^'/,'');
+      } else { p.docs.push(doc); }
+    }
+    if(termRisk&&!p.term_risk_docs.find(function(x){return x.doc_num===docNum;}))p.term_risk_docs.push(doc);
+    if(ehfImpact&&!p.ehf_impact_docs.find(function(x){return x.doc_num===docNum;}))p.ehf_impact_docs.push(doc);
   }
   return all;
 }
@@ -1724,18 +1733,41 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
   Object.keys(DUN_DOCS).forEach(k => delete DUN_DOCS[k]);
   function addToDunDocs(pMap) {
     Object.entries(pMap).forEach(([bp, d]) => {
-      const top = d.docs.filter(x=>x.total_ar_pd>0)
+      const rawDocs = d.docs.filter(x=>x.total_ar_pd>0);
+      // Aggregate by doc_num: sum amounts, keep max dpd, first due date
+      const byDoc = {};
+      rawDocs.forEach(x => {
+        const key = x.doc_num;
+        if (!byDoc[key]) {
+          byDoc[key] = {doc_num:key, net_due_dt:x.net_due_dt, dpd:x.dpd,
+            lc_amt:0, lc:x.lc, total_ar_pd:0,
+            eur_amt:0, od_me:x.od_me||0, od_qe:x.od_qe||0,
+            ehf_amt_me:0, ehf_amt_qe:0,
+            fc:x.fc||'', cpp:x.cpp||'', status:x.status||'',
+            bill_to:x.bill_to||'', bill_to_name:x.bill_to_name||'', is_cdc:x.is_cdc||false};
+        }
+        byDoc[key].lc_amt       += x.lc_amt||0;
+        byDoc[key].total_ar_pd  += x.total_ar_pd||0;
+        byDoc[key].eur_amt      += x.eur_amt||0;
+        byDoc[key].ehf_amt_me   += x.ehf_amt_me||0;
+        byDoc[key].ehf_amt_qe   += x.ehf_amt_qe||0;
+        byDoc[key].dpd           = Math.max(byDoc[key].dpd, x.dpd||0);
+        if (!byDoc[key].fc && x.fc) byDoc[key].fc = x.fc;
+        if (!byDoc[key].cpp && x.cpp) byDoc[key].cpp = x.cpp;
+        if (!byDoc[key].status && x.status) byDoc[key].status = x.status;
+      });
+      const agg = Object.values(byDoc).filter(x=>x.total_ar_pd>0)
         .sort((a,b)=>b.total_ar_pd-a.total_ar_pd).slice(0,15);
-      if (top.length) DUN_DOCS[bp] = top.map(x=>({
+      if (agg.length) DUN_DOCS[bp] = agg.map(x=>({
         doc: x.doc_num, due: fdN(x.net_due_dt), dpd: Math.round(x.dpd),
         amt: Math.round(x.lc_amt*100)/100,
         pd_amt: Math.round(x.total_ar_pd*100)/100, ccy: x.lc,
-        eur_amt: Math.round((x.eur_amt||0)*100)/100,
-        od_me: x.od_me||0, od_qe: x.od_qe||0,
-        ehf_me: Math.round((x.ehf_amt_me||0)*100)/100,
-        ehf_qe: Math.round((x.ehf_amt_qe||0)*100)/100,
-        fc: x.fc||'', cpp: x.cpp||'', status: x.status||'',
-        bill_to: x.bill_to||'', bill_to_name: x.bill_to_name||'', is_cdc: x.is_cdc||false
+        eur_amt: Math.round(x.eur_amt*100)/100,
+        od_me: x.od_me, od_qe: x.od_qe,
+        ehf_me: Math.round(x.ehf_amt_me*100)/100,
+        ehf_qe: Math.round(x.ehf_amt_qe*100)/100,
+        fc: x.fc, cpp: x.cpp, status: x.status,
+        bill_to: x.bill_to, bill_to_name: x.bill_to_name, is_cdc: x.is_cdc
       }));
     });
   }
