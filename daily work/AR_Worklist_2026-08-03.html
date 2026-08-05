@@ -404,6 +404,92 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
 </div>
 
 <script>
+// ── Contact editing ───────────────────────────────────────────────────────────
+var contactEdits = {};  // bp -> [email, email, ...]
+(function loadContactEdits(){
+  try {
+    var s=localStorage.getItem('ar_contact_edits_2026');
+    if(s) contactEdits=JSON.parse(s);
+  } catch(e){}
+})();
+
+function saveContactEdits(){
+  try { localStorage.setItem('ar_contact_edits_2026', JSON.stringify(contactEdits)); } catch(e){}
+  // Also propagate to CONTACTS so Dunning modal picks up changes
+  Object.entries(contactEdits).forEach(function(e){
+    var bp=e[0], emails=e[1];
+    if(!CONTACTS[bp]) CONTACTS[bp]={emails:[],names:[]};
+    CONTACTS[bp].emails=emails;
+  });
+}
+
+function getContactEmails(bp){
+  if(contactEdits[bp]) return contactEdits[bp];
+  var c=CONTACTS[bp]||CONTACTS[(PARTNERS.find(function(p){return p.bp===bp;})||{}).sold_to||'']||{emails:[]};
+  return c.emails||[];
+}
+
+function renderContactField(bp, container){
+  var emails = getContactEmails(bp);
+  var isEdited = !!contactEdits[bp];
+  var chipsHtml = emails.map(function(e,i){
+    return '<span class="contact-chip'+(isEdited?' edited':'')+'">'
+      +'<a href="mailto:'+e+'" onclick="event.stopPropagation()" style="color:inherit;text-decoration:none">'+e+'</a>'
+      +' <span class="rm-contact" onclick="removeContact(\''+bp+'\','+i+',this)" title="Remove">×</span>'
+      +'</span>';
+  }).join('');
+  var noContact = emails.length===0
+    ? '<span class="no-contact-edit" onclick="focusAddContact(\''+bp+'\',this)">No contact — click to add</span>'
+    : '';
+  container.innerHTML = '<div class="contact-edit-wrap" id="ce-'+bp+'">'
+    + chipsHtml + noContact
+    + '<input class="add-contact-input" id="ci-'+bp+'" type="email" placeholder="+ add email" '
+    + 'onkeydown="addContactKey(event,\''+bp+'\')" style="'+(emails.length>0?'':'')+'"/>'
+    + (isEdited?'<button class="contact-save-btn" onclick="exportContactsCSV()" title="Export updated contacts">↓ Export</button>':'')
+    +'</div>';
+}
+
+function addContactKey(e, bp){
+  if(e.key!=='Enter'&&e.key!==',') return;
+  e.preventDefault();
+  var val=e.target.value.trim().replace(/,$/,'');
+  if(!val||!val.includes('@')) return;
+  if(!contactEdits[bp]) contactEdits[bp]=getContactEmails(bp).slice();
+  if(!contactEdits[bp].includes(val)) contactEdits[bp].push(val);
+  e.target.value='';
+  saveContactEdits();
+  var card=e.target.closest('.partner-card');
+  if(card){
+    var infoItem=e.target.closest('.info-item');
+    if(infoItem) renderContactField(bp, infoItem.querySelector('.contact-edit-wrap').parentNode);
+  }
+}
+
+function removeContact(bp, idx, el){
+  if(!contactEdits[bp]) contactEdits[bp]=getContactEmails(bp).slice();
+  contactEdits[bp].splice(idx,1);
+  saveContactEdits();
+  var infoItem=el.closest('.info-item');
+  if(infoItem) renderContactField(bp, infoItem.querySelector('.contact-edit-wrap').parentNode);
+}
+
+function focusAddContact(bp, el){
+  var inp=document.getElementById('ci-'+bp);
+  if(inp) inp.focus();
+}
+
+function exportContactsCSV(){
+  var rows=['BP#,Account Name,CC,Email 1,Email 2,Email 3,Email 4,Email 5,Source'];
+  Object.entries(contactEdits).forEach(function(e){
+    var bp=e[0],emails=e[1];
+    var p=PARTNERS.find(function(x){return x.bp===bp;})||{};
+    var emailCols=emails.concat(['','','','','']).slice(0,5);
+    rows.push([bp,'"'+(p.name||'').replace(/"/g,'""')+'"',p.cc||'',...emailCols,'collector-edit'].join(','));
+  });
+  var blob=new Blob(['﻿'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='updated_contacts_2026-08.csv';a.click();URL.revokeObjectURL(a.href);
+}
+
 // ── Cross-page data storage ───────────────────────────────────────────────────
 function saveDataToStorage() {
   try {
@@ -1695,7 +1781,7 @@ function buildCardHTML(bp, d, cc_label, currency) {
     +'<div class="bar-seg seg60" style="width:'+b60.toFixed(1)+'%"></div>'
     +'<div class="bar-seg seg90" style="width:'+b90.toFixed(1)+'%"></div>'
     +'<div class="bar-seg seg90p" style="width:'+b9p.toFixed(1)+'%"></div></div>'
-    +'<div class="info-row"><div class="info-item"><span class="info-label">Contact:</span>'+emailHTML+'</div></div>'
+    +'<div class="info-row"><div class="info-item" id="info-contact-'+bp+'"><span class="info-label">Contact:</span>'+emailHTML+'</div></div>'
     +'<div class="card-details hidden" id="det-'+bp+'"></div>'
     +'</div></div>\n';
 }
@@ -2600,6 +2686,11 @@ document.addEventListener('DOMContentLoaded',function(){
   var _ok=loadDataFromStorage();
   var cm=[{cc:'0038',ci:'cards38',ni:'cnt38',l:'CC0038',c:'CNY'},{cc:'0073',ci:'cards73',ni:'cnt73',l:'CC0073',c:'TWD'},{cc:'0074',ci:'cards74',ni:'cnt74',l:'CC0074',c:'HKD'}];
   cm.forEach(function(m){var r=PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});var e=document.getElementById(m.ci);if(e)e.innerHTML=r.map(function(p){return buildCardHTML(p.bp,p,m.l,m.c);}).join('');var n=document.getElementById(m.ni);if(n)n.textContent=r.length+' past-due accounts';});
+  // Render editable contact fields
+  PARTNERS.filter(function(p){return p.total_pd>0;}).forEach(function(p){
+    var ci=document.getElementById('info-contact-'+p.bp);
+    if(ci) renderContactField(p.bp, ci);
+  });
   var rb=document.getElementById('ds-restore-btn');
   var stat=document.getElementById('ds-proc-status');
   if(_ok&&PARTNERS.length>0){
