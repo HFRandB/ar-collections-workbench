@@ -1665,14 +1665,13 @@ function buildCardHTML(bp, d, cc_label, currency) {
   const termTag   = d.term_risk  ? '<span class="risk-tag term-tag">⚠ Term Risk</span>' : '';
   const ehfTag    = d.ehf_impact ? '<span class="risk-tag ehf-tag">EHF Impact</span>' : '';
   const obTag     = d.ob_risk    ? '<span class="risk-tag ob-tag">⛔ OB Risk</span>' : '';
-  const cdcTag    = d.is_cdc     ? '<span class="cdc-tag" title="Billed via China Datacom Corporation">CDC A/R</span>' : '';
   const bt = Math.max(Math.abs(d.total_pd),1);
   const b30=Math.max(0,d.pd_01_30)/bt*100, b60=Math.max(0,d.pd_31_60)/bt*100,
         b90=Math.max(0,d.pd_61_90)/bt*100, b9p=Math.max(0,d.pd90)/bt*100;
   const expandBtn = '<button class="expand-btn" onclick="toggleDetails(this,\''+bp+'\')">▸ Details</button>';
   return '<div class="partner-card" data-cc="'+cc_label+'" data-collector="'+collector+'" data-bp="'+bp
     +'" data-term="'+String(d.term_risk)+'" data-ehf="'+String(d.ehf_impact)+'" data-ob="'+String(d.ob_risk||false)+'">\n'
-    +'<div class="card-header"><div class="card-title">'+priorityBadge(d)+termTag+ehfTag+obTag+cdcTag
+    +'<div class="card-header"><div class="card-title">'+priorityBadge(d)+termTag+ehfTag+obTag
     +'<span class="partner-name">'+d.name+'</span><span class="bp-id">BP# '+bp+'</span></div>'
     +'<div class="card-meta"><span class="cc-tag">'+cc_label+'</span>'+colTag
     +'<span class="max-dpd">Max DPD: <strong>'+Math.round(d.max_dpd||0)+'d</strong></span>'
@@ -1722,6 +1721,10 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
         total_pd: d.total_pd, pd90: d.pd_90,
         pd_01_30: d.pd_01_30, pd_31_60: d.pd_31_60, pd_61_90: d.pd_61_90,
         term_risk: d.term_risk, ehf_impact: d.ehf_impact,
+        ob_risk: d.ob_risk||false,
+        max_dpd: d.max_dpd||0,
+        is_cdc: d.is_cdc||false,
+        bill_to_name: d.bill_to_name||'',
         ehf_now: d.ehf_amt_now, ehf_me: d.ehf_amt_me, ehf_qe: d.ehf_amt_qe
       });
     });
