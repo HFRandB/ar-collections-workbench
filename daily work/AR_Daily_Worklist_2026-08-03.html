@@ -1758,7 +1758,25 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
       .sort((a,b)=>b[1].total_pd-a[1].total_pd).slice(0,n);
   }
   function renderSection(entries, ccLabel, currency) {
-    return entries.map(([bp,d])=>buildCardHTML(bp,d,ccLabel,currency)).join('');
+    return entries.map(([bp,d]) => {
+      // Normalize raw parsed object to match PARTNERS format expected by buildCardHTML
+      const norm = {
+        cc: d.cc, bp: bp,
+        name: d.bp_name || d.name || bp,
+        collector: (d.collector||'').trim(),
+        currency: currency,
+        total_pd: d.total_pd, pd90: d.pd_90||d.pd90||0,
+        pd_01_30: d.pd_01_30||0, pd_31_60: d.pd_31_60||0, pd_61_90: d.pd_61_90||0,
+        term_risk: d.term_risk, ehf_impact: d.ehf_impact,
+        ob_risk: d.ob_risk||d.max_dpd>60||false,
+        max_dpd: d.max_dpd||0,
+        is_cdc: d.is_cdc||false,
+        ehf_now: d.ehf_amt_now||d.ehf_now||0,
+        ehf_me:  d.ehf_amt_me ||d.ehf_me ||0,
+        ehf_qe:  d.ehf_amt_qe ||d.ehf_qe ||0
+      };
+      return buildCardHTML(bp, norm, ccLabel, currency);
+    }).join('');
   }
 
   const cnt38 = Object.values(p38new).filter(d=>d.total_pd>0).length;
