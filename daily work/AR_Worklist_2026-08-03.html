@@ -515,7 +515,17 @@ function loadDataFromStorage() {
     if (!p) return false;
     PARTNERS.length = 0; JSON.parse(p).forEach(function(x){PARTNERS.push(x);});
     if (d) { var dd=JSON.parse(d); Object.keys(DUN_DOCS).forEach(function(k){delete DUN_DOCS[k];}); Object.assign(DUN_DOCS,dd); }
-    if (c) { var cc=JSON.parse(c); Object.keys(CONTACTS).forEach(function(k){delete CONTACTS[k];}); Object.assign(CONTACTS,cc); }
+    if (c) {
+      var cc=JSON.parse(c);
+      // Only overwrite if localStorage has MORE contacts than baked-in (avoid wiping with old empty {})
+      if(Object.keys(cc).length > Object.keys(CONTACTS).length) {
+        Object.keys(CONTACTS).forEach(function(k){delete CONTACTS[k];});
+        Object.assign(CONTACTS,cc);
+      } else if(Object.keys(cc).length > 0) {
+        // Merge: keep baked-in, overlay localStorage extras
+        Object.assign(CONTACTS, cc);
+      }
+    }
     return true;
   } catch(e) { return false; }
 }
@@ -2684,6 +2694,16 @@ function loadXLSX(cb){if(typeof XLSX!=='undefined'){cb();return;}alert('SheetJS 
 <script src="xlsx.mini.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
+  // Clear stale empty contacts from localStorage if baked-in has more
+  try {
+    var storedCt = localStorage.getItem('ar_contacts_data');
+    if(storedCt) {
+      var stLen = Object.keys(JSON.parse(storedCt)).length;
+      if(stLen < Object.keys(CONTACTS).length) {
+        localStorage.removeItem('ar_contacts_data');  // clear stale, will be re-saved after load
+      }
+    }
+  } catch(e){}
   var _ok=loadDataFromStorage();
   var cm=[{cc:'0038',ci:'cards38',ni:'cnt38',l:'CC0038',c:'CNY'},{cc:'0073',ci:'cards73',ni:'cnt73',l:'CC0073',c:'TWD'},{cc:'0074',ci:'cards74',ni:'cnt74',l:'CC0074',c:'HKD'}];
   cm.forEach(function(m){var r=PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});var e=document.getElementById(m.ci);if(e)e.innerHTML=r.map(function(p){return buildCardHTML(p.bp,p,m.l,m.c);}).join('');var n=document.getElementById(m.ni);if(n)n.textContent=r.length+' past-due accounts';});
