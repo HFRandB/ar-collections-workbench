@@ -611,7 +611,7 @@ function renderDetTable(det, bp) {
       var fcSel  = FC_OPTS.replace('value="'+fc+'"','value="'+fc+'" selected');
       var cppSel = CPP_OPTS.replace('value="'+cpp+'"','value="'+cpp+'" selected');
       return '<tr>'
-        +'<td>'+d.doc+'</td>'
+        +'<td>'+d.doc+(d.is_cdc?'<span class="cdc-tag" style="margin-left:4px;font-size:9px" title="Bill-to: China Datacom">CDC</span>':'')+'</td>'
         +'<td>'+(d.due||'—')+'</td>'
         +'<td class="num '+dpdCls+'">'+d.dpd+'</td>'
         +'<td class="num">'+d.pd_amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
@@ -2078,6 +2078,7 @@ function openUnblock(btn) {
   var tbody = document.getElementById('ub-ar-body');
   if (docs.length) {
     var totLocal=0, totEUR=0, totEhfMe=0, totEhfQe=0, totEhfMeEur=0, totEhfQeEur=0;
+    var fmt=function(v){return v?v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'';};var fmtI=function(v){return(v&&v!==0)?Math.round(v).toLocaleString():'-';};
     var rows = docs.map(function(d) {
       totLocal += d.pd_amt;
       var ed = ehfDocMap[d.doc] || {};
@@ -2091,8 +2092,6 @@ function openUnblock(btn) {
       var ehfQeEur = ehfQe>0 && fxRatio>0 ? Math.round(ehfQe*fxRatio*100)/100 : 0;
       totEhfMe += ehfMe; totEhfQe += ehfQe; totEUR += eurAmt;
       totEhfMeEur += ehfMeEur; totEhfQeEur += ehfQeEur;
-      var fmt = function(v){ return v ? v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : ''; };
-      var fmtI = function(v){ return v ? Math.round(v).toLocaleString() : '-'; };
       // Get fc/status from DUN_DOCS fields for text column
       var text = d.fc ? d.fc + (d.status ? ' | ' + d.status.slice(0,30) : '') : (d.status ? d.status.slice(0,40) : '');
       return '<tr>'

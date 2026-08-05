@@ -712,7 +712,7 @@ function renderDetTable(det, bp) {
       var fcSel  = FC_OPTS.replace('value="'+fc+'"','value="'+fc+'" selected');
       var cppSel = CPP_OPTS.replace('value="'+cpp+'"','value="'+cpp+'" selected');
       return '<tr>'
-        +'<td>'+d.doc+'</td>'
+        +'<td>'+d.doc+(d.is_cdc?'<span class="cdc-tag" style="margin-left:4px;font-size:9px" title="Bill-to: China Datacom">CDC</span>':'')+'</td>'
         +'<td>'+(d.due||'—')+'</td>'
         +'<td class="num '+dpdCls+'">'+d.dpd+'</td>'
         +'<td class="num">'+d.pd_amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
