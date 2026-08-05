@@ -223,8 +223,6 @@ function saveDataToStorage() {
     localStorage.setItem('ar_data_timestamp', new Date().toISOString());
     const mo = new Date().toISOString().slice(0,7);
     localStorage.setItem('ar_data_month', mo);
-    // Notify other tabs
-    window.dispatchEvent(new StorageEvent('storage', {key:'ar_data_timestamp', newValue: new Date().toISOString()}));
   } catch(e) { console.warn('Storage save failed:', e.message); }
 }
 
@@ -1621,6 +1619,7 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
   document.querySelector('.search-box').value='';
 
   applyFilters();
+  saveDataToStorage();
 }
 
 // ── Main recalc entry point ──────────────────────────────────────────────────
@@ -2187,6 +2186,8 @@ function togglePaid(btn,e){e.stopPropagation();var key=btn.dataset.key,bp=btn.da
 function applyPaidToRow(key,bp,isPaid){var btn=document.querySelector('.paid-btn[data-key="'+key+'"]');if(!btn)return;var row=btn.closest('tr');if(!row)return;row.classList.toggle('row-paid',isPaid);var dc=row.querySelector('td:first-child'),badge=dc?dc.querySelector('.paid-badge'):null;if(isPaid&&!badge&&dc)dc.innerHTML+='<span class="paid-badge">Paid</span>';else if(!isPaid&&badge)badge.remove();btn.textContent=isPaid?'✓ Paid':'Mark Paid';btn.classList.toggle('is-paid',isPaid);}
 function calcIncome(){var inc={};Object.entries(editStore).forEach(function(e){var key=e[0],val=e[1];if(!val||val.paid!=='yes')return;var p=key.split('|'),cc=p[0],bp=p[1],doc=p[2],docs=DUN_DOCS[bp]||[],d=docs.find(function(x){return x.doc===doc;});if(!d)return;if(!inc[cc])inc[cc]={amount:0,count:0,currency:d.ccy};inc[cc].amount+=d.pd_amt;inc[cc].count++;});return inc;}
 function updateIncomeBar(){var bar=document.getElementById('income-bar');if(!bar)return;var inc=calcIncome();if(!Object.keys(inc).length){bar.innerHTML='<div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet</span>';return;}var blocks=Object.entries(inc).map(function(e){var cc=e[0],d=e[1];return '<div class="income-block"><div class="income-label">'+cc+'</div><div class="income-val">'+Math.round(d.amount).toLocaleString()+' <small style="font-size:10px">'+d.currency+'</small></div><div class="income-sub">'+d.count+' doc'+(d.count!==1?'s':'')+' paid</div></div>';});bar.innerHTML='<div class="income-title">💰 Income Collected</div>'+blocks.join('<div class="income-sep"></div>');}
+function loadXLSX(cb){if(typeof XLSX!=='undefined'){cb();return;}alert('SheetJS not loaded.');}
+function dsRestoreFromStorage(){var stat=document.getElementById('ds-proc-status');if(stat){stat.textContent='Restoring…';stat.style.color='#0070F2';}var ok=loadDataFromStorage();if(ok&&PARTNERS.length>0){var cm=[{cc:'0038',ci:'cards38',ni:'cnt38',l:'CC0038',c:'CNY'},{cc:'0073',ci:'cards73',ni:'cnt73',l:'CC0073',c:'TWD'},{cc:'0074',ci:'cards74',ni:'cnt74',l:'CC0074',c:'HKD'}];cm.forEach(function(m){var r=PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});var e=document.getElementById(m.ci);if(e)e.innerHTML=r.map(function(p){return buildCardHTML(p.bp,p,m.l,m.c);}).join('');var n=document.getElementById(m.ni);if(n)n.textContent=r.length+' past-due accounts';});refreshDropdowns();document.querySelectorAll('.partner-card').forEach(function(c){c.classList.toggle('has-term',c.dataset.term==='true');c.classList.toggle('has-ehf',c.dataset.ehf==='true');});updateIncomeBar();var mo=localStorage.getItem('ar_data_month')||'';var cnt=PARTNERS.filter(function(p){return p.total_pd>0;}).length;if(stat){stat.textContent='✓ Restored '+cnt+' accounts ('+mo+')';stat.style.color='#188918';}var rb=document.getElementById('ds-restore-btn');if(rb)rb.style.display='none';}else{if(stat){stat.textContent='No saved data — please upload a file.';stat.style.color='#BB0000';}}}
 </script>
 <script src="xlsx.mini.min.js"></script>
 <script>
