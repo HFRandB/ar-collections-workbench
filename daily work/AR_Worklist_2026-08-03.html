@@ -446,7 +446,8 @@ function renderContactField(bp, container){
     + '<input class="add-contact-input" id="ci-'+bp+'" type="email" placeholder="+ add email" '
     + 'onkeydown="addContactKey(event,\''+bp+'\')" style="'+(emails.length>0?'':'')+'"/>'
     + (isEdited?'<button class="contact-save-btn" onclick="exportContactsCSV()" title="Export updated contacts">↓ Export</button>':'')
-    +'</div>';
+    
+    +'<a href="https://sapit-home-prod-004.launchpad.cfapps.eu10.hana.ondemand.com/site#mdgeditcontactpartnerfunctions-Display" target="_blank" class="crm-link" title="Update contacts in SAP CRM">🔗 Update in CRM</a>'+'</div>';
 }
 
 function addContactKey(e, bp){
