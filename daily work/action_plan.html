@@ -123,7 +123,22 @@ body{font-family:"72","72full",Arial,sans-serif;background:var(--bg);color:var(-
     <option value="CS">CS — Service</option>
     <option value="OT">OT — Other</option>
   </select>
-  <input type="text" id="search-input" placeholder="Search account…" oninput="applyFilters()" style="width:180px">
+  <select id="collector-filter" onchange="applyFilters()">
+    <option value="">All Collectors</option>
+    <option value="Chen, Patrick">Chen, Patrick</option>
+    <option value="Gao, Camille">Gao, Camille</option>
+    <option value="Guo, Jiazhao">Guo, Jiazhao</option>
+    <option value="Hai, Yan">Hai, Yan</option>
+    <option value="Hu, Cicy">Hu, Cicy</option>
+    <option value="Huang, Fan">Huang, Fan</option>
+    <option value="Jiang, Mavis">Jiang, Mavis</option>
+    <option value="Lu, Limin">Lu, Limin</option>
+    <option value="Ma, Sailin">Ma, Sailin</option>
+    <option value="Volume">Volume</option>
+    <option value="Zeng, Eilleen">Zeng, Eilleen</option>
+    <option value="Zhang, Raymond">Zhang, Raymond</option>
+  </select>
+  <input type="text" id="search-input" placeholder="Search account…" oninput="applyFilters()" style="width:160px">
   <span id="result-count" style="font-size:11px;color:#6A6D70;margin-left:auto"></span>
 </div>
 <div class="content" id="content"></div>
@@ -137,7 +152,7 @@ const CC_LABEL = {'0038':'CC0038 — SAP China','0073':'CC0073 — SAP Taiwan','
 const CC_CUR   = {'0038':'CNY','0073':'TWD','0074':'HKD'};
 const LOB_FULL = {'CL':'Cloud','MT':'Migration/OnPrem','CS':'Service','OT':'Other','Payment':'Payment','SI':'System Integration'};
 
-let state = {priority:'all', cc:'', lob:'', search:''};
+let state = {priority:'all', cc:'', lob:'', collector:'', search:''};
 
 function fmt(v) { return v ? Math.round(v).toLocaleString() : '0'; }
 
@@ -160,9 +175,10 @@ function setFilter(btn) {
 }
 
 function applyFilters() {
-  state.cc     = document.getElementById('cc-filter').value;
-  state.lob    = document.getElementById('lob-filter').value;
-  state.search = document.getElementById('search-input').value.toLowerCase();
+  state.cc        = document.getElementById('cc-filter').value;
+  state.lob       = document.getElementById('lob-filter').value;
+  state.collector = document.getElementById('collector-filter').value;
+  state.search    = document.getElementById('search-input').value.toLowerCase();
   renderAccounts();
 }
 
@@ -171,6 +187,7 @@ function renderAccounts() {
     if (state.priority !== 'all' && a.priority !== state.priority) return false;
     if (state.cc && a.cc !== state.cc) return false;
     if (state.lob && !accountHasLob(a, state.lob)) return false;
+    if (state.collector && a.collector !== state.collector) return false;
     if (state.search && !a.name.toLowerCase().includes(state.search) && !a.bp.includes(state.search)) return false;
     return true;
   });
