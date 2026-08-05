@@ -229,7 +229,7 @@ function buildCard(a) {
   const statChips = (a.current_statuses||[]).slice(0,2).map(x => '<span class="field-chip" title="'+x+'">'+x.slice(0,50)+(x.length>50?'…':'')+'</span>').join('');
 
   return '<div class="account-card priority-'+a.priority+'" id="ac-'+a.bp+'">'
-    +'<div class="card-top" onclick="toggleCard(''+a.bp+'')">'
+    +'<div class="card-top" onclick="toggleCard(this)" data-bp="'+a.bp+'">'
     +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
     +'<span class="p-badge p-'+a.priority+'">'+a.priority+'</span>'
     +'<span class="card-name">'+a.name+'</span>'
@@ -260,10 +260,12 @@ function buildCard(a) {
     +'</div>';
 }
 
-function toggleCard(bp) {
+function toggleCard(el) {
+  const bp = el.dataset.bp;
   const body = document.getElementById('body-'+bp);
+  if(!body) return;
   body.classList.toggle('open');
-  const arrow = document.querySelector('#ac-'+bp+' .card-top span:last-child');
+  const arrow = el.querySelector('span:last-child');
   if(arrow) arrow.textContent = body.classList.contains('open') ? '▾' : '▸';
 }
 
