@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- v2026-08-06-fix -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>AR Worklist — 2026-08</title>
 <style>
@@ -1429,7 +1433,11 @@ function fdlConfirm() {
   var win = window.open('', '_blank', 'width=900,height=700');
   win.document.write(
     '<!DOCTYPE html><html><head>'
-    + '<meta charset="UTF-8">'
+    + '<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- v2026-08-06-fix -->'
     + '<title>FDL - ' + name + ' - ' + cc + '</title>'
     + '<style>' + printCSS + '</style>'
     + '</head><body>'
@@ -2010,7 +2018,9 @@ async function _dsRecalcInner() {
         if(stat2){stat2.textContent='Parse error: '+(parseErr.message||parseErr);stat2.style.color='#BB0000';}
         throw parseErr;
       }
-      await setProgress('Parsing Master Report — CC0038 done…', 35);
+      // Show debug counts
+      var cnt38=Object.keys(all['0038']||{}).length, cnt73=Object.keys(all['0073']||{}).length, cnt74=Object.keys(all['0074']||{}).length;
+      await setProgress('Parsed: CC0038='+cnt38+' CC0073='+cnt73+' CC0074='+cnt74, 35);
       p38new = all['0038']||{}; p73new = all['0073']||{}; p74new = all['0074']||{};
       await setProgress('Parsing Master Report — all CCs done', 50);
     } else {
