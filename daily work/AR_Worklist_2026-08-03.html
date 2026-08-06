@@ -1433,11 +1433,7 @@ function fdlConfirm() {
   var win = window.open('', '_blank', 'width=900,height=700');
   win.document.write(
     '<!DOCTYPE html><html><head>'
-    + '<meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<!-- v2026-08-06-fix -->'
+    + '<meta charset="UTF-8">'
     + '<title>FDL - ' + name + ' - ' + cc + '</title>'
     + '<style>' + printCSS + '</style>'
     + '</head><body>'
@@ -1479,7 +1475,7 @@ function dsDetectSlot(name) {
   if (n.includes('038')) return '0038';
   if (n.includes('073')) return '0073';
   if (n.includes('074')) return '0074';
-  return null;
+  return 'master';
 }
 
 function dsHandleFiles(files) {
@@ -1502,11 +1498,20 @@ function dsMarkSlot(slot, fname) {
 
 function dsCheckReady() {
   var anyAR = DS['master'] || DS['0038'] || DS['0073'] || DS['0074'];
-  document.getElementById('ds-refresh-btn').disabled = !anyAR;
-  var loaded = Object.entries(DS).filter(([,v])=>v).map(([k])=>k);
-  document.getElementById('ds-loaded-summary').textContent =
-    loaded.length ? '— ' + loaded.map(k=>({'0038':'CC0038','0073':'CC0073','0074':'CC0074','dun':'Contacts'}[k])).join(', ') + ' loaded'
+  var btn = document.getElementById('ds-refresh-btn');
+  if(btn) btn.disabled = !anyAR;
+  var stat = document.getElementById('ds-proc-status');
+  var loaded = [];
+  var labels = {'master':'Master Report','0038':'CC0038','0073':'CC0073','0074':'CC0074','dun':'Contacts'};
+  Object.keys(DS).forEach(function(k){ if(DS[k]) loaded.push(labels[k]||k); });
+  var sumEl = document.getElementById('ds-loaded-summary');
+  if(sumEl) sumEl.textContent = loaded.length
+    ? '— ' + loaded.join(', ') + ' loaded — click ⟳ Refresh to apply'
     : '— drop your Master Report Excel to update with your own data';
+  if(anyAR && stat) {
+    stat.textContent = 'File ready — click ⟳ Refresh Worklist';
+    stat.style.color = '#188918';
+  }
 }
 
 // ── SharePoint / URL load ────────────────────────────────────────────────────
