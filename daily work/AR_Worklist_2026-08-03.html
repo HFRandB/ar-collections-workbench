@@ -1904,9 +1904,9 @@ function rebuildCards(p38new, p73new, p74new, contactsNew) {
     }).join('');
   }
 
-  const cnt38 = Object.values(p38new).filter(d=>d.total_pd>0).length;
-  const cnt73 = Object.values(p73new).filter(d=>d.total_pd>0).length;
-  const cnt74 = Object.values(p74new).filter(d=>d.total_pd>0).length;
+  const cnt38 = Object.values(p38new).filter(function(d){return d.total_pd>0;}).length;
+  const cnt73 = Object.values(p73new).filter(function(d){return d.total_pd>0;}).length;
+  const cnt74 = Object.values(p74new).filter(function(d){return d.total_pd>0;}).length;
 
   document.getElementById('cards38').innerHTML = renderSection(topN(p38new,999), 'CC0038', 'CNY');
   document.getElementById('cards73').innerHTML = renderSection(topN(p73new,999), 'CC0073', 'TWD');
@@ -1966,25 +1966,25 @@ async function _dsRecalcInner() {
   const barW = document.getElementById('ds-bar-wrap');
   const pct  = document.getElementById('ds-pct');
   const stat = document.getElementById('ds-proc-status');
-  const yield_ = (ms=0) => new Promise(r => setTimeout(r, ms));
+  var yield_ = function(ms){ms=ms||0;return new Promise(function(r){setTimeout(r,ms);});};
 
   btn.disabled = true;
   step.style.display = 'inline'; barW.style.display = 'block';
   stat.textContent = ''; stat.style.color = '#6A6D70';
 
-  const setProgress = async (msg, percent) => {
+  var setProgress = async function(msg, percent) {
     step.textContent = '⏳ ' + msg;
     if(bar) { bar.style.width = percent + '%'; }
     if(pct) { pct.textContent = percent + '%'; }
-    await yield_(15);  // yield to browser so it can repaint
+    await yield_(15);
   };
 
   try {
-    let p38new={}, p73new={}, p74new={};
+    var p38new={}, p73new={}, p74new={};
 
     if(DS['master']) {
       await setProgress('Parsing Master Report — reading rows…', 10);
-      const all = await dsBuildFromMasterSheet(DS['master'], setProgress);
+      var all = await dsBuildFromMasterSheet(DS['master'], setProgress);
       await setProgress('Parsing Master Report — CC0038 done…', 35);
       p38new = all['0038']||{}; p73new = all['0073']||{}; p74new = all['0074']||{};
       await setProgress('Parsing Master Report — all CCs done', 50);
@@ -1997,7 +1997,7 @@ async function _dsRecalcInner() {
     if(DS['dun']) {
       await setProgress('Parsing dunning contacts…', 60);
     }
-    const ctNew = DS['dun'] ? dsBuildContacts(DS['dun']) : null;
+    var ctNew = DS['dun'] ? dsBuildContacts(DS['dun']) : null;
 
     await setProgress('Calculating EHF & risk flags…', 70);
     await yield_(10);
@@ -2013,7 +2013,7 @@ async function _dsRecalcInner() {
 
     // Done
     step.style.display = 'none'; barW.style.display = 'none'; pct.textContent = '';
-    const total = Object.values(Object.assign({},p38new,p73new,p74new)).filter(d=>d.total_pd>0).length;
+    var total = Object.values(Object.assign({},p38new,p73new,p74new)).filter(function(d){return d.total_pd>0;}).length;
     stat.textContent = '✓ Loaded ' + total + ' accounts successfully';
     stat.style.color = '#188918';
 
