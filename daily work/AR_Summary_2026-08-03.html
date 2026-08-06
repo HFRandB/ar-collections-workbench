@@ -2180,6 +2180,110 @@ function calcIncome(){var inc={};Object.entries(editStore).forEach(function(e){v
 function updateIncomeBar(){var bar=document.getElementById('income-bar');if(!bar)return;var inc=calcIncome();if(!Object.keys(inc).length){bar.innerHTML='<div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet</span>';return;}var blocks=Object.entries(inc).map(function(e){var cc=e[0],d=e[1];return '<div class="income-block"><div class="income-label">'+cc+'</div><div class="income-val">'+Math.round(d.amount).toLocaleString()+' <small style="font-size:10px">'+d.currency+'</small></div><div class="income-sub">'+d.count+' doc'+(d.count!==1?'s':'')+' paid</div></div>';});bar.innerHTML='<div class="income-title">💰 Income Collected</div>'+blocks.join('<div class="income-sep"></div>');}
 function loadXLSX(cb){if(typeof XLSX!=='undefined'){cb();return;}alert('SheetJS not loaded.');}
 function dsRestoreFromStorage(){var stat=document.getElementById('ds-proc-status');if(stat){stat.textContent='Restoring…';stat.style.color='#0070F2';}var ok=loadDataFromStorage();if(ok&&PARTNERS.length>0){var cm=[{cc:'0038',ci:'cards38',ni:'cnt38',l:'CC0038',c:'CNY'},{cc:'0073',ci:'cards73',ni:'cnt73',l:'CC0073',c:'TWD'},{cc:'0074',ci:'cards74',ni:'cnt74',l:'CC0074',c:'HKD'}];cm.forEach(function(m){var r=PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});var e=document.getElementById(m.ci);if(e)e.innerHTML=r.map(function(p){return buildCardHTML(p.bp,p,m.l,m.c);}).join('');var n=document.getElementById(m.ni);if(n)n.textContent=r.length+' past-due accounts';});refreshDropdowns();document.querySelectorAll('.partner-card').forEach(function(c){c.classList.toggle('has-term',c.dataset.term==='true');c.classList.toggle('has-ehf',c.dataset.ehf==='true');});updateIncomeBar();var mo=localStorage.getItem('ar_data_month')||'';var cnt=PARTNERS.filter(function(p){return p.total_pd>0;}).length;if(stat){stat.textContent='✓ Restored '+cnt+' accounts ('+mo+')';stat.style.color='#188918';}var rb=document.getElementById('ds-restore-btn');if(rb)rb.style.display='none';}else{if(stat){stat.textContent='No saved data — please upload a file.';stat.style.color='#BB0000';}}}
+
+function renderFCBreakdown() {
+  var el = document.getElementById('fc-month-body');
+  if(!el) return;
+
+  // Build FC month -> {eur_amt, docs, bps} from DUN_DOCS
+  var fcMap = {};
+  var totalEur = 0, totalDocs = 0, blankDocs = 0, blankEur = 0;
+
+  Object.keys(DUN_DOCS).forEach(function(bp) {
+    var docs = DUN_DOCS[bp] || [];
+    // Get edits for this bp
+    docs.forEach(function(d) {
+      var key = (Object.keys(DUN_DOCS).indexOf(bp) >= 0 ? '' : '');
+      // Get fc from editStore or doc
+      var partner = PARTNERS.find(function(p){return p.bp===bp;});
+      var cc = partner ? partner.cc : '';
+      // Check editStore for this doc
+      var editKey = cc+'|'+bp+'|'+d.doc;
+      var saved = (typeof editStore !== 'undefined' && editStore[editKey]) || {};
+      var fc = saved.fc !== undefined ? saved.fc : (d.fc || '');
+      var eur = d.eur_amt || 0;
+
+      totalDocs++;
+      totalEur += eur;
+
+      if(!fc || fc === '' || fc === '(none)') {
+        blankDocs++;
+        blankEur += eur;
+        fc = '(Blank)';
+      }
+
+      if(!fcMap[fc]) fcMap[fc] = {eur:0, docs:0, bps:new Set()};
+      fcMap[fc].eur += eur;
+      fcMap[fc].docs++;
+      if(bp) fcMap[fc].bps.add(bp);
+    });
+  });
+
+  if(totalDocs === 0) {
+    el.innerHTML = '<div class="dash-empty">No document data — upload Master Report and refresh.</div>';
+    return;
+  }
+
+  // Sort: blanks last, rest by EUR desc
+  var entries = Object.entries(fcMap).sort(function(a,b){
+    if(a[0]==='(Blank)') return 1;
+    if(b[0]==='(Blank)') return -1;
+    return b[1].eur - a[1].eur;
+  });
+
+  var maxEur = Math.max.apply(null, entries.map(function(e){return e[1].eur;}));
+
+  // Risk color mapping
+  var riskFc = ['Non Payment Termination Risk','Payment Risk','3rd Party Collection'];
+  var warnFc = ['Aug-Risk','Sep-Risk','Oct-Risk','Nov-Risk','Dec-Risk','Jul-Risk'];
+
+  var rows = entries.map(function(e){
+    var fc=e[0], d=e[1];
+    var barW = maxEur>0 ? Math.round(d.eur/maxEur*100) : 0;
+    var isRisk = riskFc.indexOf(fc)>=0;
+    var isWarn = warnFc.indexOf(fc)>=0;
+    var isBlank = fc==='(Blank)';
+    var badgeStyle = isBlank
+      ? 'background:#FFF8E6;color:#856404;border:1px solid #F0C040'
+      : isRisk
+        ? 'background:#FFEAEA;color:#BB0000;border:1px solid #BB0000'
+        : isWarn
+          ? 'background:#FFF0E5;color:#C14700;border:1px solid #C14700'
+          : 'background:#E8F3FF;color:#0064D9;border:1px solid #B3D4F5';
+    var pct = totalEur>0 ? (d.eur/totalEur*100).toFixed(1)+'%' : '—';
+    return '<tr>'
+      +'<td><span class="fc-badge" style="'+badgeStyle+'">'+fc+'</span></td>'
+      +'<td class="num">'+Math.round(d.eur).toLocaleString()+' EUR</td>'
+      +'<td class="num">'+d.docs+'</td>'
+      +'<td class="num">'+d.bps.size+'</td>'
+      +'<td class="num">'+pct+'</td>'
+      +'<td style="min-width:120px"><div class="fc-bar"><div class="fc-bar-fill'+(isRisk?' fc-risk-fill':'')+'" style="width:'+barW+'%"></div></div></td>'
+      +'</tr>';
+  });
+
+  // Totals row
+  rows.push('<tr>'
+    +'<td><strong>Total</strong></td>'
+    +'<td class="num"><strong>'+Math.round(totalEur).toLocaleString()+' EUR</strong></td>'
+    +'<td class="num"><strong>'+totalDocs+'</strong></td>'
+    +'<td class="num"><strong>'+Object.values(fcMap).reduce(function(s,v){return s+v.bps.size;},0)+'</strong></td>'
+    +'<td class="num"></td><td></td>'
+    +'</tr>');
+
+  el.innerHTML = '<table class="fc-table">'
+    +'<thead><tr>'
+    +'<th>FC Month</th>'
+    +'<th class="num">EUR Amount</th>'
+    +'<th class="num">Documents</th>'
+    +'<th class="num">Accounts</th>'
+    +'<th class="num">% of Total</th>'
+    +'<th>Share</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rows.join('')+'</tbody>'
+    +'</table>'
+    +'<div style="padding:8px 12px;font-size:11px;color:#6A6D70">Blank/no FC Month: '
+    +blankDocs+' docs · '+Math.round(blankEur).toLocaleString()+' EUR</div>';
+}
 </script>
 <script src="xlsx.mini.min.js"></script>
 <script>
@@ -2188,14 +2292,14 @@ function _apply(){
   var bar=document.getElementById('data-status-bar');
   var mo=localStorage.getItem('ar_data_month')||'';
   if(ok&&PARTNERS.length){
-    updateSummary();renderDashboard();updateIncomeBar();
+    updateSummary();renderDashboard();updateIncomeBar();renderFCBreakdown();
     if(bar){bar.style.display='flex';bar.className='data-status-bar';bar.querySelector('.ds-msg').textContent='Data: '+mo+' · '+PARTNERS.length+' accounts';}
   } else {
     if(bar){bar.style.display='flex';bar.className='data-status-bar empty';bar.querySelector('.ds-msg').textContent='No data — open Worklist, upload Master Report, click ⟳ Refresh.';}
   }
 }
 document.addEventListener('DOMContentLoaded',_apply);
-window.addEventListener('storage',function(e){if(e.key==='ar_data_timestamp')_apply();});
+window.addEventListener('storage',function(e){if(e.key==='ar_data_timestamp'){_apply();renderFCBreakdown();}});
 </script>
 </body>
 </html>
