@@ -1676,28 +1676,56 @@ function dsBuildFromSheet(buf, cc) {
 
 async function dsBuildFromMasterSheet(buf, onProgress) {
   var wb=XLSX.read(buf,{type:'array',cellDates:false});
-  var ws=wb.Sheets[wb.SheetNames[0]];
+  // Find the correct sheet: prefer 'Master Report', fallback to first sheet
+  var sheetName = wb.SheetNames[0];
+  for(var si=0;si<wb.SheetNames.length;si++){
+    if(wb.SheetNames[si].toLowerCase().indexOf('master')>=0){
+      sheetName=wb.SheetNames[si]; break;
+    }
+  }
+  var ws=wb.Sheets[sheetName];
   var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
   if(rows.length<3) return {};
+  // Auto-detect header row and column indices
+  var hdrRow=-1, ccCol=-1, soldToCol=-1, dpdCol=-1, lcAmtCol=-1, lcCol=-1;
+  for(var ri=0;ri<Math.min(5,rows.length);ri++){
+    var r=rows[ri];
+    for(var ci=0;ci<(r||[]).length;ci++){
+      var h=String(r[ci]||'').toLowerCase().trim();
+      if(h==='company code') ccCol=ci;
+      if(h.includes('sold-to number')||h.includes('sold to number')) soldToCol=ci;
+      if(h==='od days'||h==='days past due') dpdCol=ci;
+      if(h==='local currency amt'||h==='local currency amount') lcAmtCol=ci;
+      if(h==='local currency') lcCol=ci;
+    }
+    if(ccCol>=0 && soldToCol>=0){ hdrRow=ri; break; }
+  }
+  // Fallback to known column positions if auto-detect fails
+  if(ccCol<0)    ccCol=2;
+  if(soldToCol<0) soldToCol=17;
+  if(dpdCol<0)   dpdCol=55;
+  if(lcAmtCol<0) lcAmtCol=23;
+  if(lcCol<0)    lcCol=24;
+  var dataStart = hdrRow>=0 ? hdrRow+1 : 2;
   var all={'0038':{},'0073':{},'0074':{}};
   var total = rows.length - 2;
   var CHUNK = 300;  // process 300 rows then yield
 
-  for(var i=2; i<rows.length; i++) {
+  for(var i=dataStart; i<rows.length; i++) {
     // Yield every CHUNK rows so browser can repaint
     if((i-2) % CHUNK === 0) {
-      var pct = Math.round(10 + ((i-2)/total)*55);  // 10%→65%
-      if(onProgress) onProgress('Parsing rows ' + (i-1) + ' / ' + total + '…', pct);
+      var pct = Math.round(10 + ((i-dataStart)/(rows.length-dataStart))*55);  // 10%→65%
+      if(onProgress) onProgress('Parsing '+sheetName+' row ' + (i-1) + '/' + total + '…', pct);
       await new Promise(function(r){setTimeout(r,0);});
     }
 
-    var row=rows[i],cc=String(row[2]||'').trim();
+    var row=rows[i],cc=String(row[ccCol]||'').trim();
     if(!all[cc]) continue;
     var billTo=String(row[13]||'').trim(),billToName=String(row[14]||'').trim();
-    var bp=String(row[17]||'').trim(),bpName=String(row[18]||'').trim(); // group by sold-to
+    var bp=String(row[soldToCol]||'').trim(),bpName=String(row[soldToCol===17?18:soldToCol+1]||'').trim();
     var soldTo=bp,isCdc=(billTo==='1420822'),collector=String(row[19]||'').trim();
-    var docNum=String(row[20]||'').trim(),lcAmt=sf(row[23]),lc=String(row[24]||RECALC_CURRENCY[cc]||'').trim();
-    var postDt=dsParseDate(row[27]),netDueDt=dsParseDate(row[28]),dpd=sf(row[55]);
+    var docNum=String(row[20]||'').trim(),lcAmt=sf(row[lcAmtCol]),lc=String(row[lcCol]||RECALC_CURRENCY[cc]||'').trim();
+    var postDt=dsParseDate(row[27]),netDueDt=dsParseDate(row[28]),dpd=sf(row[dpdCol]);
     var ehfStatus=String(row[58]||'').trim(),termStatus=String(row[59]||'').trim(),obVal=row[42];
     var fc=String(row[71]||'').trim().replace(/^'/,''),cpp=String(row[72]||'').trim().replace(/^'/,''),status=String(row[73]||'').trim().replace(/^'/,'');
     if(!bp||!docNum) continue;

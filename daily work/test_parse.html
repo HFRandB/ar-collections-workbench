@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Parse Test</title></head>
+<body>
+<h2>XLSX Parse Test</h2>
+<input type="file" id="f" accept=".xlsx">
+<div id="out" style="font-family:monospace;white-space:pre;margin-top:20px;font-size:12px"></div>
+<script src="xlsx.mini.min.js"></script>
+<script>
+document.getElementById('f').onchange = function(e) {
+  var out = document.getElementById('out');
+  out.textContent = 'Reading file...\n';
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      out.textContent += 'File read: ' + ev.target.result.byteLength + ' bytes\n';
+      out.textContent += 'XLSX version: ' + (XLSX.version||'unknown') + '\n';
+      var wb = XLSX.read(new Uint8Array(ev.target.result), {type:'array', cellDates:false});
+      out.textContent += 'Sheets: ' + wb.SheetNames.join(', ') + '\n';
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+      out.textContent += 'Total rows: ' + rows.length + '\n';
+      out.textContent += 'Row 0: ' + JSON.stringify((rows[0]||[]).slice(0,5)) + '\n';
+      out.textContent += 'Row 1: ' + JSON.stringify((rows[1]||[]).slice(0,5)) + '\n';
+      // Find Master Report sheet
+var sheetIdx=0;
+for(var si=0;si<wb.SheetNames.length;si++){if(wb.SheetNames[si].toLowerCase().indexOf('master')>=0){sheetIdx=si;break;}}
+ws=wb.Sheets[wb.SheetNames[sheetIdx]];
+rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
+out.textContent += 'Using sheet: ' + wb.SheetNames[sheetIdx] + ' (' + rows.length + ' rows)\n';
+out.textContent += 'Row 2: CC=' + (rows[2]&&rows[2][2]) + ' BP=' + (rows[2]&&rows[2][17]) + ' DPD=' + (rows[2]&&rows[2][55]) + '\n';
+      
+      var counts = {'0038':0,'0073':0,'0074':0, other:0};
+      var pd_counts = {'0038':0,'0073':0,'0074':0};
+      for(var i=2;i<rows.length;i++){
+        var cc = String(rows[i][2]||'').trim();
+        if(counts[cc]!==undefined) counts[cc]++;
+        else counts.other++;
+        var dpd = parseFloat(rows[i][55])||0;
+        var amt = parseFloat(rows[i][23])||0;
+        if(dpd>0 && amt>0 && pd_counts[cc]!==undefined) pd_counts[cc]++;
+      }
+      out.textContent += '\nCC counts: ' + JSON.stringify(counts) + '\n';
+      out.textContent += 'PD counts (dpd>0): ' + JSON.stringify(pd_counts) + '\n';
+      out.textContent += '\nSUCCESS ✓';
+    } catch(err) {
+      out.textContent += 'ERROR: ' + err.message + '\n' + err.stack;
+    }
+  };
+  reader.onerror = function(err){ out.textContent += 'FileReader error: ' + err; };
+  reader.readAsArrayBuffer(e.target.files[0]);
+};
+</script>
+</body>
+</html>
