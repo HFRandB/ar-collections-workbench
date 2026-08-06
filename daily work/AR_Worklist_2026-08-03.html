@@ -1131,10 +1131,64 @@ function dlCSV(name, rows) {
 }
 function exportCSV() {
   var ps = visiblePartners();
-  var rows = [csvRow(['Company Code','BP#','Name','Collector','Currency','Total PD','PD 1-30d','PD 31-60d','PD 61-90d','PD>90d','Termination Risk','EHF Impact','EHF Now','EHF ME','EHF QE'])];
-  ps.forEach(p => rows.push(csvRow(['CC'+p.cc,p.bp,p.name,p.collector,p.currency,p.total_pd.toFixed(2),p.pd_01_30.toFixed(2),p.pd_31_60.toFixed(2),p.pd_61_90.toFixed(2),p.pd90.toFixed(2),p.term_risk?'Yes':'No',p.ehf_impact?'Yes':'No',p.ehf_now.toFixed(2),p.ehf_me.toFixed(2),p.ehf_qe.toFixed(2)])));
-  dlCSV('AR_Worklist_2026-07-31.csv', rows);
-  document.getElementById('exportMenu').classList.remove('open');
+  // Doc-level export matching Master Report sheet structure
+  var headers = [
+    'Company Code','Sold-to Number','Sold-To Party Name','Collector Name','Bill-to Number','Name of Bill-to Party',
+    'Document Number','Local Currency Amt','Local Currency','Open Balance in EUR',
+    'Net Due Date','OD Days','OD Days by Month-End','OD Days by Q-End',
+    'EHF Impact by M-End','EHF Impact by Q-End',
+    'FC Month','Customer Payment Process','Current Status','AR Plan',
+    'EHF II Status','Termination Status','Unique ID'
+  ];
+  var rows = [csvRow(headers)];
+
+  ps.forEach(function(p) {
+    var docs = DUN_DOCS[p.bp] || [];
+    docs.forEach(function(d) {
+      // Get edits from editStore
+      var editKey = 'CC'+p.cc+'|'+p.bp+'|'+d.doc;
+      var saved = (typeof editStore !== 'undefined' && editStore[editKey]) || {};
+      var fc  = saved.fc     !== undefined ? saved.fc     : (d.fc     || '');
+      var cpp = saved.cpp    !== undefined ? saved.cpp    : (d.cpp    || '');
+      var st  = saved.status !== undefined ? saved.status : (d.status || '');
+      rows.push(csvRow([
+        'CC'+p.cc,
+        p.bp,
+        p.name,
+        p.collector,
+        d.bill_to     || '',
+        d.bill_to_name|| '',
+        d.doc,
+        d.pd_amt      || 0,
+        d.ccy         || p.currency,
+        d.eur_amt     || 0,
+        d.due         || '',
+        d.dpd         || 0,
+        d.od_me       || 0,
+        d.od_qe       || 0,
+        d.ehf_me      || 0,
+        d.ehf_qe      || 0,
+        fc,
+        cpp,
+        st,
+        '',  // AR Plan - not stored per-doc, from editStore
+        p.ehf_impact ? 'EHF Impact' : '',
+        p.term_risk  ? 'Terminated'  : '',
+        'CC'+p.cc+'|'+p.bp+'|'+d.doc
+      ]));
+    });
+  });
+
+  if(rows.length <= 1) {
+    // Fallback: account-level if no docs
+    ps.forEach(function(p){
+      rows.push(csvRow(['CC'+p.cc,p.bp,p.name,p.collector,'','','','',p.currency,'','','','','','','','','','','',
+        p.ehf_impact?'EHF Impact':'',p.term_risk?'Terminated':'','CC'+p.cc+'|'+p.bp]));
+    });
+  }
+
+  dlCSV('AR_Worklist_Export_'+new Date().toISOString().slice(0,10)+'.csv', rows);
+  var m=document.getElementById('exportMenu'); if(m) m.classList.remove('open');
 }
 function exportEHFCSV() {
   var rows = [csvRow(['Company Code','BP#','Name','Collector','Doc#','Posting Date','EHF Due','OD Now','OD ME','OD QE','LC Amt','Ccy','EHF Now','EHF ME','EHF QE'])];
