@@ -2579,7 +2579,49 @@ function togglePaid(btn,e){e.stopPropagation();var key=btn.dataset.key,bp=btn.da
 function applyPaidToRow(key,bp,isPaid){var btn=document.querySelector('.paid-btn[data-key="'+key+'"]');if(!btn)return;var row=btn.closest('tr');if(!row)return;row.classList.toggle('row-paid',isPaid);var dc=row.querySelector('td:first-child'),badge=dc?dc.querySelector('.paid-badge'):null;if(isPaid&&!badge&&dc)dc.innerHTML+='<span class="paid-badge">Paid</span>';else if(!isPaid&&badge)badge.remove();btn.textContent=isPaid?'✓ Paid':'Mark Paid';btn.classList.toggle('is-paid',isPaid);}
 function calcIncome(){var inc={};Object.entries(editStore).forEach(function(e){var key=e[0],val=e[1];if(!val||val.paid!=='yes')return;var p=key.split('|'),cc=p[0],bp=p[1],doc=p[2],docs=DUN_DOCS[bp]||[],d=docs.find(function(x){return x.doc===doc;});if(!d)return;if(!inc[cc])inc[cc]={amount:0,count:0,currency:d.ccy};inc[cc].amount+=d.pd_amt;inc[cc].count++;});return inc;}
 function updateIncomeBar(){var bar=document.getElementById('income-bar');if(!bar)return;var inc=calcIncome();if(!Object.keys(inc).length){bar.innerHTML='<div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet</span>';return;}var blocks=Object.entries(inc).map(function(e){var cc=e[0],d=e[1];return '<div class="income-block"><div class="income-label">'+cc+'</div><div class="income-val">'+Math.round(d.amount).toLocaleString()+' <small style="font-size:10px">'+d.currency+'</small></div><div class="income-sub">'+d.count+' doc'+(d.count!==1?'s':'')+' paid</div></div>';});bar.innerHTML='<div class="income-title">💰 Income Collected</div>'+blocks.join('<div class="income-sep"></div>');}
-function loadXLSX(cb){if(typeof XLSX!=='undefined'){cb();return;}alert('SheetJS not loaded.');}</script>
+function loadXLSX(cb){if(typeof XLSX!=='undefined'){cb();return;}alert('SheetJS not loaded.');}
+function exportUnblockExcel() {
+  // Collect table data from ub-ar-body
+  var customer = document.getElementById('ub-customer').value || 'Unknown';
+  var erp      = document.getElementById('ub-erp').value || '';
+  var entity   = document.getElementById('ub-entity').value || '';
+  var tbody    = document.getElementById('ub-ar-body');
+  if(!tbody) return;
+
+  // Build rows
+  var headers = ['AR LOB','Document #','Text','AR Amount (Local)','AR Amount (EUR)',
+                 'OD Days by Month-End','OD Days by Q-End',
+                 'EHF Impact by M-End','EHF Impact by Q-End','Payment Plan'];
+  var rows = [headers];
+  var trs = tbody.querySelectorAll('tr');
+  trs.forEach(function(tr){
+    var inputs = tr.querySelectorAll('input');
+    var rowData = [];
+    inputs.forEach(function(inp){ rowData.push(inp.value||''); });
+    if(rowData.length >= 8) rows.push(rowData);
+  });
+
+  // Build CSV with BOM for Excel
+  var csv = '﻿';
+  csv += 'Customer:,' + customer + '\r\n';
+  csv += 'ERP#:,' + erp + '\r\n';
+  csv += 'Entity:,' + entity + '\r\n';
+  csv += '\r\n';
+  rows.forEach(function(r){
+    csv += r.map(function(c){
+      var s=String(c||'');
+      return (s.includes(',')||s.includes('"')||s.includes('\n')) ? '"'+s.replace(/"/g,'""')+'"' : s;
+    }).join(',') + '\r\n';
+  });
+
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Unblock_AR_'+customer.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30)+'_'+entity+'.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
 
 <!-- FDL Modal -->
 <div class="modal-overlay hidden" id="fdlOverlay">
@@ -2754,6 +2796,7 @@ function loadXLSX(cb){if(typeof XLSX!=='undefined'){cb();return;}alert('SheetJS 
       </div>
     </div>
     <div class="modal-footer">
+      <button class="btn-secondary" onclick="exportUnblockExcel()" style="border-color:#188918;color:#188918">📊 Export to Excel</button>
       <button class="btn-primary" onclick="ubOpenMail()">&#128231; Open in Mail</button>
       <button class="btn-secondary" onclick="ubCopyEmail()">&#128203; Copy Email</button>
       <button class="btn-secondary" onclick="ubPreview()">&#128196; Preview Text</button>
