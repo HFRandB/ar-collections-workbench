@@ -1,0 +1,2905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- v2026-08-06-fix -->
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AR Worklist — 2026-08</title>
+<style>
+:root{--blue:#0070F2;--dark:#1C2B33;--bg:#F5F6F7;--card:#fff;--bdr:#E0E0E0;
+  --crit:#BB0000;--high:#E76500;--med:#E9730C;--low:#188918;--ehf:#007373;--term:#6600CC}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"72","72full",Arial,sans-serif;background:var(--bg);color:var(--dark);font-size:14px}
+.page-header{background:linear-gradient(135deg,#1C2B33 0%,#0070F2 100%);color:#fff;padding:22px 32px;display:flex;align-items:center;justify-content:space-between}
+.header-left h1{font-size:21px;font-weight:700}.header-left p{opacity:.8;font-size:12px;margin-top:3px}
+.header-right{text-align:right;font-size:12px;opacity:.85}
+.summary-bar{background:#fff;border-bottom:1px solid var(--bdr);padding:14px 32px;display:flex;gap:0;flex-wrap:wrap}
+.sum-block{flex:1;min-width:150px;padding:0 16px;border-right:1px solid var(--bdr)}
+.sum-block:last-child{border-right:none}
+.sum-label{font-size:10px;color:#6A6D70;text-transform:uppercase;letter-spacing:.5px}
+.sum-value{font-size:18px;font-weight:700;margin:2px 0}.sum-sub{font-size:10px;color:#6A6D70;line-height:1.5}
+.sum-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.ehf-global{background:#E6F9F9;border-bottom:1px solid #B3E0E0;padding:12px 32px;display:flex;gap:28px;flex-wrap:wrap;align-items:center}
+.ehf-global-title{font-size:12px;font-weight:700;color:var(--ehf);min-width:100px}
+.ehf-global-block{text-align:center}
+.ehf-global-label{font-size:10px;color:var(--ehf);text-transform:uppercase;letter-spacing:.4px}
+.ehf-global-val{font-size:15px;font-weight:700;color:var(--ehf)}
+.ehf-global-sub{font-size:10px;color:#4A9090}
+.ehf-sep{width:1px;height:36px;background:#B3E0E0}
+.filter-bar{background:var(--bg);border-bottom:1px solid var(--bdr);padding:9px 32px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:50;backdrop-filter:blur(4px)}
+.filter-bar button{padding:5px 12px;border:1px solid var(--bdr);background:#fff;border-radius:14px;cursor:pointer;font-size:12px;transition:all .15s;white-space:nowrap}
+.filter-bar button:hover{background:#E8F3FF;border-color:var(--blue);color:var(--blue)}
+.filter-bar button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.filter-bar button.term-active{background:var(--term);color:#fff;border-color:var(--term)}
+.filter-bar button.ehf-active{background:var(--ehf);color:#fff;border-color:var(--ehf)}
+.filter-label{font-size:10px;color:#6A6D70;text-transform:uppercase;letter-spacing:.5px;font-weight:600;white-space:nowrap}
+.filter-sep{width:1px;height:18px;background:var(--bdr);flex-shrink:0}
+.collector-select{appearance:none;-webkit-appearance:none;padding:5px 28px 5px 12px;border:1px solid var(--bdr);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236A6D70'/%3E%3C/svg%3E") no-repeat right 10px center;border-radius:14px;cursor:pointer;font-size:12px;outline:none;transition:all .15s}
+.collector-select:hover{background-color:#E8F3FF;border-color:var(--blue);color:var(--blue)}
+.collector-select.filtered{background-color:#5C3D8F;color:#fff;border-color:#5C3D8F;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23fff'/%3E%3C/svg%3E")}
+.search-box{padding:5px 12px;border:1px solid var(--bdr);border-radius:14px;font-size:12px;width:180px;outline:none}
+.search-box:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(0,112,242,.12)}
+.export-wrap{position:relative;display:inline-block}
+.export-btn{padding:5px 14px;background:#0070F2;color:#fff;border:none;border-radius:14px;cursor:pointer;font-size:12px;font-weight:600}
+.export-btn:hover{background:#0057CC}
+.export-menu{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);min-width:200px;z-index:999;display:none;overflow:hidden}
+.export-menu.open{display:block}
+.export-menu li{list-style:none;padding:9px 16px;font-size:13px;cursor:pointer;transition:background .1s;display:flex;align-items:center;gap:8px}
+.export-menu li:hover{background:#E8F3FF;color:#0070F2}
+.export-divider{border-top:1px solid var(--bdr);margin:2px 0;padding:0!important}
+.result-count{font-size:11px;color:#6A6D70;padding:3px 32px 0}
+.content{padding:18px 32px}
+.section-title{font-size:15px;font-weight:700;margin:24px 0 10px;display:flex;align-items:center;gap:8px}
+.section-count{font-size:11px;background:#E8F3FF;color:var(--blue);padding:2px 8px;border-radius:10px;font-weight:600}
+.partner-card{background:var(--card);border:1px solid var(--bdr);border-radius:8px;margin-bottom:10px;overflow:hidden;transition:box-shadow .15s}
+.partner-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.partner-card.has-term{border-left:3px solid var(--term)}
+.partner-card.has-ehf{border-left:3px solid var(--ehf)}
+.partner-card.has-term.has-ehf{border-left:3px solid var(--term)}
+.card-header{padding:10px 16px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;background:#FAFAFA;flex-wrap:wrap;gap:6px}
+.card-title{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.partner-name{font-size:14px;font-weight:600}.bp-id{font-size:11px;color:#9DA0A4}
+.card-meta{display:flex;gap:8px;align-items:center;font-size:11px;flex-wrap:wrap}
+.cc-tag{background:#E8F3FF;color:#0064D9;padding:2px 7px;border-radius:4px;font-weight:600}
+.collector-tag{background:#F0E8FF;color:#5C3D8F;padding:2px 7px;border-radius:4px;font-weight:600}
+.max-dpd{color:#6A6D70}
+.dun-btn{padding:4px 11px;background:#fff;color:#0070F2;border:1px solid #0070F2;border-radius:12px;cursor:pointer;font-size:11px;font-weight:600;transition:all .15s;white-space:nowrap}
+.dun-btn:hover{background:#0070F2;color:#fff}
+.risk-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.term-tag{background:#F0E0FF;color:var(--term);border:1px solid var(--term)}
+.ehf-tag{background:#E0F5F5;color:var(--ehf);border:1px solid var(--ehf)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.b-crit{background:#FFEAEA;color:#BB0000;border:1px solid #BB0000}
+.b-high{background:#FFF0E5;color:#C14700;border:1px solid #C14700}
+.b-med{background:#FFF8E6;color:#B44F00;border:1px solid #E9730C}
+.b-low{background:#F0FFF0;color:#188918;border:1px solid #188918}
+.card-body{padding:12px 16px}
+.amounts{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.amt-box{min-width:100px}.amt-label{font-size:10px;color:#6A6D70;text-transform:uppercase;letter-spacing:.4px}
+.amt-value{font-size:15px;font-weight:700}.amt-value small{font-size:9px;color:#9DA0A4;font-weight:400}
+.amt-value.aged{color:var(--crit)}.ehf-col{color:var(--ehf)}.accent{color:#005F9E}
+.ehf-box{border-left:2px solid #B3E0E0;padding-left:10px}
+.aging-bar{height:5px;border-radius:3px;background:#F0F0F0;display:flex;overflow:hidden;margin-bottom:10px}
+.bar-seg{height:100%}.seg30{background:#61D800}.seg60{background:#E9730C}.seg90{background:#E76500}.seg90p{background:#BB0000}
+.info-row{font-size:12px;margin-bottom:8px}
+.info-item{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap;margin-bottom:3px}
+.info-label{font-weight:600;color:#6A6D70;min-width:80px;font-size:11px}
+.no-contact{color:#BB0000;font-style:italic;font-size:11px}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.doc-section{margin-top:10px;border:1px solid var(--bdr);border-radius:6px;overflow:hidden}
+.doc-section.term-section{border-color:#D0A0F0}
+.doc-title{background:#F8F8F8;padding:7px 12px;font-size:12px;font-weight:700;border-bottom:1px solid var(--bdr)}
+.doc-section.term-section .doc-title{background:#F8F0FF;color:var(--term);border-bottom-color:#D0A0F0}
+.doc-subtitle{font-weight:400;color:#6A6D70;margin-left:8px;font-size:11px}
+.ehf-summary-row{display:flex;gap:20px;padding:8px 12px;background:#F0FAFA;border-bottom:1px solid #D0EBEB;flex-wrap:wrap}
+.ehf-sum-box{text-align:center;min-width:130px}
+.ehf-sum-label{font-size:10px;color:var(--ehf);text-transform:uppercase;letter-spacing:.3px}
+.ehf-sum-val{font-size:14px;font-weight:700;color:var(--ehf)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#F5F5F5;padding:5px 8px;text-align:left;font-weight:600;color:#6A6D70;border-bottom:1px solid var(--bdr);white-space:nowrap}
+td{padding:4px 8px;border-bottom:1px solid #F0F0F0;vertical-align:top}
+tr:last-child td{border-bottom:none}tr:hover td{background:#FAFCFF}
+.num{text-align:right;font-variant-numeric:tabular-nums}.crit{color:var(--crit);font-weight:700}.ehf-val{color:var(--ehf);font-weight:600}
+.legend{display:flex;gap:14px;align-items:center;font-size:11px;color:#6A6D70;flex-wrap:wrap}
+.legend-item{display:flex;gap:5px;align-items:center}.legend-dot{width:10px;height:10px;border-radius:2px}
+/* Dunning modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.hidden{display:none!important}
+.modal{background:#fff;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.22);width:100%;max-width:780px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-header{padding:14px 20px;background:linear-gradient(135deg,#1C2B33,#0070F2);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-header h2{font-size:15px;font-weight:700}.modal-header .modal-meta{font-size:11px;opacity:.8;margin-top:2px}
+.modal-close{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 4px;opacity:.8;line-height:1}
+.modal-close:hover{opacity:1}
+.modal-body{padding:18px 20px;overflow-y:auto;flex:1}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--bdr);display:flex;gap:10px;align-items:center;background:#FAFAFA;flex-shrink:0;flex-wrap:wrap}
+.dun-section{margin-bottom:14px}
+.dun-label{font-size:11px;font-weight:700;color:#6A6D70;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.dun-to{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;padding:6px 0}
+.dun-email-chip{display:inline-flex;align-items:center;gap:5px;background:#E8F3FF;color:#0064D9;border:1px solid #B3D4F5;border-radius:14px;padding:3px 10px;font-size:12px}
+.dun-email-chip .rm{cursor:pointer;color:#6A6D70;font-size:14px;line-height:1;margin-left:2px}
+.dun-email-chip .rm:hover{color:#BB0000}
+.dun-add-email{padding:3px 10px;border:1px dashed var(--bdr);border-radius:14px;font-size:12px;outline:none;width:200px}
+.dun-add-email:focus{border-color:var(--blue)}
+.dun-subject{width:100%;padding:6px 10px;border:1px solid var(--bdr);border-radius:6px;font-size:13px;outline:none;margin-bottom:10px}
+.dun-subject:focus{border-color:var(--blue)}
+.dun-body{width:100%;padding:8px 10px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;font-family:monospace;resize:vertical;min-height:170px;outline:none;line-height:1.6}
+.dun-body:focus{border-color:var(--blue)}
+.dun-docs-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
+.dun-docs-table th{background:#F5F5F5;padding:5px 8px;text-align:left;font-weight:600;color:#6A6D70;border-bottom:1px solid var(--bdr);white-space:nowrap}
+.dun-docs-table td{padding:4px 8px;border-bottom:1px solid #F5F5F5}
+.dun-docs-table tr:last-child td{border-bottom:none}
+.dun-docs-table tr.sel td{background:#EEF6FF}
+.dun-docs-table tr:hover td{background:#F5FAFF;cursor:pointer}
+.dun-sel-bar{display:flex;align-items:center;gap:10px;padding:5px 0 8px;font-size:12px;color:#6A6D70;flex-wrap:wrap}
+.dun-sel-count{color:var(--dark);font-weight:700}
+.dun-sel-total{color:#0070F2;font-weight:700}
+.dun-sel-link{color:#0070F2;cursor:pointer;text-decoration:underline;font-size:11px}
+.dun-sep{color:#ccc}
+.btn-primary{padding:7px 18px;background:#0070F2;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
+.btn-primary:hover{background:#0057CC}
+.btn-secondary{padding:7px 18px;background:#fff;color:var(--dark);border:1px solid var(--bdr);border-radius:6px;cursor:pointer;font-size:13px}
+.btn-secondary:hover{background:#F5F5F5}
+.btn-cancel{padding:7px 18px;background:#fff;color:#BB0000;border:1px solid #BB0000;border-radius:6px;cursor:pointer;font-size:13px}
+.btn-cancel:hover{background:#FFF0F0}
+.modal-status{font-size:12px;color:#188918;margin-left:auto}
+.hidden{display:none!important}
+@media(max-width:768px){.content,.summary-bar,.filter-bar{padding:10px 14px}.amt-box{min-width:85px}}
+@media print{.filter-bar{display:none}.partner-card{break-inside:avoid}.modal-overlay{display:none!important}}
+</style>
+</head>
+<body>
+<div class="page-header">
+  <div class="header-left"><h1>AR Collections Daily Worklist</h1><p>Accounts Receivable · Past Due Follow-up · EHF Assessment · Termination Risk</p></div>
+  <div class="header-right"><strong>2026-08-03</strong><br>CC0038 China · CC0073 Taiwan · CC0074 HK<br><span style="opacity:.7;font-size:11px">Source: /Documents/daily work/ar reports</span></div>
+</div>
+
+
+<!-- Data Source Panel -->
+<div class="nav-bar">
+  <a href="AR_Summary_2026-08-03.html" class="nav-link" id="nav-summary">📊 Summary</a>
+  <a href="AR_Activity_2026-08-03.html" class="nav-link" id="nav-activity">📈 Activity</a>
+  <a href="AR_Worklist_2026-08-03.html" class="nav-link" id="nav-worklist" class="nav-link active">📋 Worklist</a>
+  <a href="action_plan.html" class="nav-link" id="nav-action">🎯 Action Plan</a>
+  <a href="features.html" class="nav-link" id="nav-features">📄 Features</a>
+</div>
+<div class="useful-links-bar">
+  <span style="font-size:10px;color:rgba(255,255,255,.6);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Quick Links</span>
+  <a href="https://sapit-home-prod-004.launchpad.cfapps.eu10.hana.ondemand.com/site#cmscasestoreview-display?sap-ui-app-id-hint=11ba03d1-0b19-4d43-b24f-c1e50cd4c9b6&/" target="_blank" class="ql-link" title="Access Contracts in SAP CMS">📄 Contracts (CMS)</a>
+  <a href="https://sapit-home-prod-004.launchpad.cfapps.eu10.hana.ondemand.com/site#mdgeditcontactpartnerfunctions-Display" target="_blank" class="ql-link" title="Update contacts in SAP CRM">👤 Update Contacts (CRM)</a>
+  <a href="https://oneai.cfapps.eu10-004.hana.ondemand.com/oneai/chatbot/application/index.html#/space/3564c841-5511-4f67-8d6e-a4d25dda3268/public/4fdd0444-af83-44ca-ad39-edf6be1e7212" target="_blank" class="ql-link" title="Ask CC AI Assistant" style="border-color:rgba(100,200,255,.4);color:#7DD3FC">🤖 Ask CC AI</a>
+</div>
+<div class="income-bar" id="income-bar"><div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet</span></div>
+  <div id="ds-panel">
+  <div id="ds-toggle" onclick="toggleDSPanel(this)" class="open">
+    <span>📂 Data Source</span>
+    <span class="ds-arrow">▼</span>
+    <span id="ds-loaded-summary" style="font-weight:400;color:#6A6D70;margin-left:4px">— drop your Master Report Excel to update with your own data</span>
+  </div>
+  <div id="ds-body" class="open">
+    <div class="ds-grid">
+      <!-- Drop zone -->
+      <div class="ds-drop-zone" id="ds-dropzone"
+           ondragover="dsDragOver(event)" ondragleave="dsDragLeave(event)" ondrop="dsDrop(event)"
+           onclick="document.getElementById('ds-file-input').click()">
+        <input type="file" id="ds-file-input" multiple accept=".xlsx" onchange="dsFileSelect(event)" onclick="event.stopPropagation()">
+        <div class="ds-drop-icon">📥</div>
+        <div class="ds-drop-title">Drop Excel files here or click to browse</div>
+        <div class="ds-drop-sub">Drop <strong>Master Report_GC_YYYYMM.xlsx</strong> here to load your own data<br>Supports: Master Report (all CCs) · individual CC reports<br><span style="color:#E9730C">⚠ Also drop <strong>dunning contacts</strong> file to load contact emails</span></div>
+        <div class="ds-slots" id="ds-slots">
+          <span class="ds-slot" id="slot-master">Master Report —</span>
+          <span class="ds-slot" id="slot-0038">CC0038 —</span>
+          <span class="ds-slot" id="slot-0073">CC0073 —</span>
+          <span class="ds-slot" id="slot-0074">CC0074 —</span>
+          <span class="ds-slot" id="slot-dun">Contacts —</span>
+        </div>
+      </div>
+      <!-- SharePoint URL -->
+      <div class="ds-sp-section">
+        <div class="ds-sp-title">Or load from SharePoint / URL</div>
+        <div class="ds-sp-row">
+          <select id="sp-slot">
+            <option value="master">Master Report (all CCs)</option>
+            <option value="0038">CC0038 AR Report</option>
+            <option value="0073">CC0073 AR Report</option>
+            <option value="0074">CC0074 AR Report</option>
+            <option value="dun">Dunning Contacts</option>
+          </select>
+        </div>
+        <div class="ds-sp-row">
+          <input type="text" id="sp-url" placeholder="Paste SharePoint / direct download URL…">
+          <button class="ds-sp-btn" onclick="dsLoadURL()">Load</button>
+        </div>
+        <div class="ds-err" id="sp-error"></div>
+      </div>
+    </div>
+    <div class="ds-actions">
+      <button class="ds-refresh-btn" id="ds-refresh-btn" onclick="dsRecalc()" disabled>⟳ Refresh Worklist</button>
+      <button class="ds-refresh-btn" id="ds-restore-btn" onclick="dsRestoreFromStorage()" style="background:#0070F2;display:none">↺ Restore Saved Data</button>
+      <div class="ds-progress-step" id="ds-progress">⏳ Processing…</div>
+      <div class="ds-progress-bar-wrap" id="ds-bar-wrap"><div class="ds-progress-bar" id="ds-bar"></div></div>
+      <span class="ds-progress-pct" id="ds-pct"></span>
+      <div class="ds-status" id="ds-proc-status"></div>
+    </div>
+  </div>
+</div>
+
+  <div class="filter-bar">
+  <span class="filter-label">Entity</span>
+  <button class="active" data-group="section" onclick="setSection('all',this)">All</button>
+  <button data-group="section" onclick="setSection('CC0038',this)">CC0038 China</button>
+  <button data-group="section" onclick="setSection('CC0073',this)">CC0073 Taiwan</button>
+  <button data-group="section" onclick="setSection('CC0074',this)">CC0074 HK</button>
+  <span class="filter-sep"></span>
+  <span class="filter-label">Priority</span>
+  <button data-group="priority" onclick="togglePriority('CRITICAL',this)">Critical &gt;365d</button>
+  <button data-group="priority" onclick="togglePriority('HIGH',this)">High &gt;90d</button>
+  <span class="filter-sep"></span>
+  <span class="filter-label">Risk</span>
+  <button id="btnTerm" onclick="toggleRisk('term',this)">⚠ Termination Risk</button>
+  <button id="btnEhf"  onclick="toggleRisk('ehf',this)">EHF Impact</button>
+  <button id="btnOb" onclick="toggleRisk('ob',this)">⛔ Order Block Risk</button>
+  <span class="filter-sep"></span>
+  <select class="collector-select" id="collectorSelect" onchange="setCollector(this)">
+    <option value="">All Collectors</option>
+    <option value="Bo Hao Chen">Bo Hao Chen</option>
+    <option value="Fan Huang">Fan Huang</option>
+    <option value="Lei Zhang">Lei Zhang</option>
+    <option value="Limin Lu">Limin Lu</option>
+    <option value="Sailin Ma">Sailin Ma</option>
+    <option value="Shixi Hu">Shixi Hu</option>
+    <option value="Wenjing Jiang">Wenjing Jiang</option>
+    <option value="Yan Hai">Yan Hai</option>
+    <option value="Yun Gao">Yun Gao</option>
+  </select>
+  <select class="collector-select" id="customerSelect" onchange="setCustomer(this)">
+    <option value="">All Customers</option>
+      <option value="AESC (Hong Kong) Co., Limited">AESC (Hong Kong) Co., Limited</option>
+      <option value="AUO Corporation">AUO Corporation</option>
+      <option value="BOE Technology Group Co., Ltd.">BOE Technology Group Co., Ltd.</option>
+      <option value="BYD Company Limited">BYD Company Limited</option>
+      <option value="Beijing Aircraft Maintenance&Engineering">Beijing Aircraft Maintenance&Engineering</option>
+      <option value="CHINT ELECTRICS (HONG KONG) LIMITED">CHINT ELECTRICS (HONG KONG) LIMITED</option>
+      <option value="CNRC International Limited">CNRC International Limited</option>
+      <option value="COFCO Corporation">COFCO Corporation</option>
+      <option value="Chery Global Innovations (Hong Kong)">Chery Global Innovations (Hong Kong)</option>
+      <option value="Chicony Electronics Co., Ltd.">Chicony Electronics Co., Ltd.</option>
+      <option value="China COSCO Shipping Corporation Limited">China COSCO Shipping Corporation Limited</option>
+      <option value="China Datacom Corporation Limited">China Datacom Corporation Limited</option>
+      <option value="China Hi-Tech Holding Company Limited">China Hi-Tech Holding Company Limited</option>
+      <option value="China Natinal Heavy Duty Truck Group">China Natinal Heavy Duty Truck Group</option>
+      <option value="China National Offshore Oil Corp.">China National Offshore Oil Corp.</option>
+      <option value="China Petroleum & Chemical Corporation">China Petroleum & Chemical Corporation</option>
+      <option value="Contemporary Amperex Technology">Contemporary Amperex Technology</option>
+      <option value="Cooler Master Co., Ltd.">Cooler Master Co., Ltd.</option>
+      <option value="Coretronic Intelligent Cloud Service">Coretronic Intelligent Cloud Service</option>
+      <option value="Deloitte & Touche Consulting Co.">Deloitte & Touche Consulting Co.</option>
+      <option value="Delta Electronics Inc.">Delta Electronics Inc.</option>
+      <option value="EC Healthcare">EC Healthcare</option>
+      <option value="ENNOSTAR Inc.">ENNOSTAR Inc.</option>
+      <option value="Foreverwin Electronic & Information">Foreverwin Electronic & Information</option>
+      <option value="GLORY WHEEL ENTERPRISE Co., LTD">GLORY WHEEL ENTERPRISE Co., LTD</option>
+      <option value="Geely International(Hong Kong) Limited">Geely International(Hong Kong) Limited</option>
+      <option value="Guoxuan High-tech (HK) Limited">Guoxuan High-tech (HK) Limited</option>
+      <option value="Haier Kaaosi Co., Ltd.">Haier Kaaosi Co., Ltd.</option>
+      <option value="Harbin Pharmaceutical Group Holding">Harbin Pharmaceutical Group Holding</option>
+      <option value="Hisense (Hong Kong) Company Limited">Hisense (Hong Kong) Company Limited</option>
+      <option value="Hisense (Hongkong) Middle East - Africa">Hisense (Hongkong) Middle East - Africa</option>
+      <option value="Hisense Group Holding Co. Ltd">Hisense Group Holding Co. Ltd</option>
+      <option value="Hisense International (Hong Kong) Europe">Hisense International (Hong Kong) Europe</option>
+      <option value="Inventec Corporation">Inventec Corporation</option>
+      <option value="LC Future Center Limited">LC Future Center Limited</option>
+      <option value="LIESHENG HK LIMITED">LIESHENG HK LIMITED</option>
+      <option value="Lenovo HK Services Ltd">Lenovo HK Services Ltd</option>
+      <option value="Nan Shan Life Insurance Co., Ltd.">Nan Shan Life Insurance Co., Ltd.</option>
+      <option value="Nine Dragons Paper Industries (Dongguan)">Nine Dragons Paper Industries (Dongguan)</option>
+      <option value="Q BURGER GROUP CO LTD">Q BURGER GROUP CO LTD</option>
+      <option value="Qisda Corporation">Qisda Corporation</option>
+      <option value="SAIC HK Limited">SAIC HK Limited</option>
+      <option value="SANY Group Co.,Ltd.">SANY Group Co.,Ltd.</option>
+      <option value="SAP (China) Co., Ltd.">SAP (China) Co., Ltd.</option>
+      <option value="SAP Asia Pte. Ltd.">SAP Asia Pte. Ltd.</option>
+      <option value="SAP Hong Kong Co. Ltd.">SAP Hong Kong Co. Ltd.</option>
+      <option value="SAP SE">SAP SE</option>
+      <option value="Shandong Energy Digital Technology">Shandong Energy Digital Technology</option>
+      <option value="Shanghai Fin-shine Technology Co., Ltd.">Shanghai Fin-shine Technology Co., Ltd.</option>
+      <option value="Shanghai Zhenhua Port Machinery">Shanghai Zhenhua Port Machinery</option>
+      <option value="Shenzhen Mindray Bio-Medical Electronics">Shenzhen Mindray Bio-Medical Electronics</option>
+      <option value="Sinbon Electronics Company Ltd.">Sinbon Electronics Company Ltd.</option>
+      <option value="Sino Administration Services Limited">Sino Administration Services Limited</option>
+      <option value="Taiwan Semiconductor Manufacturing">Taiwan Semiconductor Manufacturing</option>
+      <option value="Tianjin Ting Yu Consulting">Tianjin Ting Yu Consulting</option>
+      <option value="United Microelectronics Corporation">United Microelectronics Corporation</option>
+      <option value="WIK Far East Ltd">WIK Far East Ltd</option>
+      <option value="Wistron Corporation">Wistron Corporation</option>
+      <option value="XCMG International Trading Corporation">XCMG International Trading Corporation</option>
+      <option value="Xiaomi Communications Co., Ltd.">Xiaomi Communications Co., Ltd.</option>
+      <option value="Xiaomi H.K. Limited">Xiaomi H.K. Limited</option>
+      <option value="YAGEO CORPORATION">YAGEO CORPORATION</option>
+      <option value="Zhejiang Geely Holding Group Co., Ltd.">Zhejiang Geely Holding Group Co., Ltd.</option>
+    <option value="Aijing Zeng">Aijing Zeng</option>
+<option value="Bo Hao Chen">Bo Hao Chen</option>
+<option value="Chaochao Liu">Chaochao Liu</option>
+<option value="Fan Huang">Fan Huang</option>
+<option value="Jiazhao Guo">Jiazhao Guo</option>
+<option value="Lei Zhang">Lei Zhang</option>
+<option value="Limin Lu">Limin Lu</option>
+<option value="Sailin Ma">Sailin Ma</option>
+<option value="Shixi Hu">Shixi Hu</option>
+<option value="Wenjing Jiang">Wenjing Jiang</option>
+<option value="Yan Hai">Yan Hai</option>
+<option value="Yun Gao">Yun Gao</option>
+  </select>
+  <input class="search-box" type="text" placeholder="Search customer…" oninput="setSearch(this.value)">
+  <button class="export-btn" style="background:#5C3D8F" onclick="openActivityDashboard()">&#128202; Activity</button>
+  <div class="export-wrap" id="exportWrap">
+    <button class="export-btn" onclick="toggleExportMenu(event)">⬇ Export</button>
+    <ul class="export-menu" id="exportMenu">
+      <li onclick="exportCSV()">📄 Export Filtered CSV</li>
+      <li onclick="exportEHFCSV()">📊 Export EHF CSV</li>
+      <li class="export-divider"></li>
+      <li onclick="window.print()">🖨 Print / PDF</li>
+    </ul>
+  </div>
+</div>
+
+  <div class="result-count" id="resultCount"></div>
+
+
+  <div class="content">
+  <div class="section-title">CC0038 — SAP China (CNY) <span class="section-count" id="cnt38">605 past-due accounts</span></div>
+  <div id="cards38"></div>
+  <div class="section-title">CC0073 — SAP Taiwan (TWD) <span class="section-count" id="cnt73">133 past-due accounts</span></div>
+  <div id="cards73"></div>
+  <div class="section-title">CC0074 — SAP Hong Kong (HKD) <span class="section-count" id="cnt74">151 past-due accounts</span></div>
+  <div id="cards74"></div>
+</div>
+<!-- Dunning Modal -->
+</div>
+<div class="modal-overlay hidden" id="dunningOverlay">
+  <div class="modal" id="dunningModal">
+    <div class="modal-header">
+      <div><h2 id="dun-title">Dunning Notice</h2><div class="modal-meta" id="dun-meta"></div></div>
+      <button class="modal-close" onclick="closeDunning()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="dun-section">
+        <div class="dun-label">To</div>
+        <div class="dun-to" id="dun-to-chips">
+          <input class="dun-add-email" id="dun-add-input" type="email" placeholder="+ add email" onkeydown="addEmailChip(event)">
+        </div>
+      </div>
+      <div class="dun-section">
+        <div class="dun-label">Subject</div>
+        <input class="dun-subject" id="dun-subject" type="text">
+      </div>
+      <div class="dun-section">
+        <div class="dun-label">Outstanding Overdue Documents</div>
+        <div class="dun-sel-bar">
+          <label><input type="checkbox" id="dun-chk-all" onchange="dunSelAll(this)"> All</label>
+          <span class="dun-sep">|</span>
+          <span class="dun-sel-count" id="dun-sel-count">0 selected</span>
+          <span class="dun-sel-total" id="dun-sel-total"></span>
+          <span class="dun-sep">|</span>
+          <span class="dun-sel-link" onclick="dunSelOD(90)">OD&gt;90d</span>
+          <span class="dun-sel-link" onclick="dunSelOD(365)">OD&gt;365d</span>
+          <span class="dun-sel-link" onclick="dunSelClear()">Clear</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="dun-docs-table">
+            <thead><tr>
+              <th style="width:30px"><input type="checkbox" id="dun-hdr-chk" onchange="dunSelAll(this)"></th>
+              <th>Document #</th><th>Net Due Date</th><th>Days OD</th><th class="num">OD Amount</th><th>Ccy</th>
+            </tr></thead>
+            <tbody id="dun-docs-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="dun-section">
+        <div class="dun-label">Email Body</div>
+        <textarea class="dun-body" id="dun-body"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary"   onclick="dunSendMail()">&#128231; Open in Mail</button>
+      <button class="btn-secondary" onclick="dunCopyAll()">&#128203; Copy Email</button>
+      <button class="btn-secondary" onclick="dunCopyBody()">&#128203; Copy Body</button>
+      <button class="btn-cancel"    onclick="closeDunning()">Cancel</button>
+      <span class="modal-status" id="dun-status"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Visible error display for debugging ──────────────────────────────────────
+window.onerror = function(msg, src, line, col, err) {
+  var stat = document.getElementById('ds-proc-status');
+  if(stat) {
+    stat.textContent = 'JS Error: ' + msg + ' (line ' + line + ')';
+    stat.style.color = '#BB0000';
+    stat.style.fontSize = '11px';
+  }
+  console.error(msg, src, line, col, err);
+  return false;
+};
+window.addEventListener('unhandledrejection', function(e) {
+  var stat = document.getElementById('ds-proc-status');
+  if(stat) {
+    stat.textContent = 'Promise Error: ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason));
+    stat.style.color = '#BB0000';
+  }
+});
+
+// ── Contact editing ───────────────────────────────────────────────────────────
+var contactEdits = {};  // bp -> [email, email, ...]
+(function loadContactEdits(){
+  try {
+    var s=localStorage.getItem('ar_contact_edits_2026');
+    if(s) contactEdits=JSON.parse(s);
+  } catch(e){}
+})();
+
+function saveContactEdits(){
+  try { localStorage.setItem('ar_contact_edits_2026', JSON.stringify(contactEdits)); } catch(e){}
+  // Also propagate to CONTACTS so Dunning modal picks up changes
+  Object.entries(contactEdits).forEach(function(e){
+    var bp=e[0], emails=e[1];
+    if(!CONTACTS[bp]) CONTACTS[bp]={emails:[],names:[]};
+    CONTACTS[bp].emails=emails;
+  });
+}
+
+function getContactEmails(bp){
+  if(contactEdits[bp]) return contactEdits[bp];
+  var c=CONTACTS[bp]||CONTACTS[(PARTNERS.find(function(p){return p.bp===bp;})||{}).sold_to||'']||{emails:[]};
+  return c.emails||[];
+}
+
+function renderContactField(bp, container){
+  var emails = getContactEmails(bp);
+  var isEdited = !!contactEdits[bp];
+  var chipsHtml = emails.map(function(e,i){
+    return '<span class="contact-chip'+(isEdited?' edited':'')+'">'
+      +'<a href="mailto:'+e+'" onclick="event.stopPropagation()" style="color:inherit;text-decoration:none">'+e+'</a>'
+      +' <span class="rm-contact" onclick="removeContact(\''+bp+'\','+i+',this)" title="Remove">×</span>'
+      +'</span>';
+  }).join('');
+  var noContact = emails.length===0
+    ? '<span class="no-contact-edit" onclick="focusAddContact(\''+bp+'\',this)">No contact — click to add</span>'
+    : '';
+  container.innerHTML = '<div class="contact-edit-wrap" id="ce-'+bp+'">'
+    + chipsHtml + noContact
+    + '<input class="add-contact-input" id="ci-'+bp+'" type="email" placeholder="+ add email" '
+    + 'onkeydown="addContactKey(event,\''+bp+'\')" style="'+(emails.length>0?'':'')+'"/>'
+    + (isEdited?'<button class="contact-save-btn" onclick="exportContactsCSV()" title="Export updated contacts">↓ Export</button>':'')
+    
+    +'<a href="https://sapit-home-prod-004.launchpad.cfapps.eu10.hana.ondemand.com/site#mdgeditcontactpartnerfunctions-Display" target="_blank" class="crm-link" title="Update contacts in SAP CRM">🔗 Update in CRM</a>'+'</div>';
+}
+
+function addContactKey(e, bp){
+  if(e.key!=='Enter'&&e.key!==',') return;
+  e.preventDefault();
+  var val=e.target.value.trim().replace(/,$/,'');
+  if(!val||!val.includes('@')) return;
+  if(!contactEdits[bp]) contactEdits[bp]=getContactEmails(bp).slice();
+  if(!contactEdits[bp].includes(val)) contactEdits[bp].push(val);
+  e.target.value='';
+  saveContactEdits();
+  var card=e.target.closest('.partner-card');
+  if(card){
+    var infoItem=e.target.closest('.info-item');
+    if(infoItem) renderContactField(bp, infoItem.querySelector('.contact-edit-wrap').parentNode);
+  }
+}
+
+function removeContact(bp, idx, el){
+  if(!contactEdits[bp]) contactEdits[bp]=getContactEmails(bp).slice();
+  contactEdits[bp].splice(idx,1);
+  saveContactEdits();
+  var infoItem=el.closest('.info-item');
+  if(infoItem) renderContactField(bp, infoItem.querySelector('.contact-edit-wrap').parentNode);
+}
+
+function focusAddContact(bp, el){
+  var inp=document.getElementById('ci-'+bp);
+  if(inp) inp.focus();
+}
+
+function exportContactsCSV(){
+  var rows=['BP#,Account Name,CC,Email 1,Email 2,Email 3,Email 4,Email 5,Source'];
+  Object.entries(contactEdits).forEach(function(e){
+    var bp=e[0],emails=e[1];
+    var p=PARTNERS.find(function(x){return x.bp===bp;})||{};
+    var emailCols=emails.concat(['','','','','']).slice(0,5);
+    rows.push([bp,'"'+(p.name||'').replace(/"/g,'""')+'"',p.cc||'',...emailCols,'collector-edit'].join(','));
+  });
+  var blob=new Blob(['﻿'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='updated_contacts_2026-08.csv';a.click();URL.revokeObjectURL(a.href);
+}
+
+// ── Cross-page data storage ───────────────────────────────────────────────────
+function saveDataToStorage() {
+  try {
+    var accts = buildAccountsLob();
+    localStorage.setItem('ar_partners_data',  JSON.stringify(PARTNERS));
+    localStorage.setItem('ar_dun_docs_data',  JSON.stringify(DUN_DOCS));
+    localStorage.setItem('ar_contacts_data',  JSON.stringify(CONTACTS));
+    localStorage.setItem('ar_accounts_lob',   JSON.stringify(accts));
+    localStorage.setItem('ar_data_timestamp', new Date().toISOString());
+    var mo = new Date().toISOString().slice(0,7);
+    localStorage.setItem('ar_data_month', mo);
+    // Notify other tabs
+    window.dispatchEvent(new StorageEvent('storage', {key:'ar_data_timestamp', newValue: new Date().toISOString()}));
+  } catch(e) { console.warn('Storage save failed:', e.message); }
+}
+
+function loadDataFromStorage() {
+  try {
+    var p = localStorage.getItem('ar_partners_data');
+    var d = localStorage.getItem('ar_dun_docs_data');
+    var c = localStorage.getItem('ar_contacts_data');
+    if (!p) return false;
+    PARTNERS.length = 0; JSON.parse(p).forEach(function(x){PARTNERS.push(x);});
+    if (d) { var dd=JSON.parse(d); Object.keys(DUN_DOCS).forEach(function(k){delete DUN_DOCS[k];}); Object.assign(DUN_DOCS,dd); }
+    if (c) {
+      // Only restore contacts if they came from a user-uploaded file
+      var fromUpload = localStorage.getItem('ar_contacts_from_upload');
+      if(fromUpload === '1') {
+        var cc=JSON.parse(c);
+        Object.keys(CONTACTS).forEach(function(k){delete CONTACTS[k];});
+        Object.assign(CONTACTS,cc);
+      }
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+function buildAccountsLob() {
+  var getActionPlan = function(p) {
+    var dpd=p.max_dpd||0, term=p.term_risk, ehf=p.ehf_impact;
+    var priority = dpd>365||term?'CRITICAL':dpd>180?'HIGH':dpd>90||ehf?'HIGH':dpd>60?'MEDIUM':dpd>30?'WATCH':'LOW';
+    var actions = [];
+    if (dpd>365||term) { actions.push({type:'LEGAL',action:'>1 year overdue — issue Final Demand Letter; initiate legal action; review bad debt provision'}); actions.push({type:'BLOCK',action:'Service suspension per O2C DOA — submit unblock request if new deal with exit criteria'}); }
+    else if (dpd>180)  { actions.push({type:'ESCALATE',action:'180+ days OD — send FDL immediately; escalate to CC RD; explore unblock if new deal'}); actions.push({type:'P2P',action:'Obtain written payment plan; plans >14 days require CC RD approval'}); }
+    else if (dpd>90&&ehf){ actions.push({type:'EHF',action:'EHF triggered — initiate non-payment suspension; submit unblock request if exit criteria met'}); actions.push({type:'DUNNING',action:'Escalated dunning notice — collect written payment commitment'}); }
+    else if (dpd>90)   { actions.push({type:'DUNNING',action:'90+ days OD — send 2nd/3rd dunning; obtain payment plan with specific dates'}); actions.push({type:'BLOCK',action:'Review order block per O2C DOA: <1M EUR→CC RD, ≥1M EUR→CC RD+RCFO'}); }
+    else if (dpd>60)   { actions.push({type:'DUNNING',action:'60-90 days OD — send first escalated dunning; verify invoice receipt; confirm no dispute'}); actions.push({type:'VERIFY',action:'Check PO status, invoice delivery and payment process; confirm correct contact'}); }
+    else if (dpd>30)   { actions.push({type:'REMIND',action:'30-60 days OD — send payment reminder; verify expected payment date and process'}); }
+    if (!actions.length) actions.push({type:'MONITOR',action:'Continue standard follow-up — update collection notes; verify payment status'});
+    return {priority:priority, actions:actions};
+  };
+  return PARTNERS.filter(function(p){return p.total_pd>0;}).map(function(p) {
+    var docs = DUN_DOCS[p.bp]||[];
+    var lob_breakdown = {};
+    var total_eur = 0;
+    docs.forEach(function(d){
+      var key = 'CL|Cloud';
+      if (!lob_breakdown[key]) lob_breakdown[key]={amt:0,dpd_max:0,docs:0,eur:0};
+      lob_breakdown[key].amt += d.pd_amt;
+      lob_breakdown[key].dpd_max = Math.max(lob_breakdown[key].dpd_max, d.dpd);
+      lob_breakdown[key].docs++;
+      lob_breakdown[key].eur += (d.eur_amt||0);
+      total_eur += (d.eur_amt||0);
+    });
+    var plan = getActionPlan(p);
+    return {
+      cc:p.cc, bp:p.bp, name:p.name, collector:p.collector||'', lc:p.currency||'',
+      total_pd:p.total_pd, pd_90:p.pd90||0, max_dpd:p.max_dpd||0,
+      term_risk:p.term_risk, ehf_impact:p.ehf_impact, is_cdc:p.is_cdc||false,
+      bill_to_name:p.bill_to_name||'',
+      total_eur:Math.round(total_eur*100)/100,
+      fc_months:[], cpp_vals:[], current_statuses:[], ar_plan_vals:[],
+      acc_treatments:[], lob_breakdown:lob_breakdown,
+      priority:plan.priority, actions:plan.actions
+    };
+  });
+}
+
+// ── Empty state helpers ────────────────────────────────────────────────────────
+function showWorlistEmptyState() {
+  var msg = '<div class="empty-upload-state">'
+    +'<div style="font-size:36px;margin-bottom:16px">📂</div>'
+    +'<div style="font-size:16px;font-weight:700;color:#1C2B33;margin-bottom:8px">No data loaded yet</div>'
+    +'<div style="font-size:13px;color:#6A6D70;max-width:400px;margin:0 auto;line-height:1.7">'
+    +'Drop your <strong>Master Report_GC_YYYYMM.xlsx</strong> file into the Data Source panel above,<br>'
+    +'then click <strong>⟳ Refresh Worklist</strong> to load your data.'
+    +'</div></div>';
+  ['cards38','cards73','cards74'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.innerHTML = msg;
+  });
+  ['cnt38','cnt73','cnt74'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.textContent='0 past-due accounts';
+  });
+}
+
+// ── Data ──
+
+// ── Edit Store & Activity Log ─────────────────────────────────────────────────
+var editStore = {};
+var activityLog = [];
+(function loadEdits() {
+  try {
+    var saved = localStorage.getItem('ar_edits_2026_08');
+    if (saved) editStore = JSON.parse(saved);
+    var log = localStorage.getItem('ar_activity_2026_08');
+    if (log) activityLog = JSON.parse(log);
+  } catch(e) {}
+})();
+function saveEdits() {
+  try {
+    localStorage.setItem('ar_edits_2026_08', JSON.stringify(editStore));
+    localStorage.setItem('ar_activity_2026_08', JSON.stringify(activityLog));
+  } catch(e) {}
+}
+function logActivity(key, field, oldVal, newVal) {
+  var now=new Date(), date=now.toISOString().slice(0,10), ts=now.toISOString();
+  var parts=key.split('|');
+  activityLog.push({ts:ts,date:date,key:key,cc:parts[0]||'',bp:parts[1]||'',doc:parts[2]||'',field:field,oldVal:oldVal,newVal:newVal});
+  if(activityLog.length>5000) activityLog=activityLog.slice(-5000);
+}
+function getDocKey(cc,bp,doc){return cc+'|'+bp+'|'+doc;}
+function fieldLabel(f){return f==='fc'?'FC Month':f==='cpp'?'Customer Payment Process':f==='status'?'Current Status':f;}
+var PARTNERS  = [];
+var CONTACTS  = {};
+var EHF_DETAILS = {};
+var DUN_DOCS  = {};
+
+// ── Filter state ─────────────────────────────────────────────────────────────
+var S = {section:'all', priority:null, term:false, ehf:false, ob:false, collector:'', customer:'', search:''};
+
+function setSection(v, btn) {
+  S.section = v;
+  document.querySelectorAll('[data-group="section"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // If selected customer is no longer valid under new section, reset it
+  refreshDropdowns();
+  applyFilters();
+}
+function togglePriority(v, btn) {
+  if (S.priority === v) { S.priority = null; btn.classList.remove('active'); }
+  else { S.priority = v; document.querySelectorAll('[data-group="priority"]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+  applyFilters();
+}
+function toggleRisk(key, btn) {
+  S[key] = !S[key];
+  btn.classList.toggle('term-active', key==='term' && S.term);
+  btn.classList.toggle('ehf-active',  key==='ehf'  && S.ehf);
+  btn.classList.toggle('ob-active',   key==='ob'   && S.ob);
+  btn.classList.toggle('ob-active',   key==='ob'   && S.ob);
+  applyFilters();
+}
+function setCollector(sel) {
+  S.collector = sel.value;
+  sel.classList.toggle('filtered', !!sel.value);
+  // Reset customer if it doesn't exist under new collector
+  refreshCustomerOptions();
+  applyFilters();
+}
+function setCustomer(sel) {
+  S.customer = sel.value;
+  sel.classList.toggle('filtered', !!sel.value);
+  // Refresh collector options based on selected customer
+  refreshCollectorOptions();
+  applyFilters();
+}
+
+// ── Cascading dropdown refresh ───────────────────────────────────────────────
+function refreshDropdowns() {
+  refreshCollectorOptions();
+  refreshCustomerOptions();
+}
+
+function refreshCollectorOptions() {
+  if(!document.getElementById('collectorSelect')) return;
+  // Show collectors valid under current section + customer filters
+  var valid = new Set(
+    PARTNERS
+      .filter(p => {
+        if (S.section !== 'all' && ('CC'+p.cc) !== S.section) return false;
+        if (S.customer && p.name !== S.customer) return false;
+        return p.collector;
+      })
+      .map(p => p.collector)
+  );
+  var sel = document.getElementById('collectorSelect');
+  var prev = sel.value;
+  sel.innerHTML = '<option value="">All Collectors</option>'
+    + [...valid].sort().map(c => '<option value="'+c+'"'+(c===prev?' selected':'')+'>'+c+'</option>').join('');
+  // If previous selection no longer valid, reset
+  if (prev && !valid.has(prev)) { sel.value = ''; S.collector = ''; sel.classList.remove('filtered'); }
+}
+
+function refreshCustomerOptions() {
+  if(!document.getElementById('customerSelect')) return;
+  // Show customers valid under current section + collector filters
+  var valid = new Set(
+    PARTNERS
+      .filter(p => {
+        if (S.section !== 'all' && ('CC'+p.cc) !== S.section) return false;
+        if (S.collector && p.collector !== S.collector) return false;
+        return p.name;
+      })
+      .map(p => p.name)
+  );
+  var sel = document.getElementById('customerSelect');
+  var prev = sel.value;
+  sel.innerHTML = '<option value="">All Customers</option>'
+    + [...valid].sort().map(n => '<option value="'+n+'"'+(n===prev?' selected':'')+'>'+n+'</option>').join('');
+  // If previous selection no longer valid, reset
+  if (prev && !valid.has(prev)) { sel.value = ''; S.customer = ''; sel.classList.remove('filtered'); }
+}
+
+function setSearch(v) { S.search = v.toLowerCase(); applyFilters(); }
+
+function applyFilters() {
+  var cards = document.querySelectorAll('.partner-card');
+  var vis = 0;
+  cards.forEach(card => {
+    var show = true;
+    if (S.section !== 'all' && card.dataset.cc !== S.section) show = false;
+    if (S.priority) { var b = card.querySelector('.badge'); if (!b || !b.textContent.includes(S.priority)) show = false; }
+    if (S.term && card.dataset.term !== 'true') show = false;
+    if (S.ehf  && card.dataset.ehf  !== 'true') show = false;
+    if (S.ob   && card.dataset.ob   !== 'true') show = false;
+    if (S.collector && card.dataset.collector !== S.collector) show = false;
+    if (S.customer && card.querySelector('.partner-name').textContent.trim() !== S.customer) show = false;
+    if (S.search && !card.querySelector('.partner-name').textContent.toLowerCase().includes(S.search)) show = false;
+    card.classList.toggle('hidden', !show);
+    if (show) vis++;
+  });
+  document.getElementById('resultCount').textContent = vis < cards.length ? 'Showing ' + vis + ' of ' + cards.length + ' accounts' : '';
+  updateSummary();
+}
+
+// ── Summary bar ───────────────────────────────────────────────────────────────
+function fmtN(v) { return Math.round(v).toLocaleString(); }
+function updateSummary() {
+  var CCL = {'0038':'38','0073':'73','0074':'74'};
+  var CUR = {'38':'CNY','73':'TWD','74':'HKD'};
+  var a = {'38':{pd:0,pd90:0,cnt:0,tr:0,ei:0,en:0,em:0,eq:0},
+              '73':{pd:0,pd90:0,cnt:0,tr:0,ei:0,en:0,em:0,eq:0},
+              '74':{pd:0,pd90:0,cnt:0,tr:0,ei:0,en:0,em:0,eq:0}};
+  PARTNERS.forEach(p => {
+    var k = CCL[p.cc]; if (!k) return;
+    if (S.section !== 'all' && ('CC'+p.cc) !== S.section) return;
+    if (S.term && !p.term_risk) return;
+    if (S.ehf  && !p.ehf_impact) return;
+    if (S.ob   && !p.ob_risk) return;
+    if (S.collector && p.collector !== S.collector) return;
+    if (S.customer && p.name !== S.customer) return;
+    if (S.search && !p.name.toLowerCase().includes(S.search)) return;
+    var r = a[k];
+    r.pd+=p.total_pd; r.pd90+=p.pd90; r.cnt++;
+    if(p.term_risk) r.tr++; if(p.ehf_impact) r.ei++;
+    r.en+=p.ehf_now; r.em+=p.ehf_me; r.eq+=p.ehf_qe;
+  });
+  ['38','73','74'].forEach(k => { try {
+    var r=a[k], c=CUR[k];
+    var _s=(id,v)=>{var e=document.getElementById(id);if(e)e.textContent=v;};
+    _s('s'+k+'-pd',  fmtN(r.pd)+' '+c);
+    _s('s'+k+'-sub', 'PD>90: '+fmtN(r.pd90)+' · '+r.cnt+' accounts');
+    _s('s'+k+'-term', r.tr+' Termination Risk');
+    _s('s'+k+'-ehf',  r.ei+' EHF Impact');
+    _s('e'+k+'-now',  fmtN(r.en)+' '+c);
+    _s('e'+k+'-me',   fmtN(r.em));
+    _s('e'+k+'-qe',   fmtN(r.eq));
+  } catch(_){} });
+  var tot = a['38'].cnt+a['73'].cnt+a['74'].cnt;
+  (function(){var e=document.getElementById('s-total');if(e)e.textContent=tot;})();
+  (function(){var e=document.getElementById('s-total-sub');if(e)e.textContent='Termination Risk: '+(a['38'].tr+a['73'].tr+a['74'].tr)+' · EHF: '+(a['38'].ei+a['73'].ei+a['74'].ei);})();
+}
+
+
+function toggleDetails(btn, bp) {
+  var det = document.getElementById('det-' + bp);
+  if (!det) return;
+  var isOpen = btn.classList.toggle('open');
+  btn.textContent = isOpen ? '▾ Details' : '▸ Details';
+  det.classList.toggle('hidden', !isOpen);
+  if (!isOpen) return;
+  renderDetTable(det, bp);
+}
+
+function renderDetTable(det, bp) {
+  var docs = DUN_DOCS[bp] || [];
+  var card = det.closest('.partner-card');
+  var cc   = card ? card.dataset.cc : '';
+  var dirtyKeys = Object.keys(editStore).filter(function(k){return k.startsWith(cc+'|'+bp+'|');});
+  var FC_OPTS  = FC_MONTHS.map(function(v){return '<option value="'+v+'">'+v+'</option>';}).join('')+'<option value="">(none)</option>';
+  var CPP_OPTS = CPP_OPTIONS.map(function(v){return '<option value="'+v+'">'+(v||'(none)')+'</option>';}).join('');
+  var rows = '';
+  if (!docs.length) {
+    rows = '<tr><td colspan="8" style="text-align:center;color:#9DA0A4;padding:12px">No overdue documents found</td></tr>';
+  } else {
+    rows = docs.map(function(d) {
+      var key = getDocKey(cc, bp, d.doc);
+      var saved = editStore[key]||{};
+      var fc  = saved.fc     !== undefined ? saved.fc     : (d.fc     ||'');
+      var cpp = saved.cpp    !== undefined ? saved.cpp    : (d.cpp    ||'');
+      var st  = saved.status !== undefined ? saved.status : (d.status ||'');
+      var dirty = !!editStore[key];
+      var dpdCls = d.dpd>365?'crit':'';
+      var fcSel  = FC_OPTS.replace('value="'+fc+'"','value="'+fc+'" selected');
+      var cppSel = CPP_OPTS.replace('value="'+cpp+'"','value="'+cpp+'" selected');
+      return '<tr>'
+        +'<td>'+d.doc+(d.is_cdc?'<span class="cdc-tag" style="margin-left:4px;font-size:9px" title="Bill-to: China Datacom">CDC</span>':'')+'</td>'
+        +'<td>'+(d.due||'—')+'</td>'
+        +'<td class="num '+dpdCls+'">'+d.dpd+'</td>'
+        +'<td class="num">'+d.pd_amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
+        +'<td>'+d.ccy+'</td>'
+        +'<td class="ec'+(dirty?' dirty':'')+'"><select data-key="'+key+'" data-field="fc" data-bp="'+bp+'" onchange="detCellEdit(this)">'+fcSel+'</select></td>'
+        +'<td class="ec'+(dirty?' dirty':'')+'"><select data-key="'+key+'" data-field="cpp" data-bp="'+bp+'" onchange="detCellEdit(this)">'+cppSel+'</select></td>'
+        +'<td class="ec'+(dirty?' dirty':'')+'" style="min-width:180px"><input type="text" value="'+st.replace(/"/g,'&quot;')+'" placeholder="Add status…" data-key="'+key+'" data-field="status" data-bp="'+bp+'" onchange="detCellEdit(this)"></td>'
+        +'</tr>';
+    }).join('');
+  }
+  det.innerHTML =
+    '<div class="det-header">'
+    +'<span>Document Details '+(dirtyKeys.length?'<span class="det-unsaved">'+dirtyKeys.length+' unsaved</span>':'')+'</span>'
+    +'<span style="font-size:10px;color:#9DA0A4">Click cells to edit</span></div>'
+    +'<div class="det-table-wrap"><table class="det-table">'
+    +'<thead><tr><th>Doc #</th><th>Net Due</th><th>Days OD</th><th class="num">OD Amount</th><th>Ccy</th>'
+    +'<th>FC Month</th><th>Customer Payment Process</th><th>Current Status</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div>'
+    +'<div class="det-save-bar">'
+    +'<button class="det-save-btn" onclick="detSaveAll(\''+bp+'\')">&#128190; Save Edits</button>'
+    +'<button class="det-export-btn" onclick="exportEditsCSV()">&#128229; Export Edits CSV</button>'
+    +'<button class="det-export-btn" style="border-color:#5C3D8F;color:#5C3D8F" onclick="openActivityDashboard()">&#128202; Activity</button>'
+    +'<span class="det-save-msg" id="det-msg-'+bp+'"></span>'
+    +'</div>';
+}
+
+function detCellEdit(el) {
+  var key   = el.dataset.key;
+  var field = el.dataset.field;
+  var bp    = el.dataset.bp;
+  if (!editStore[key]) editStore[key] = {};
+  var _old = editStore[key][field]||'';
+  editStore[key][field] = el.value;
+  logActivity(key, field, _old, el.value);
+  if(field==='cpp'){var _pv=(el.value.toLowerCase()==='paid'||el.value.toLowerCase()==='paid to cdc'),_wp=editStore[key]&&editStore[key].paid==='yes';if(_pv!==_wp){editStore[key].paid=_pv?'yes':'no';logActivity(key,'paid',_wp?'yes':'no',_pv?'yes':'no');applyPaidToRow(key,bp,_pv);updateIncomeBar();}}
+  saveEdits();
+  el.closest('.ec').classList.add('dirty');
+  var det = document.getElementById('det-' + bp);
+  if (det) {
+    var badge = det.querySelector('.det-unsaved');
+    var cc = det.closest('.partner-card').dataset.cc;
+    var n = Object.keys(editStore).filter(function(k){return k.startsWith(cc+'|'+bp+'|');}).length;
+    if (badge) badge.textContent = n+' unsaved';
+    else { var hdr=det.querySelector('.det-header span'); if(hdr) hdr.innerHTML+='<span class="det-unsaved">'+n+' unsaved</span>'; }
+  }
+}
+
+function detSaveAll(bp) {
+  saveEdits();
+  var det = document.getElementById('det-' + bp);
+  if (det) {
+    det.querySelectorAll('.ec.dirty').forEach(function(c){c.classList.remove('dirty');});
+    var badge = det.querySelector('.det-unsaved'); if(badge) badge.remove();
+    var msg = document.getElementById('det-msg-'+bp);
+    if(msg){msg.textContent='&#10003; Saved';setTimeout(function(){msg.textContent='';},2000);}
+  }
+}
+
+function saveAllEdits() { saveEdits(); }
+
+function exportEditsCSV() {
+  var rows = ['CC,BP,Doc#,FC Month,Customer Payment Process,Current Status'];
+  Object.entries(editStore).forEach(function(e){
+    var p=e[0].split('|'),d=e[1];
+    rows.push([p[0],p[1],p[2],d.fc||'',d.cpp||'',(d.status||'').replace(/,/g,';')].join(','));
+  });
+  var blob=new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ar_edits_2026-08-03.csv';a.click();URL.revokeObjectURL(a.href);
+}
+
+
+var FC_MONTHS = ["Aug","Aug-Risk","Sep","Sep-Risk","Oct","Oct-Risk","Nov","Nov-Risk","Dec","Dec-Risk","Jul","Jul-Risk","Non Payment Termination Risk","Payment Risk","Offset/Concession/Cancel/Cleared"];
+var CPP_OPTIONS = ["","Standard (invoice- internal payment process)","PO/PR process","Budget Process","Payment Split before FI","Acceptance before FI","Paid","paid","Paid to CDC","PO accpetnace done"];
+function getDocKey(cc,bp,doc){return cc+'|'+bp+'|'+doc;}
+function getDirtyCount(){return Object.keys(editStore).length;}
+
+// ── Dunning ───────────────────────────────────────────────────────────────────
+var _recipients = [];
+
+function openDunning(btn) {
+  var card = btn.closest('.partner-card');
+  var bp   = card.dataset.bp;
+  var name = card.querySelector('.partner-name').textContent.trim();
+  var cc   = card.dataset.cc;
+  var coll = card.dataset.collector || '';
+
+  var ct   = CONTACTS[bp] || {};
+  _recipients = (ct.emails || []).slice();
+
+  var docs = (DUN_DOCS[bp] || []).filter(d => d.pd_amt > 0);
+
+  document.getElementById('dun-title').textContent = 'Dunning — ' + name;
+  document.getElementById('dun-meta').textContent  = cc + '  ·  BP# ' + bp + (coll ? '  ·  ' + coll : '');
+  var subjMap = {
+    'CC0038': '【付款提醒】未付款项通知 — ' + name,
+    'CC0073': '【付款提醒】未付款項通知 — ' + name,
+    'CC0074': '[Payment Reminder] Outstanding Invoices — ' + name
+  };
+  document.getElementById('dun-subject').value = subjMap[cc] || subjMap['CC0074'];
+
+  renderChips();
+  window._dun = { docs: docs, ccy: docs.length ? docs[0].ccy : '', greeting: (ct.names||['Sir/Madam'])[0], cc: cc };
+  renderDunDocs(docs.map((_,i)=>i));
+
+  document.getElementById('dun-status').textContent = '';
+  document.getElementById('dunningOverlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDunning() {
+  document.getElementById('dunningOverlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function renderChips() {
+  var wrap = document.getElementById('dun-to-chips');
+  wrap.querySelectorAll('.dun-email-chip').forEach(c => c.remove());
+  var inp = document.getElementById('dun-add-input');
+  _recipients.forEach((email, i) => {
+    var chip = document.createElement('span');
+    chip.className = 'dun-email-chip';
+    chip.innerHTML = email + '<span class="rm" onclick="removeChip('+i+')">&#x00D7;</span>';
+    wrap.insertBefore(chip, inp);
+  });
+}
+
+function removeChip(i) { _recipients.splice(i,1); renderChips(); }
+
+function addEmailChip(e) {
+  if (e.key !== 'Enter' && e.key !== ',') return;
+  e.preventDefault();
+  var v = e.target.value.trim().replace(/,$/,'');
+  if (v && v.includes('@')) { _recipients.push(v); e.target.value=''; renderChips(); }
+}
+
+function renderDunDocs(selIdxs) {
+  var docs = window._dun.docs;
+  var sel  = new Set(selIdxs);
+  var tbody = document.getElementById('dun-docs-body');
+  if (!docs.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9DA0A4;padding:10px">No overdue documents</td></tr>';
+    updateDunBar(sel); return;
+  }
+  tbody.innerHTML = docs.map((d,i) => {
+    var cls = d.dpd > 365 ? 'crit' : d.dpd > 90 ? '' : '';
+    var chk = sel.has(i) ? 'checked' : '';
+    return '<tr class="'+(sel.has(i)?'sel':'')+'" onclick="dunToggleRow('+i+',event)">'
+      +'<td><input type="checkbox" data-i="'+i+'" '+chk+' onclick="event.stopPropagation();dunToggleRow('+i+',event)"></td>'
+      +'<td>'+d.doc+'</td>'
+      +'<td>'+(d.due||'—')+'</td>'
+      +'<td class="num '+cls+'">'+d.dpd+'</td>'
+      +'<td class="num">'+d.pd_amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
+      +'<td>'+d.ccy+'</td>'
+      +'</tr>';
+  }).join('');
+  updateDunBar(sel);
+  regenBody(sel);
+}
+
+function getSelSet() {
+  var s = new Set();
+  document.querySelectorAll('#dun-docs-body input[type=checkbox]').forEach(c => { if(c.checked) s.add(+c.dataset.i); });
+  return s;
+}
+
+function dunToggleRow(i, e) {
+  var chk = document.querySelector('#dun-docs-body input[data-i="'+i+'"]');
+  if (e.target !== chk) chk.checked = !chk.checked;
+  chk.closest('tr').classList.toggle('sel', chk.checked);
+  var s = getSelSet(); updateDunBar(s); regenBody(s);
+}
+
+function dunSelAll(src) {
+  document.querySelectorAll('#dun-docs-body input[type=checkbox]').forEach(c => {
+    c.checked = src.checked; c.closest('tr').classList.toggle('sel', src.checked);
+  });
+  document.getElementById('dun-chk-all').checked = src.checked;
+  document.getElementById('dun-hdr-chk').checked = src.checked;
+  var s = getSelSet(); updateDunBar(s); regenBody(s);
+}
+
+function dunSelOD(threshold) {
+  var docs = window._dun.docs;
+  document.querySelectorAll('#dun-docs-body input[type=checkbox]').forEach((c,idx) => {
+    var on = docs[idx] && docs[idx].dpd > threshold;
+    c.checked = on; c.closest('tr').classList.toggle('sel', on);
+  });
+  var s = getSelSet(); updateDunBar(s); regenBody(s);
+}
+
+function dunSelClear() {
+  document.querySelectorAll('#dun-docs-body input[type=checkbox]').forEach(c => { c.checked=false; c.closest('tr').classList.remove('sel'); });
+  document.getElementById('dun-chk-all').checked = false;
+  document.getElementById('dun-hdr-chk').checked = false;
+  updateDunBar(new Set()); regenBody(new Set());
+}
+
+function updateDunBar(selSet) {
+  var docs = window._dun.docs;
+  var sel  = [...selSet].map(i=>docs[i]).filter(Boolean);
+  var tot  = sel.reduce((s,d)=>s+d.pd_amt, 0);
+  document.getElementById('dun-sel-count').textContent = selSet.size + ' doc' + (selSet.size!==1?'s':'') + ' selected';
+  document.getElementById('dun-sel-total').textContent = selSet.size
+    ? '= ' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + window._dun.ccy : '';
+  var all = docs.length > 0 && selSet.size === docs.length;
+  document.getElementById('dun-chk-all').checked = all;
+  document.getElementById('dun-hdr-chk').checked = all;
+}
+
+function dunTemplate(cc, greeting, lines, tot, ccy) {
+  if (cc === 'CC0038') {
+    // Simplified Chinese
+    return '尊敬的' + greeting + '，\n\n'
+      + '您好！根据我们的账务记录，截至2026年7月31日，贵司仍有以下未付款项：\n\n'
+      + (lines || '  （暂无逾期单据）') + '\n\n'
+      + '未付款合计：' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + ccy + '\n\n'
+      + '烦请贵司尽快安排付款，或告知预计付款日期，感谢您的配合。\n\n'
+      + '如有任何疑问，请随时与我们联系。\n\n'
+      + '感谢您的及时关注。\n\n'
+      + '此致\nSAP ' + cc + ' 应收账款团队';
+  } else if (cc === 'CC0073') {
+    // Traditional Chinese
+    return '敬啟者 ' + greeting + '，\n\n'
+      + '您好！根據我們的帳務記錄，截至2026年7月31日，貴公司仍有以下未付款項：\n\n'
+      + (lines || '  （暫無逾期單據）') + '\n\n'
+      + '未付款合計：' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + ccy + '\n\n'
+      + '煩請貴公司儘快安排付款，或告知預計付款日期，感謝您的配合。\n\n'
+      + '如有任何疑問，請隨時與我們聯繫。\n\n'
+      + '感謝您的及時關注。\n\n'
+      + '敬上\nSAP ' + cc + ' 應收帳款團隊';
+  } else {
+    // English for CC0074 HK
+    return 'Dear ' + greeting + ',\n\n'
+      + 'We hope this message finds you well. As per our records, the following invoice(s) remain outstanding as of 2026-07-31:\n\n'
+      + (lines || '  (No documents selected)') + '\n\n'
+      + 'Total Outstanding: ' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + ccy + '\n\n'
+      + 'Could you kindly arrange payment at your earliest convenience, or advise us of the expected payment date?\n\n'
+      + 'Should you have any queries, please do not hesitate to contact us.\n\n'
+      + 'Thank you for your prompt attention.\n\n'
+      + 'Best regards,\nSAP ' + cc + ' Collections Team';
+  }
+}
+
+function regenBody(selSet) {
+  var dun  = window._dun;
+  var docs = dun.docs;
+  var sel  = [...selSet].map(i=>docs[i]).filter(Boolean);
+  var tot  = sel.reduce((s,d)=>s+d.pd_amt, 0);
+  var lines = sel.map(d =>
+    '  ' + (d.doc+'').padEnd(20) + (d.due||'').padEnd(14) + String(d.dpd).padEnd(8) + 'DPD   ' +
+    d.pd_amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + d.ccy
+  ).join('\n');
+  document.getElementById('dun-body').value = dunTemplate(dun.cc, dun.greeting, lines, tot, dun.ccy);
+}
+
+function showDunStatus(msg) {
+  var el = document.getElementById('dun-status');
+  el.textContent = msg;
+  setTimeout(() => el.textContent = '', 2500);
+}
+
+function dunSendMail() {
+  var to  = _recipients.join(',');
+  var sub = encodeURIComponent(document.getElementById('dun-subject').value);
+  var bod = encodeURIComponent(document.getElementById('dun-body').value);
+  window.location.href = 'mailto:'+to+'?subject='+sub+'&body='+bod;
+  showDunStatus('Opened in mail ✓');
+}
+function dunCopyAll() {
+  var txt = 'To: '+_recipients.join('; ')+'\nSubject: '+document.getElementById('dun-subject').value+'\n\n'+document.getElementById('dun-body').value;
+  navigator.clipboard.writeText(txt).then(()=>showDunStatus('Copied ✓'));
+}
+function dunCopyBody() {
+  navigator.clipboard.writeText(document.getElementById('dun-body').value).then(()=>showDunStatus('Body copied ✓'));
+}
+
+// Close modal on overlay click or Escape
+(function(){var el=document.getElementById('dunningOverlay');if(el)el.addEventListener('click',function(e){if(e.target===this)closeDunning();});})();
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'){closeDunning();closeFDL();} });
+
+// ── Export ───────────────────────────────────────────────────────────────────
+function toggleExportMenu(e) { e.stopPropagation(); document.getElementById('exportMenu').classList.toggle('open'); }
+document.addEventListener('click', function(){var m=document.getElementById('exportMenu');if(m)m.classList.remove('open');});
+
+function visiblePartners() {
+  return PARTNERS.filter(p => {
+    if (S.section !== 'all' && ('CC'+p.cc) !== S.section) return false;
+    if (S.term && !p.term_risk) return false;
+    if (S.ehf  && !p.ehf_impact) return false;
+    if (S.ob   && !p.ob_risk) return false;
+    if (S.collector && p.collector !== S.collector) return false;
+    if (S.customer && p.name !== S.customer) return false;
+    if (S.search && !p.name.toLowerCase().includes(S.search)) return false;
+    return true;
+  });
+}
+function csvRow(f) { return f.map(v=>{ var s=String(v==null?'':v); return s.includes(',')||s.includes('"')?'"'+s.replace(/"/g,'""')+'"':s; }).join(','); }
+function dlCSV(name, rows) {
+  var blob = new Blob(['\uFEFF'+rows.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+function exportCSV() {
+  // Export ALL accounts (full report) regardless of current filters
+  var ps = PARTNERS.filter(function(p){return p.total_pd>0;}).sort(function(a,b){return b.total_pd-a.total_pd;});
+  // Doc-level export matching Master Report sheet structure
+  var headers = [
+    'Company Code','Sold-to Number','Sold-To Party Name','Collector Name','Bill-to Number','Name of Bill-to Party',
+    'Document Number','Local Currency Amt','Local Currency','Open Balance in EUR',
+    'Net Due Date','OD Days','OD Days by Month-End','OD Days by Q-End',
+    'EHF Impact by M-End','EHF Impact by Q-End',
+    'FC Month','Customer Payment Process','Current Status','AR Plan',
+    'EHF II Status','Termination Status','Unique ID'
+  ];
+  var rows = [csvRow(headers)];
+
+  ps.forEach(function(p) {
+    var docs = DUN_DOCS[p.bp] || [];
+    docs.forEach(function(d) {
+      // Get edits from editStore
+      var editKey = 'CC'+p.cc+'|'+p.bp+'|'+d.doc;
+      var saved = (typeof editStore !== 'undefined' && editStore[editKey]) || {};
+      var fc  = saved.fc     !== undefined ? saved.fc     : (d.fc     || '');
+      var cpp = saved.cpp    !== undefined ? saved.cpp    : (d.cpp    || '');
+      var st  = saved.status !== undefined ? saved.status : (d.status || '');
+      rows.push(csvRow([
+        'CC'+p.cc,
+        p.bp,
+        p.name,
+        p.collector,
+        d.bill_to     || '',
+        d.bill_to_name|| '',
+        d.doc,
+        d.pd_amt      || 0,
+        d.ccy         || p.currency,
+        d.eur_amt     || 0,
+        d.due         || '',
+        d.dpd         || 0,
+        d.od_me       || 0,
+        d.od_qe       || 0,
+        d.ehf_me      || 0,
+        d.ehf_qe      || 0,
+        fc,
+        cpp,
+        st,
+        '',  // AR Plan - not stored per-doc, from editStore
+        p.ehf_impact ? 'EHF Impact' : '',
+        p.term_risk  ? 'Terminated'  : '',
+        'CC'+p.cc+'|'+p.bp+'|'+d.doc
+      ]));
+    });
+  });
+
+  if(rows.length <= 1) {
+    // Fallback: account-level if no docs
+    ps.forEach(function(p){
+      rows.push(csvRow(['CC'+p.cc,p.bp,p.name,p.collector,'','','','',p.currency,'','','','','','','','','','','',
+        p.ehf_impact?'EHF Impact':'',p.term_risk?'Terminated':'','CC'+p.cc+'|'+p.bp]));
+    });
+  }
+
+  dlCSV('AR_Full_Report_'+new Date().toISOString().slice(0,10)+'.csv', rows);
+  var m=document.getElementById('exportMenu'); if(m) m.classList.remove('open');
+}
+function exportEHFCSV() {
+  var rows = [csvRow(['Company Code','BP#','Name','Collector','Doc#','Posting Date','EHF Due','OD Now','OD ME','OD QE','LC Amt','Ccy','EHF Now','EHF ME','EHF QE'])];
+  document.querySelectorAll('.partner-card:not(.hidden)').forEach(card => {
+    var cc=card.dataset.cc, bp=card.dataset.bp||'', name=card.querySelector('.partner-name').textContent.trim(), coll=card.dataset.collector||'';
+    card.querySelectorAll('.doc-section:not(.term-section) tbody tr').forEach(tr => {
+      var tds=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+      if(tds.length>=10) rows.push(csvRow([cc,bp,name,coll,...tds]));
+    });
+  });
+  dlCSV('AR_EHF_2026-07-31.csv', rows);
+  document.getElementById('exportMenu').classList.remove('open');
+}
+
+
+// ── FDL ──────────────────────────────────────────────────────────────────────
+var _fdl = {};
+
+// Deadline = today + 14 days
+function fdlDefaultDeadline() {
+  var d = new Date('2026-07-31');
+  d.setDate(d.getDate() + 14);
+  return d.toISOString().slice(0, 10);
+}
+
+function openFDL(btn) {
+  var card = btn.closest('.partner-card');
+  var bp   = card.dataset.bp;
+  var name = card.querySelector('.partner-name').textContent.trim();
+  var cc   = card.dataset.cc;
+  var coll = card.dataset.collector || '';
+
+  var docs = (DUN_DOCS[bp] || []).filter(d => d.pd_amt > 0);
+  var ccy  = docs.length ? docs[0].ccy : '';
+
+  _fdl = { bp, name, cc, coll, docs, ccy, selIdxs: new Set() };
+
+  document.getElementById('fdl-title').textContent = 'Final Demand Letter — ' + name;
+  document.getElementById('fdl-meta').textContent  = cc + '  ·  BP# ' + bp;
+
+  // Pre-fill edit fields
+  document.getElementById('fdl-customer-name').value = name;
+  document.getElementById('fdl-erp').value            = bp;
+  document.getElementById('fdl-deadline').value       = fdlDefaultDeadline();
+  document.getElementById('fdl-date').value           = '2026-08-03';
+  document.getElementById('fdl-collector-name').value = coll;
+  document.getElementById('fdl-collector-phone').value= '';
+  document.getElementById('fdl-collector-email').value= '';
+  document.getElementById('fdl-address').value        = '';
+  document.getElementById('fdl-attention').value      = '';
+
+  // Render doc selection table
+  fdlRenderDocs(new Set());
+
+  // Show step 1, hide step 2
+  document.getElementById('fdl-step1').classList.remove('hidden');
+  document.getElementById('fdl-step2').classList.add('hidden');
+  document.getElementById('fdl-status').textContent = '';
+
+  document.getElementById('fdlOverlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFDL() {
+  document.getElementById('fdlOverlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+(function(){var el=document.getElementById('fdlOverlay');if(el)el.addEventListener('click',function(e){if(e.target===this)closeFDL();});})();
+
+// ── Step 1: doc selection ─────────────────────────────────────────────────────
+function fdlRenderDocs(selSet) {
+  var docs  = _fdl.docs;
+  var tbody = document.getElementById('fdl-docs-body');
+  if (!docs.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9DA0A4;padding:10px">No overdue documents</td></tr>';
+    fdlUpdateBar(selSet); return;
+  }
+  tbody.innerHTML = docs.map((d, i) => {
+    var cls = d.dpd > 365 ? 'crit' : '';
+    var chk = selSet.has(i) ? 'checked' : '';
+    return '<tr class="' + (selSet.has(i) ? 'sel' : '') + '" onclick="fdlToggleRow(' + i + ',event)">'
+      + '<td><input type="checkbox" data-i="' + i + '" ' + chk + ' onclick="event.stopPropagation();fdlToggleRow(' + i + ',event)"></td>'
+      + '<td>' + d.doc + '</td>'
+      + '<td>' + (d.due || '—') + '</td>'
+      + '<td class="num ' + cls + '">' + d.dpd + '</td>'
+      + '<td class="num">' + d.pd_amt.toLocaleString(undefined, {minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
+      + '<td>' + d.ccy + '</td>'
+      + '</tr>';
+  }).join('');
+  fdlUpdateBar(selSet);
+}
+
+function fdlGetSelSet() {
+  var s = new Set();
+  document.querySelectorAll('#fdl-docs-body input[type=checkbox]').forEach(c => { if (c.checked) s.add(+c.dataset.i); });
+  return s;
+}
+
+function fdlToggleRow(i, e) {
+  var chk = document.querySelector('#fdl-docs-body input[data-i="' + i + '"]');
+  if (e.target !== chk) chk.checked = !chk.checked;
+  chk.closest('tr').classList.toggle('sel', chk.checked);
+  var s = fdlGetSelSet(); fdlUpdateBar(s);
+}
+
+function fdlSelAll(src) {
+  document.querySelectorAll('#fdl-docs-body input[type=checkbox]').forEach(c => {
+    c.checked = src.checked; c.closest('tr').classList.toggle('sel', src.checked);
+  });
+  ['fdl-chk-all','fdl-hdr-chk'].forEach(id => document.getElementById(id).checked = src.checked);
+  fdlUpdateBar(fdlGetSelSet());
+}
+
+function fdlSelOD(t) {
+  var docs = _fdl.docs;
+  document.querySelectorAll('#fdl-docs-body input[type=checkbox]').forEach((c, i) => {
+    var on = docs[i] && docs[i].dpd > t;
+    c.checked = on; c.closest('tr').classList.toggle('sel', on);
+  });
+  fdlUpdateBar(fdlGetSelSet());
+}
+
+function fdlSelClear() {
+  document.querySelectorAll('#fdl-docs-body input[type=checkbox]').forEach(c => { c.checked=false; c.closest('tr').classList.remove('sel'); });
+  ['fdl-chk-all','fdl-hdr-chk'].forEach(id => document.getElementById(id).checked = false);
+  fdlUpdateBar(new Set());
+}
+
+function fdlUpdateBar(selSet) {
+  var docs = _fdl.docs;
+  var sel  = [...selSet].map(i => docs[i]).filter(Boolean);
+  var tot  = sel.reduce((s,d) => s + d.pd_amt, 0);
+  document.getElementById('fdl-sel-count').textContent = selSet.size + ' doc' + (selSet.size !== 1 ? 's' : '') + ' selected';
+  document.getElementById('fdl-sel-total').textContent = selSet.size
+    ? '= ' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + _fdl.ccy : '';
+  document.getElementById('fdl-next-btn').disabled = selSet.size === 0;
+  ['fdl-chk-all','fdl-hdr-chk'].forEach(id => document.getElementById(id).checked = selSet.size === docs.length && docs.length > 0);
+  _fdl.selIdxs = selSet;
+}
+
+function fdlToStep2() {
+  _fdl.selIdxs = fdlGetSelSet();
+  document.getElementById('fdl-step1').classList.add('hidden');
+  document.getElementById('fdl-step2').classList.remove('hidden');
+  fdlRefreshPreview();
+}
+
+function fdlBack() {
+  document.getElementById('fdl-step2').classList.add('hidden');
+  document.getElementById('fdl-step1').classList.remove('hidden');
+  fdlRenderDocs(_fdl.selIdxs);
+}
+
+// ── Step 2: preview ──────────────────────────────────────────────────────────
+function fdlGetFields() {
+  return {
+    customerName:   document.getElementById('fdl-customer-name').value,
+    erp:            document.getElementById('fdl-erp').value,
+    deadline:       document.getElementById('fdl-deadline').value,
+    collectorName:  document.getElementById('fdl-collector-name').value,
+    collectorPhone: document.getElementById('fdl-collector-phone').value,
+    collectorEmail: document.getElementById('fdl-collector-email').value,
+    date:           document.getElementById('fdl-date').value,
+    address:        document.getElementById('fdl-address').value,
+    attention:      document.getElementById('fdl-attention').value,
+  };
+}
+
+function fdlFmt(v) { return v ? v : '<span class="fdl-highlight">[填写]</span>'; }
+
+function fdlBuildPreview(cc, f, selDocs, tot, ccy) {
+  var tblRows = selDocs.map(d =>
+    '<tr><td>' + d.doc + '</td><td>' + (d.due||'') + '</td><td>' + (d.due||'') + '</td>'
+    + '<td class="num">' + d.dpd + '</td>'
+    + '<td class="num">' + d.pd_amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
+    + '<td></td></tr>'
+  ).join('');
+  var totRow = '<tr class="total-row"><td colspan="4" style="text-align:right"><strong>'
+    + (cc==='CC0074' ? '' : (cc==='CC0038' ? '合计金额' : '合計金額'))
+    + '</strong></td>'
+    + '<td class="num"><strong>' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong></td><td></td></tr>';
+
+  if (cc === 'CC0038') {
+    var hdrs = ['税务发票号码','发票日期','付款到期日','逾期天数','金额（人民币/元）','说明'];
+    return '<div class="fdl-preview">'
+      + '<div class="fdl-title">到期应付账款通知</div>'
+      + '<div class="fdl-meta">'
+      + '<div class="fdl-meta-row">尊敬的' + fdlFmt(f.customerName) + '：</div>'
+      + '<div class="fdl-meta-row">ERP：' + fdlFmt(f.erp) + '</div>'
+      + '</div>'
+      + '<div class="fdl-body-para">我司已向贵司开具并发送了下列发票。</div>'
+      + '<div class="fdl-body-para">贵司应付金额为：<strong>' + ccy + ' ' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong></div>'
+      + '<div class="fdl-body-para">尽管我司此前已多次发送付款提醒，截至目前，我司仍未收到以下已到期发票对应的付款。</div>'
+      + '<div class="fdl-body-para">烦请贵司高度重视此事，并于 <strong>' + fdlFmt(f.deadline) + '</strong> 前完成以下发票的付款。</div>'
+      + '<div class="fdl-body-para"><strong>逾期发票详情：</strong></div>'
+      + '<table class="fdl-table"><thead><tr>' + hdrs.map(h=>'<th>'+h+'</th>').join('') + '</tr></thead><tbody>' + tblRows + totRow + '</tbody></table>'
+      + '<div class="fdl-body-para">如我司未能在上述期限内收到全部应付款项，根据双方协议中的相关条款，我司将保留采取一切必要措施追收相关款项的权利，包括但不限于暂停服务、终止合同，且无需另行通知。</div>'
+      + '<div class="fdl-body-para">如您对上述发票存在任何疑问，请联系SAP应收账款团队：</div>'
+      + '<div class="fdl-sign">'
+      + '<div>' + fdlFmt(f.collectorName) + '</div>'
+      + '<div>电话：' + fdlFmt(f.collectorPhone) + '</div>'
+      + '<div>电子邮件：' + fdlFmt(f.collectorEmail) + '</div>'
+      + '<div style="margin-top:16px">思爱普（中国）有限公司</div>'
+      + '<div>全球财务共享服务中心</div>'
+      + '<div>' + fdlFmt(f.date) + '</div>'
+      + '</div></div>';
+  } else if (cc === 'CC0073') {
+    var hdrs = ['發票號碼','發票日期','付款到期日','逾期天數','金額（'+ccy+'）','註明'];
+    return '<div class="fdl-preview">'
+      + '<div class="fdl-meta">'
+      + '<div class="fdl-meta-row">日期：' + fdlFmt(f.date) + '</div>'
+      + '<div class="fdl-meta-row">收信人：' + fdlFmt(f.customerName) + '（下稱「貴公司」）</div>'
+      + '<div class="fdl-meta-row">ERP：' + fdlFmt(f.erp) + '</div>'
+      + '<div class="fdl-meta-row" style="font-weight:700;margin-top:8px">主旨：到期應付帳款通知</div>'
+      + '</div>'
+      + '<div class="fdl-body-para">應付金額：<strong>' + ccy + ' ' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong></div>'
+      + '<div class="fdl-body-para">說明：茲提請貴公司關注本公司已開立並寄送予貴公司的下列發票。</div>'
+      + '<div class="fdl-body-para">儘管本公司先前已多次發出付款提醒，截至目前為止，針對下列已到期發票，本公司仍未收到任何款項。</div>'
+      + '<div class="fdl-body-para">敬請貴公司重視此事，並協助於 <strong>' + fdlFmt(f.deadline) + '</strong> 前完成下列發票之付款。</div>'
+      + '<div class="fdl-body-para"><strong>逾期發票明細</strong></div>'
+      + '<table class="fdl-table"><thead><tr>' + hdrs.map(h=>'<th>'+h+'</th>').join('') + '</tr></thead><tbody>' + tblRows + totRow + '</tbody></table>'
+      + '<div class="fdl-body-para">如本公司未能於上述期限內收到前述應付款項，本公司將不得不採取一切必要措施追討相關欠款，且無須再另行通知貴公司。本公司並得依雙方合約相關條款，以正當事由終止相關合約或服務。</div>'
+      + '<div class="fdl-body-para">如對上述發票有任何疑問，請聯絡本公司應收帳款團隊：</div>'
+      + '<div class="fdl-sign">'
+      + '<div>' + fdlFmt(f.collectorName) + '</div>'
+      + '<div>電話：' + fdlFmt(f.collectorPhone) + '</div>'
+      + '<div>電子郵件：' + fdlFmt(f.collectorEmail) + '</div>'
+      + '<div style="margin-top:16px">SAP Taiwan Co., Ltd. 思愛普軟體系統股份有限公司</div>'
+      + '<div>Cash Collections, Global Finance Shared Services</div>'
+      + '</div></div>';
+  } else {
+    // CC0074 English
+    var hdrs = ['Document Number','Document Date','Net Due Date','Arrears (Days)','Amount ('+ccy+')','Text'];
+    return '<div class="fdl-preview en">'
+      + '<div class="fdl-meta">'
+      + '<div class="fdl-meta-row">' + fdlFmt(f.date) + '</div>'
+      + '<div class="fdl-meta-row" style="margin-top:8px">' + fdlFmt(f.customerName) + '</div>'
+      + '<div class="fdl-meta-row">' + fdlFmt(f.address) + '</div>'
+      + '<div class="fdl-meta-row">ERP: ' + fdlFmt(f.erp) + '</div>'
+      + '<div class="fdl-meta-row" style="margin-top:6px">Attention: ' + fdlFmt(f.attention) + '</div>'
+      + '</div>'
+      + '<div class="fdl-body-para"><strong>OUTSTANDING AMOUNT DUE FOR PAYMENT ' + ccy + ' ' + tot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong></div>'
+      + '<div class="fdl-body-para">We refer to the following outstanding invoices that were sent to ' + fdlFmt(f.customerName) + ' for payment.</div>'
+      + '<div class="fdl-body-para">Despite our previous reminders, to date we have not yet received payment for the due invoices.</div>'
+      + '<div class="fdl-body-para">We would appreciate it if you could kindly look into this matter and arrange payment of the invoices by <strong>' + fdlFmt(f.deadline) + '</strong>.</div>'
+      + '<table class="fdl-table"><thead><tr>' + hdrs.map(h=>'<th>'+h+'</th>').join('') + '</tr></thead><tbody>' + tblRows + totRow + '</tbody></table>'
+      + '<div class="fdl-body-para">In the event SAP does not receive the aforesaid amount within the stipulated timeframe, SAP shall have no option but to take all necessary steps to recover the outstanding amount without further notice, including but not limited to suspension of service and termination of contract.</div>'
+      + '<div class="fdl-body-para">Should you have any questions regarding these invoices, please contact the Accounts Receivable Team:</div>'
+      + '<div class="fdl-sign">'
+      + '<div>' + fdlFmt(f.collectorName) + '</div>'
+      + '<div>Telephone: ' + fdlFmt(f.collectorPhone) + '</div>'
+      + '<div>Email: ' + fdlFmt(f.collectorEmail) + '</div>'
+      + '<div style="margin-top:16px">Yours faithfully,</div>'
+      + '<div style="margin-top:20px">Cash Collections, Global Finance Shared Services</div>'
+      + '<div>SAP Hong Kong Co. Ltd.</div>'
+      + '</div></div>';
+  }
+}
+
+function fdlRefreshPreview() {
+  var f       = fdlGetFields();
+  var docs    = _fdl.docs;
+  var selDocs = [..._fdl.selIdxs].map(i => docs[i]).filter(Boolean);
+  var tot     = selDocs.reduce((s,d) => s + d.pd_amt, 0);
+  document.getElementById('fdl-preview-wrap').innerHTML = fdlBuildPreview(_fdl.cc, f, selDocs, tot, _fdl.ccy);
+}
+
+// ── Confirm → PDF ─────────────────────────────────────────────────────────────
+function fdlConfirm() {
+  fdlRefreshPreview();
+  var previewHTML = document.getElementById('fdl-preview-wrap').innerHTML;
+  var cc = _fdl.cc;
+  var name = _fdl.name;
+
+  var printCSS = `
+    @page { size: A4; margin: 20mm 25mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "SimSun","Times New Roman",serif; font-size: 12pt; line-height: 1.8; color: #000; }
+    .fdl-preview.en { font-family: "Times New Roman",Georgia,serif; }
+    .fdl-preview { padding: 0; }
+    .fdl-title { font-size: 17pt; font-weight: 700; text-align: center; margin-bottom: 20pt; letter-spacing: 1px; }
+    .fdl-meta { margin-bottom: 14pt; }
+    .fdl-meta-row { margin-bottom: 4pt; }
+    .fdl-body-para { margin-bottom: 10pt; text-align: justify; }
+    .fdl-highlight { border-bottom: 1px solid #999; }
+    .fdl-table { width: 100%; border-collapse: collapse; margin: 12pt 0; font-size: 10pt; }
+    .fdl-table th { background: #F0F0F0; border: 1px solid #999; padding: 4pt 6pt; font-weight: 700; text-align: center; }
+    .fdl-table td { border: 1px solid #CCC; padding: 3pt 6pt; vertical-align: top; }
+    .fdl-table td.num { text-align: right; }
+    .fdl-table tr.total-row td { font-weight: 700; border-top: 2px solid #999; }
+    .fdl-sign { margin-top: 18pt; }
+    .crit { color: #CC0000; font-weight: 700; }
+  `;
+
+  var win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(
+    '<!DOCTYPE html><html><head>'
+    + '<meta charset="UTF-8">'
+    + '<title>FDL - ' + name + ' - ' + cc + '</title>'
+    + '<style>' + printCSS + '</style>'
+    + '</head><body>'
+    + previewHTML
+    + '<scr'+'ipt>window.onload=function(){window.print();}</scr'+'ipt>'
+    + '</body></html>'
+  );
+  win.document.close();
+  document.getElementById('fdl-status').textContent = 'Print dialog opened — choose "Save as PDF".';
+}
+
+
+// ── Data Source: drop zone / URL / recalc ─────────────────────────────────
+var DS = { 'master': null, '0038': null, '0073': null, '0074': null, 'dun': null };
+
+function toggleDSPanel(el) {
+  el.classList.toggle('open');
+  document.getElementById('ds-body').classList.toggle('open');
+}
+
+// ── Drag-drop handlers ───────────────────────────────────────────────────────
+function dsDragOver(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('ds-dropzone').classList.add('dragover'); }
+function dsDragLeave(e) { document.getElementById('ds-dropzone').classList.remove('dragover'); }
+function dsDrop(e) {
+  e.preventDefault(); e.stopPropagation();
+  document.getElementById('ds-dropzone').classList.remove('dragover');
+  dsHandleFiles([...e.dataTransfer.files]);
+}
+function dsFileSelect(e) { dsHandleFiles([...e.target.files]); }
+
+function dsDetectSlot(name) {
+  var n = name.toLowerCase();
+  if (n.includes('dunning') || n.includes('contact') || n.includes('direct contact') || n.includes('direct_contact')) return 'dun';
+  if (n.includes('master')) return 'master';
+  if (n.includes('0038') || n.includes('cn ') || n.includes('china')) return '0038';
+  if (n.includes('0073') || n.includes('cc0073')) return '0073';
+  if (n.includes('0074') || n.includes('cc0074')) return '0074';
+  // fallback: ask from filename patterns
+  if (n.includes('038')) return '0038';
+  if (n.includes('073')) return '0073';
+  if (n.includes('074')) return '0074';
+  return 'master';
+}
+
+function dsHandleFiles(files) {
+  files.forEach(file => {
+    var slot = dsDetectSlot(file.name);
+    if (!slot) { dsSetStatus('Could not detect file type for: ' + file.name + '. Rename to include 0038/0073/0074 or "dunning".', true); return; }
+    var reader = new FileReader();
+    reader.onload = e => { DS[slot] = e.target.result; dsMarkSlot(slot, file.name); dsCheckReady(); };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function dsMarkSlot(slot, fname) {
+  var el = document.getElementById('slot-' + slot);
+  var labels = {'master':'Master Report','0038':'CC0038','0073':'CC0073','0074':'CC0074','dun':'Contacts'};
+  el.textContent = labels[slot] + ' ✓';
+  el.className = 'ds-slot loaded';
+  el.title = fname;
+}
+
+function dsCheckReady() {
+  var anyAR = DS['master'] || DS['0038'] || DS['0073'] || DS['0074'];
+  var btn = document.getElementById('ds-refresh-btn');
+  if(btn) btn.disabled = !anyAR;
+  var stat = document.getElementById('ds-proc-status');
+  var loaded = [];
+  var labels = {'master':'Master Report','0038':'CC0038','0073':'CC0073','0074':'CC0074','dun':'Contacts'};
+  Object.keys(DS).forEach(function(k){ if(DS[k]) loaded.push(labels[k]||k); });
+  var sumEl = document.getElementById('ds-loaded-summary');
+  if(sumEl) sumEl.textContent = loaded.length
+    ? '— ' + loaded.join(', ') + ' loaded — click ⟳ Refresh to apply'
+    : '— drop your Master Report Excel to update with your own data';
+  if(anyAR && stat) {
+    stat.textContent = 'File ready — click ⟳ Refresh Worklist';
+    stat.style.color = '#188918';
+  }
+}
+
+// ── SharePoint / URL load ────────────────────────────────────────────────────
+function dsConvertSharePointURL(url) {
+  // Convert SharePoint view/sharing links to direct download links
+  // Pattern: /:x:/r/teams/SITE/Shared%20Documents/PATH?d=DOCID&...
+  var m = url.match(/[?&]d=w([a-f0-9]{32})/i);
+  if (m) {
+    // Extract site base from URL
+    var siteMatch = url.match(/https:\/\/[^\/]+\/teams\/[^\/]+/);
+    var siteBase = siteMatch ? siteMatch[0] : 'https://sap.sharepoint.com';
+    // Format UUID with dashes
+    var raw = m[1];
+    var uuid = raw.slice(0,8)+'-'+raw.slice(8,12)+'-'+raw.slice(12,16)+'-'+raw.slice(16,20)+'-'+raw.slice(20);
+    return siteBase + '/_layouts/15/download.aspx?UniqueId=' + uuid;
+  }
+  // Already a download or other URL — use as-is
+  return url;
+}
+
+async function dsLoadURL() {
+  var rawUrl = document.getElementById('sp-url').value.trim();
+  var slot   = document.getElementById('sp-slot').value;
+  var errEl  = document.getElementById('sp-error');
+  errEl.textContent = '';
+  if (!rawUrl) { errEl.textContent = 'Please enter a URL.'; return; }
+
+  var url = dsConvertSharePointURL(rawUrl);
+  if (url !== rawUrl) {
+    errEl.textContent = 'ℹ Converted to download URL: ' + url;
+    errEl.style.color = '#0070F2';
+  }
+
+  var btn = document.querySelector('.ds-sp-btn');
+  btn.disabled = true; btn.textContent = 'Loading…';
+  try {
+    var resp = await fetch(url, {credentials: 'include'});
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' — make sure you are logged into SharePoint in this browser');
+    var buf = await resp.arrayBuffer();
+    DS[slot] = buf;
+    dsMarkSlot(slot, rawUrl.split('/').pop().split('?')[0] || rawUrl);
+    dsCheckReady();
+    errEl.textContent = '✓ Loaded successfully';
+    errEl.style.color = '#188918';
+  } catch(err) {
+    errEl.style.color = '#BB0000';
+    if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      errEl.textContent = 'CORS blocked — open this worklist from a web server (not file://), or download the file and drag-and-drop it instead.';
+    } else {
+      errEl.textContent = 'Failed: ' + err.message;
+    }
+  }
+  btn.disabled = false; btn.textContent = 'Load';
+}
+
+// ── Recalculation engine ─────────────────────────────────────────────────────
+var RECALC_TODAY     = new Date('2026-07-31');
+var RECALC_MONTH_END = new Date('2026-07-31');
+var RECALC_Q_END     = new Date('2026-09-30');
+var RECALC_EHF_DIV   = {'0038':1.06, '0073':1.05, '0074':1.0};
+var RECALC_CURRENCY  = {'0038':'CNY','0073':'TWD','0074':'HKD'};
+
+function dsDateDays(d1, d2) {
+  if (!d1 || !d2) return 0;
+  return Math.round((d2 - d1) / 86400000);
+}
+
+function dsParseDate(v) {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+  if (typeof v === 'number') {
+    // Excel serial date
+    var d = new Date(Math.round((v - 25569) * 86400000));
+    return d;
+  }
+  var s = String(v).slice(0, 10);
+  var d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
+function sf(v) { var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+function dsBuildFromSheet(buf, cc) {
+  var wb   = XLSX.read(buf, {type:'array', cellDates:false});
+  var ws   = wb.Sheets[wb.SheetNames[0]];
+  var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+  if (rows.length < 2) return {};
+
+  var partners = {};
+  for (var i = 1; i < rows.length; i++) {
+    var row = rows[i];
+    var bp      = String(row[1] || '').trim();
+    var bpName  = String(row[2] || '').trim();
+    var docNum  = String(row[32] || '').trim();
+    var postDt  = dsParseDate(row[43]);
+    var netDueDt= dsParseDate(row[45]);
+    var lcAmt   = sf(row[49]);
+    var lc      = String(row[50] || RECALC_CURRENCY[cc] || '').trim();
+    var dpd     = sf(row[46]);
+    var collector= String(row[31] || '').trim();
+    var soldTo  = String(row[19] || '').trim();
+    var arPD    = sf(row[57]);
+    var pd0130  = sf(row[59]);
+    var pd3160  = sf(row[60]);
+    var pd6190  = sf(row[61]);
+    var pd9190  = sf(row[62]);
+    var pd90    = sf(row[68]);
+
+    if (!bp || !docNum) continue;
+
+    // EHF calculation
+    var ehfDueDt = postDt ? new Date(postDt.getTime() + 30*86400000) : null;
+    var ehfOdNow = ehfDueDt ? Math.max(0, dsDateDays(ehfDueDt, RECALC_TODAY)) : 0;
+    var ehfOdMe  = ehfDueDt ? Math.max(0, dsDateDays(ehfDueDt, RECALC_MONTH_END)) : 0;
+    var ehfOdQe  = ehfDueDt ? Math.max(0, dsDateDays(ehfDueDt, RECALC_Q_END)) : 0;
+    var div      = RECALC_EHF_DIV[cc] || 1;
+    var ehfNow   = (ehfOdNow > 90 && lcAmt > 0) ? lcAmt / div : 0;
+    var ehfMe    = (ehfOdMe  > 90 && lcAmt > 0) ? lcAmt / div : 0;
+    var ehfQe    = (ehfOdQe  > 90 && lcAmt > 0) ? lcAmt / div : 0;
+    var termRisk = dpd > 365;
+    var ehfImpact= dpd > 90;
+
+    if (!partners[bp]) {
+      partners[bp] = {
+        bp, bp_name: bpName, cc, lc, collector, sold_to: soldTo,
+        total_pd:0, pd_01_30:0, pd_31_60:0, pd_61_90:0, pd_91_120:0, pd_90:0,
+        ehf_amt_now:0, ehf_amt_me:0, ehf_amt_qe:0,
+        max_dpd:0, term_risk:false, ehf_impact:false,
+        term_risk_docs:[], ehf_impact_docs:[], docs:[]
+      };
+    }
+    var p = partners[bp];
+    p.total_pd    += arPD;
+    p.pd_01_30    += pd0130;
+    p.pd_31_60    += pd3160;
+    p.pd_61_90    += pd6190;
+    p.pd_91_120   += pd9190;
+    p.pd_90       += pd90;
+    p.ehf_amt_now += ehfNow;
+    p.ehf_amt_me  += ehfMe;
+    p.ehf_amt_qe  += ehfQe;
+    p.max_dpd      = Math.max(p.max_dpd, dpd);
+    if (!p.collector && collector) p.collector = collector;
+    if (termRisk)  { p.term_risk = true;  p.term_risk_docs.push({doc_num:docNum,posting_dt:postDt,net_due_dt:netDueDt,dpd,lc_amt:lcAmt,lc}); }
+    if (ehfImpact) {
+      p.ehf_impact = true;
+      p.ehf_impact_docs.push({doc_num:docNum,posting_dt:postDt,ehf_due_dt:ehfDueDt,
+        ehf_od_now:ehfOdNow,ehf_od_me:ehfOdMe,ehf_od_qe:ehfOdQe,
+        lc_amt:lcAmt,lc,ehf_amt_now:ehfNow,ehf_amt_me:ehfMe,ehf_amt_qe:ehfQe});
+    }
+    if (arPD > 0) {
+      p.docs.push({doc_num:docNum,net_due_dt:netDueDt,dpd,lc_amt:lcAmt,lc,
+        total_ar_pd:arPD,pd_01_30:pd0130,pd_31_60:pd3160,pd_61_90:pd6190,pd_90:pd90,
+        ehf_due_dt:ehfDueDt,ehf_od_now:ehfOdNow,ehf_od_me:ehfOdMe,ehf_od_qe:ehfOdQe,
+        ehf_amt_now:ehfNow,ehf_amt_me:ehfMe,ehf_amt_qe:ehfQe,
+        ehf_impact:ehfImpact,term_risk:termRisk});
+    }
+  }
+  return partners;
+}
+
+
+async function dsBuildFromMasterSheet(buf, onProgress) {
+  var wb=XLSX.read(buf,{type:'array',cellDates:false});
+  // Find the correct sheet: prefer 'Master Report', fallback to first sheet
+  var sheetName = wb.SheetNames[0];
+  for(var si=0;si<wb.SheetNames.length;si++){
+    if(wb.SheetNames[si].toLowerCase().indexOf('master')>=0){
+      sheetName=wb.SheetNames[si]; break;
+    }
+  }
+  var ws=wb.Sheets[sheetName];
+  var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
+  if(rows.length<3) return {};
+  // Auto-detect header row and column indices
+  var hdrRow=-1, ccCol=-1, soldToCol=-1, dpdCol=-1, lcAmtCol=-1, lcCol=-1;
+  for(var ri=0;ri<Math.min(5,rows.length);ri++){
+    var r=rows[ri];
+    for(var ci=0;ci<(r||[]).length;ci++){
+      var h=String(r[ci]||'').toLowerCase().trim();
+      if(h==='company code') ccCol=ci;
+      if(h.includes('sold-to number')||h.includes('sold to number')) soldToCol=ci;
+      if(h==='od days'||h==='days past due') dpdCol=ci;
+      if(h==='local currency amt'||h==='local currency amount') lcAmtCol=ci;
+      if(h==='local currency') lcCol=ci;
+    }
+    if(ccCol>=0 && soldToCol>=0){ hdrRow=ri; break; }
+  }
+  // Fallback to known column positions if auto-detect fails
+  if(ccCol<0)    ccCol=2;
+  if(soldToCol<0) soldToCol=17;
+  if(dpdCol<0)   dpdCol=55;
+  if(lcAmtCol<0) lcAmtCol=23;
+  if(lcCol<0)    lcCol=24;
+  var dataStart = hdrRow>=0 ? hdrRow+1 : 2;
+  var all={'0038':{},'0073':{},'0074':{}};
+  var total = rows.length - 2;
+  var CHUNK = 300;  // process 300 rows then yield
+
+  for(var i=dataStart; i<rows.length; i++) {
+    // Yield every CHUNK rows so browser can repaint
+    if((i-2) % CHUNK === 0) {
+      var pct = Math.round(10 + ((i-dataStart)/(rows.length-dataStart))*55);  // 10%→65%
+      if(onProgress) onProgress('Parsing '+sheetName+' row ' + (i-1) + '/' + total + '…', pct);
+      await new Promise(function(r){setTimeout(r,0);});
+    }
+
+    var row=rows[i],cc=String(row[ccCol]||'').trim();
+    if(!all[cc]) continue;
+    var billTo=String(row[13]||'').trim(),billToName=String(row[14]||'').trim();
+    var bp=String(row[soldToCol]||'').trim(),bpName=String(row[soldToCol===17?18:soldToCol+1]||'').trim();
+    var soldTo=bp,isCdc=(billTo==='1420822'),collector=String(row[19]||'').trim();
+    var docNum=String(row[20]||'').trim(),lcAmt=sf(row[lcAmtCol]),lc=String(row[lcCol]||RECALC_CURRENCY[cc]||'').trim();
+    var postDt=dsParseDate(row[27]),netDueDt=dsParseDate(row[28]),dpd=sf(row[dpdCol]);
+    var ehfStatus=String(row[58]||'').trim(),termStatus=String(row[59]||'').trim(),obVal=row[42];
+    var fc=String(row[71]||'').trim().replace(/^'/,''),cpp=String(row[72]||'').trim().replace(/^'/,''),status=String(row[73]||'').trim().replace(/^'/,'');
+    if(!bp||!docNum) continue;
+    var ehfDueDt=postDt?new Date(postDt.getTime()+30*86400000):null;
+    var ehfOdNow=ehfDueDt?Math.max(0,dsDateDays(ehfDueDt,RECALC_TODAY)):0;
+    var ehfOdMe=ehfDueDt?Math.max(0,dsDateDays(ehfDueDt,RECALC_MONTH_END)):0;
+    var ehfOdQe=ehfDueDt?Math.max(0,dsDateDays(ehfDueDt,RECALC_Q_END)):0;
+    var div=RECALC_EHF_DIV[cc]||1;
+    var ehfNow=(ehfOdNow>90&&lcAmt>0)?lcAmt/div:0,ehfMe=(ehfOdMe>90&&lcAmt>0)?lcAmt/div:0,ehfQe=(ehfOdQe>90&&lcAmt>0)?lcAmt/div:0;
+    var termRisk=dpd>365||!!termStatus,ehfImpact=dpd>90||!!ehfStatus,obRisk=dpd>60||(obVal&&obVal!==0&&obVal!=='');
+    var pd0130=0,pd3160=0,pd6190=0,pd90p=0,arPD=0;
+    if(dpd>0)arPD=lcAmt; if(dpd>0&&dpd<=30)pd0130=lcAmt; if(dpd>30&&dpd<=60)pd3160=lcAmt;
+    if(dpd>60&&dpd<=90)pd6190=lcAmt; if(dpd>90)pd90p=lcAmt;
+    var pmap=all[cc];
+    if(!pmap[bp])pmap[bp]={bp:bp,bp_name:bpName,cc:cc,lc:lc,collector:collector,sold_to:soldTo,bill_to:billTo,bill_to_name:billToName,is_cdc:false,bill_to:billTo,bill_to_name:billToName,is_cdc:isCdc,
+      total_pd:0,pd_01_30:0,pd_31_60:0,pd_61_90:0,pd_90:0,
+      ehf_amt_now:0,ehf_amt_me:0,ehf_amt_qe:0,max_dpd:0,
+      term_risk:false,ehf_impact:false,ob_risk:false,
+      term_risk_docs:[],ehf_impact_docs:[],docs:[]};
+    var p=pmap[bp];
+    p.total_pd+=arPD;p.pd_01_30+=pd0130;p.pd_31_60+=pd3160;p.pd_61_90+=pd6190;p.pd_90+=pd90p;
+    p.ehf_amt_now+=ehfNow;p.ehf_amt_me+=ehfMe;p.ehf_amt_qe+=ehfQe;
+    p.max_dpd=Math.max(p.max_dpd,dpd);
+    if(!p.collector&&collector)p.collector=collector;
+    if(termRisk)p.term_risk=true;if(ehfImpact)p.ehf_impact=true;if(obRisk)p.ob_risk=true;if(isCdc)p.is_cdc=true;if(isCdc)p.is_cdc=true;
+    var eurAmt=sf(row[65]);
+    var odMe=netDueDt?Math.max(0,Math.round((new Date('2026-08-31')-netDueDt)/86400000)):0;
+    var odQe=netDueDt?Math.max(0,Math.round((new Date('2026-09-30')-netDueDt)/86400000)):0;
+    var doc={doc_num:docNum,posting_dt:postDt,net_due_dt:netDueDt,lc_amt:lcAmt,lc:lc,
+      dpd:Math.round(dpd),total_ar_pd:arPD,pd_01_30:pd0130,pd_31_60:pd3160,pd_61_90:pd6190,pd_90:pd90p,
+      ehf_due_dt:ehfDueDt,ehf_od_now:ehfOdNow,ehf_od_me:ehfOdMe,ehf_od_qe:ehfOdQe,
+      ehf_amt_now:ehfNow,ehf_amt_me:ehfMe,ehf_amt_qe:ehfQe,ehf_impact:ehfImpact,term_risk:termRisk,
+      eur_amt:Math.round(eurAmt*100)/100, od_me:odMe, od_qe:odQe,
+      bill_to:billTo, bill_to_name:billToName, is_cdc:isCdc};
+    if(arPD>0){
+      // Aggregate by doc_num
+      var existing=p.docs.find(function(x){return x.doc_num===docNum;});
+      if(existing){
+        existing.lc_amt+=lcAmt;existing.total_ar_pd+=arPD;
+        existing.eur_amt+=(eurAmt||0);existing.ehf_amt_me+=ehfMe;existing.ehf_amt_qe+=ehfQe;
+        existing.dpd=Math.max(existing.dpd,Math.round(dpd));
+        if(!existing.fc&&fc)existing.fc=fc;if(!existing.cpp&&cpp)existing.cpp=cpp;if(!existing.status&&(row[73]))existing.status=String(row[73]||'').trim().replace(/^'/,'');
+      } else { p.docs.push(doc); }
+    }
+    if(termRisk&&!p.term_risk_docs.find(function(x){return x.doc_num===docNum;}))p.term_risk_docs.push(doc);
+    if(ehfImpact&&!p.ehf_impact_docs.find(function(x){return x.doc_num===docNum;}))p.ehf_impact_docs.push(doc);
+  }
+  return all;
+}
+
+function dsBuildContacts(buf) {
+  var wb   = XLSX.read(buf, {type:'array', cellDates:false});
+  var ws   = wb.Sheets[wb.SheetNames[0]];
+  var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+  var ct   = {};
+  for (var i = 1; i < rows.length; i++) {
+    var row   = rows[i];
+    var bp    = String(row[0] || '').trim();
+    var fn    = String(row[6] || '').trim();
+    var ln    = String(row[7] || '').trim();
+    var email = String(row[18] || '').trim();
+    if (!bp || !email) continue;
+    if (!ct[bp]) ct[bp] = {emails:[], names:[]};
+    if (!ct[bp].emails.includes(email)) ct[bp].emails.push(email);
+    var name = (fn + ' ' + ln).trim();
+    if (name && !ct[bp].names.includes(name)) ct[bp].names.push(name);
+  }
+  try{localStorage.setItem('ar_contacts_from_upload','1');}catch(e){}
+  return ct;
+}
+
+// ── Card HTML builder (JS port of Python build_cards) ───────────────────────
+function faN(v) { v=parseFloat(v)||0; return v===0?'—':Math.round(v).toLocaleString(); }
+function fdN(v) {
+  if (!v) return '';
+  if (v instanceof Date) return v.toISOString().slice(0,10);
+  return String(v).slice(0,10);
+}
+function priorityBadge(d) {
+  if (d.max_dpd>365) return '<span class="badge b-crit">CRITICAL</span>';
+  if (d.max_dpd>90)  return '<span class="badge b-high">HIGH</span>';
+  if (d.max_dpd>30)  return '<span class="badge b-med">MEDIUM</span>';
+  return '<span class="badge b-low">WATCH</span>';
+}
+function cstepN(cs) {
+  var m={'1000':'Statement','1001':'Statement','1003':'1st Reminder','1010':'1st Reminder',
+    '1015':'1st Reminder','1016':'1st Reminder','2000':'2nd Reminder','2015':'2nd Reminder',
+    '2016':'2nd Reminder','3000':'Final Notice','4000':'Collections','4001':'Collections',
+    '4002':'Collections','4010':'Collections+','4016':'Collections+'};
+  return m[String(cs||'').trim()]||'';
+}
+
+function buildCardHTML(bp, d, cc_label, currency) {
+  var emails = (CONTACTS[bp]||CONTACTS[d.sold_to]||{emails:[]}).emails.slice(0,3);
+  var emailHTML = emails.length
+    ? emails.map(e=>'<a href="mailto:'+e+'">'+e+'</a>').join(', ')
+    : '<span class="no-contact">No contact</span>';
+  var collector = (d.collector||'').trim();
+  var colTag    = collector ? '<span class="collector-tag">'+collector+'</span>' : '';
+  var termTag   = d.term_risk  ? '<span class="risk-tag term-tag">⚠ Termination Risk</span>' : '';
+  var ehfTag    = d.ehf_impact ? '<span class="risk-tag ehf-tag">EHF Impact</span>' : '';
+  var obTag     = d.ob_risk    ? '<span class="risk-tag ob-tag">⛔ Order Block Risk</span>' : '';
+  var bt = Math.max(Math.abs(d.total_pd),1);
+  var b30=Math.max(0,d.pd_01_30)/bt*100, b60=Math.max(0,d.pd_31_60)/bt*100,
+        b90=Math.max(0,d.pd_61_90)/bt*100, b9p=Math.max(0,d.pd90)/bt*100;
+  var expandBtn = '<button class="expand-btn" onclick="toggleDetails(this,\''+bp+'\')">▸ Details</button>';
+  return '<div class="partner-card" data-cc="'+cc_label+'" data-collector="'+collector+'" data-bp="'+bp
+    +'" data-term="'+String(d.term_risk)+'" data-ehf="'+String(d.ehf_impact)+'" data-ob="'+String(d.ob_risk||false)+'">\n'
+    +'<div class="card-header"><div class="card-title">'+priorityBadge(d)+termTag+ehfTag+obTag
+    +'<span class="partner-name">'+d.name+'</span><span class="bp-id">BP# '+bp+'</span></div>'
+    +'<div class="card-meta"><span class="cc-tag">'+cc_label+'</span>'+colTag
+    +'<span class="max-dpd">Max DPD: <strong>'+Math.round(d.max_dpd||0)+'d</strong></span>'
+    +expandBtn
+    +'<button class="dun-btn" onclick="openDunning(this)">✉ Dunning</button>'
+    +'<button class="fdl-btn" onclick="openFDL(this)">⚑ FDL</button>'
+    +'<button class="unblock-btn" onclick="openUnblock(this)">🔓 Unblock</button>'
+    +'</div></div>\n'
+    +'<div class="card-body">'
+    +'<div class="amounts">'
+    +'<div class="amt-box"><div class="amt-label">Total Past Due</div><div class="amt-value">'+faN(d.total_pd)+' <small>'+currency+'</small></div></div>'
+    +'<div class="amt-box"><div class="amt-label">PD &gt;90d</div><div class="amt-value aged">'+faN(d.pd90)+' <small>'+currency+'</small></div></div>'
+    +'<div class="amt-box"><div class="amt-label">1–30d</div><div class="amt-value">'+faN(d.pd_01_30)+' <small>'+currency+'</small></div></div>'
+    +'<div class="amt-box"><div class="amt-label">31–60d</div><div class="amt-value">'+faN(d.pd_31_60)+' <small>'+currency+'</small></div></div>'
+    +'<div class="amt-box"><div class="amt-label">61–90d</div><div class="amt-value">'+faN(d.pd_61_90)+' <small>'+currency+'</small></div></div>'
+    +'<div class="amt-box ehf-box"><div class="amt-label">EHF Now</div><div class="amt-value ehf-col">'+faN(d.ehf_now)+' <small>'+currency+'</small></div></div>'
+    +'<div class="amt-box ehf-box"><div class="amt-label">EHF @ ME</div><div class="amt-value ehf-col">'+faN(d.ehf_me)+' <small>'+currency+'</small></div></div>'
+    +'<div class="amt-box ehf-box"><div class="amt-label">EHF @ QE</div><div class="amt-value ehf-col accent">'+faN(d.ehf_qe)+' <small>'+currency+'</small></div></div>'
+    +'</div>'
+    +'<div class="aging-bar">'
+    +'<div class="bar-seg seg30" style="width:'+b30.toFixed(1)+'%"></div>'
+    +'<div class="bar-seg seg60" style="width:'+b60.toFixed(1)+'%"></div>'
+    +'<div class="bar-seg seg90" style="width:'+b90.toFixed(1)+'%"></div>'
+    +'<div class="bar-seg seg90p" style="width:'+b9p.toFixed(1)+'%"></div></div>'
+    +'<div class="info-row"><div class="info-item" id="info-contact-'+bp+'"><span class="info-label">Contact:</span>'+emailHTML+'</div></div>'
+    +'<div class="card-details hidden" id="det-'+bp+'"></div>'
+    +'</div></div>\n';
+}
+
+// ── rebuildCards — replaces globals and re-renders everything ────────────────
+function rebuildCards(p38new, p73new, p74new, contactsNew) {
+  // Update globals
+  if (contactsNew) Object.assign(CONTACTS, contactsNew);
+
+  // Rebuild PARTNERS summary
+  PARTNERS.length = 0;
+  var CCL = {'0038':'CC0038','0073':'CC0073','0074':'CC0074'};
+  var CUR = {'0038':'CNY','0073':'TWD','0074':'HKD'};
+
+  function addToPartners(pMap) {
+    Object.entries(pMap).forEach(function(entry) {
+      var bp=entry[0], d=entry[1];
+      if (d.total_pd <= 0) return;
+      PARTNERS.push({
+        cc: d.cc, bp, name: d.bp_name,
+        collector: (d.collector||'').trim(),
+        currency: CUR[d.cc]||'',
+        total_pd: d.total_pd, pd90: d.pd_90,
+        pd_01_30: d.pd_01_30, pd_31_60: d.pd_31_60, pd_61_90: d.pd_61_90,
+        term_risk: d.term_risk, ehf_impact: d.ehf_impact,
+        ob_risk: d.ob_risk||false,
+        max_dpd: d.max_dpd||0,
+        is_cdc: d.is_cdc||false,
+        bill_to_name: d.bill_to_name||'',
+        ehf_now: d.ehf_amt_now, ehf_me: d.ehf_amt_me, ehf_qe: d.ehf_amt_qe
+      });
+    });
+  }
+  addToPartners(p38new); addToPartners(p73new); addToPartners(p74new);
+
+  // Rebuild DUN_DOCS
+  Object.keys(DUN_DOCS).forEach(k => delete DUN_DOCS[k]);
+  function addToDunDocs(pMap) {
+    Object.entries(pMap).forEach(function(entry) {
+      var bp=entry[0], d=entry[1];
+      var rawDocs = d.docs.filter(x=>x.total_ar_pd>0);
+      // Aggregate by doc_num: sum amounts, keep max dpd, first due date
+      var byDoc = {};
+      rawDocs.forEach(x => {
+        var key = x.doc_num;
+        if (!byDoc[key]) {
+          byDoc[key] = {doc_num:key, net_due_dt:x.net_due_dt, dpd:x.dpd,
+            lc_amt:0, lc:x.lc, total_ar_pd:0,
+            eur_amt:0, od_me:x.od_me||0, od_qe:x.od_qe||0,
+            ehf_amt_me:0, ehf_amt_qe:0,
+            fc:x.fc||'', cpp:x.cpp||'', status:x.status||'',
+            bill_to:x.bill_to||'', bill_to_name:x.bill_to_name||'', is_cdc:x.is_cdc||false};
+        }
+        byDoc[key].lc_amt       += x.lc_amt||0;
+        byDoc[key].total_ar_pd  += x.total_ar_pd||0;
+        byDoc[key].eur_amt      += x.eur_amt||0;
+        byDoc[key].ehf_amt_me   += x.ehf_amt_me||0;
+        byDoc[key].ehf_amt_qe   += x.ehf_amt_qe||0;
+        byDoc[key].dpd           = Math.max(byDoc[key].dpd, x.dpd||0);
+        if (!byDoc[key].fc && x.fc) byDoc[key].fc = x.fc;
+        if (!byDoc[key].cpp && x.cpp) byDoc[key].cpp = x.cpp;
+        if (!byDoc[key].status && x.status) byDoc[key].status = x.status;
+      });
+      var agg = Object.values(byDoc).filter(x=>x.total_ar_pd>0)
+        .sort((a,b)=>b.total_ar_pd-a.total_ar_pd).slice(0,15);
+      if (agg.length) DUN_DOCS[bp] = agg.map(x=>({
+        doc: x.doc_num, due: fdN(x.net_due_dt), dpd: Math.round(x.dpd),
+        amt: Math.round(x.lc_amt*100)/100,
+        pd_amt: Math.round(x.total_ar_pd*100)/100, ccy: x.lc,
+        eur_amt: Math.round(x.eur_amt*100)/100,
+        od_me: x.od_me, od_qe: x.od_qe,
+        ehf_me: Math.round(x.ehf_amt_me*100)/100,
+        ehf_qe: Math.round(x.ehf_amt_qe*100)/100,
+        fc: x.fc, cpp: x.cpp, status: x.status,
+        bill_to: x.bill_to, bill_to_name: x.bill_to_name, is_cdc: x.is_cdc
+      }));
+    });
+  }
+  addToDunDocs(p38new); addToDunDocs(p73new); addToDunDocs(p74new);
+
+  // Rebuild cards HTML
+  function topN(pMap, n) {
+    return Object.entries(pMap).filter(function(e){return e[1].total_pd>0;})
+      .sort((a,b)=>b[1].total_pd-a[1].total_pd).slice(0,n);
+  }
+  function renderSection(entries, ccLabel, currency) {
+    return entries.map(function(entry) {
+      var bp=entry[0], d=entry[1];
+      var norm = {
+        cc: d.cc, bp: bp,
+        name: d.bp_name || d.name || bp,
+        collector: (d.collector||'').trim(),
+        currency: currency,
+        total_pd: d.total_pd, pd90: d.pd_90||d.pd90||0,
+        pd_01_30: d.pd_01_30||0, pd_31_60: d.pd_31_60||0, pd_61_90: d.pd_61_90||0,
+        term_risk: d.term_risk, ehf_impact: d.ehf_impact,
+        ob_risk: d.ob_risk||d.max_dpd>60||false,
+        max_dpd: d.max_dpd||0,
+        is_cdc: d.is_cdc||false,
+        ehf_now: d.ehf_amt_now||d.ehf_now||0,
+        ehf_me:  d.ehf_amt_me ||d.ehf_me ||0,
+        ehf_qe:  d.ehf_amt_qe ||d.ehf_qe ||0
+      };
+      return buildCardHTML(bp, norm, ccLabel, currency);
+    }).join('');
+  }
+
+  var cnt38 = Object.values(p38new).filter(function(d){return d.total_pd>0;}).length;
+  var cnt73 = Object.values(p73new).filter(function(d){return d.total_pd>0;}).length;
+  var cnt74 = Object.values(p74new).filter(function(d){return d.total_pd>0;}).length;
+
+  document.getElementById('cards38').innerHTML = renderSection(topN(p38new,999), 'CC0038', 'CNY');
+  document.getElementById('cards73').innerHTML = renderSection(topN(p73new,999), 'CC0073', 'TWD');
+  document.getElementById('cards74').innerHTML = renderSection(topN(p74new,999), 'CC0074', 'HKD');
+  document.getElementById('cnt38').textContent = cnt38 + ' past-due accounts';
+  document.getElementById('cnt73').textContent = cnt73 + ' past-due accounts';
+  document.getElementById('cnt74').textContent = cnt74 + ' past-due accounts';
+
+  // Re-init border classes
+  document.querySelectorAll('.partner-card').forEach(card => {
+    card.classList.toggle('has-term', card.dataset.term === 'true');
+    card.classList.toggle('has-ehf',  card.dataset.ehf  === 'true');
+  });
+
+  // Rebuild collector select options
+  var collectors = [...new Set(
+    Object.values({...p38new,...p73new,...p74new})
+      .map(d=>(d.collector||'').trim()).filter(Boolean)
+  )].sort();
+  var sel = document.getElementById('collectorSelect');
+  sel.innerHTML = '<option value="">All Collectors</option>'
+    + collectors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
+  sel.classList.remove('filtered');
+
+  // Rebuild customer select
+  var custNames = [...new Set(PARTNERS.map(p=>p.name).filter(Boolean))].sort();
+  var custSel = document.getElementById('customerSelect');
+  custSel.innerHTML = '<option value="">All Customers</option>'
+    + custNames.map(n=>'<option value="'+n+'">'+n+'</option>').join('');
+  custSel.classList.remove('filtered');
+
+  // Reset filter state and re-render
+  S.section='all'; S.priority=null; S.term=false; S.ehf=false; S.collector=''; S.customer=''; S.search='';
+  refreshDropdowns();
+  document.querySelectorAll('[data-group="section"]').forEach(b=>b.classList.remove('active'));
+  var allBtn = document.querySelector('[data-group="section"]');
+  if (allBtn) allBtn.classList.add('active');
+  document.getElementById('btnTerm').classList.remove('term-active');
+  document.getElementById('btnEhf').classList.remove('ehf-active');
+  document.querySelector('.search-box').value='';
+
+  applyFilters();
+  saveDataToStorage();
+}
+
+// ── Main recalc entry point ──────────────────────────────────────────────────
+
+function loadXLSX(cb){if(typeof XLSX!=="undefined"){cb();return;}alert("SheetJS not loaded. Make sure xlsx.mini.min.js is in the same folder.");}
+
+async function dsRecalc() {
+  loadXLSX(async function() { await _dsRecalcInner(); });
+}
+async function _dsRecalcInner() {
+  var btn  = document.getElementById('ds-refresh-btn');
+  var step = document.getElementById('ds-progress');
+  var bar  = document.getElementById('ds-bar');
+  var barW = document.getElementById('ds-bar-wrap');
+  var pct  = document.getElementById('ds-pct');
+  var stat = document.getElementById('ds-proc-status');
+  var yield_ = function(ms){ms=ms||0;return new Promise(function(r){setTimeout(r,ms);});};
+
+  btn.disabled = true;
+  step.style.display = 'inline'; barW.style.display = 'block';
+  stat.textContent = ''; stat.style.color = '#6A6D70';
+
+  var setProgress = async function(msg, percent) {
+    step.textContent = '⏳ ' + msg;
+    if(bar) { bar.style.width = percent + '%'; }
+    if(pct) { pct.textContent = percent + '%'; }
+    await yield_(15);
+  };
+
+  try {
+    var p38new={}, p73new={}, p74new={};
+
+    if(DS['master']) {
+      await setProgress('Parsing Master Report — reading rows…', 10);
+      var all;
+      try { all = await dsBuildFromMasterSheet(DS['master'], setProgress); }
+      catch(parseErr) {
+        var stat2=document.getElementById('ds-proc-status');
+        if(stat2){stat2.textContent='Parse error: '+(parseErr.message||parseErr);stat2.style.color='#BB0000';}
+        throw parseErr;
+      }
+      // Show debug counts
+      var cnt38=Object.keys(all['0038']||{}).length, cnt73=Object.keys(all['0073']||{}).length, cnt74=Object.keys(all['0074']||{}).length;
+      await setProgress('Parsed: CC0038='+cnt38+' CC0073='+cnt73+' CC0074='+cnt74, 35);
+      p38new = all['0038']||{}; p73new = all['0073']||{}; p74new = all['0074']||{};
+      await setProgress('Parsing Master Report — all CCs done', 50);
+    } else {
+      if(DS['0038']) { await setProgress('Parsing CC0038 (China)…', 15); p38new = dsBuildFromSheet(DS['0038'],'0038'); }
+      if(DS['0073']) { await setProgress('Parsing CC0073 (Taiwan)…', 35); p73new = dsBuildFromSheet(DS['0073'],'0073'); }
+      if(DS['0074']) { await setProgress('Parsing CC0074 (HK)…', 50); p74new = dsBuildFromSheet(DS['0074'],'0074'); }
+    }
+
+    if(DS['dun']) {
+      await setProgress('Parsing dunning contacts…', 60);
+    }
+    var ctNew = DS['dun'] ? dsBuildContacts(DS['dun']) : null;
+
+    await setProgress('Calculating EHF & risk flags…', 70);
+    await yield_(10);
+
+    await setProgress('Building account cards…', 80);
+    await yield_(10);
+
+    rebuildCards(p38new, p73new, p74new, ctNew);
+
+    await setProgress('Updating summary & filters…', 95);
+    updateIncomeBar();
+    await yield_(10);
+
+    // Done
+    step.style.display = 'none'; barW.style.display = 'none'; pct.textContent = '';
+    var total = Object.values(Object.assign({},p38new,p73new,p74new)).filter(function(d){return d.total_pd>0;}).length;
+    stat.textContent = '✓ Loaded ' + total + ' accounts successfully';
+    stat.style.color = '#188918';
+
+  } catch(err) {
+    step.style.display = 'none'; barW.style.display = 'none'; pct.textContent = '';
+    stat.textContent = '✗ Error: ' + err.message;
+    stat.style.color = '#BB0000';
+    console.error(err);
+  }
+  btn.disabled = false;
+}
+
+function dsSetStatus(msg, isErr) {
+  var el = document.getElementById('ds-proc-status');
+  el.textContent = msg;
+  el.style.color = isErr ? '#BB0000' : '#6A6D70';
+}
+
+
+function openActivityDashboard() {
+  renderActivityTiles(); renderActivityChart(); renderActivityLog(); populateDateFilter();
+  document.getElementById('activityOverlay').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function closeActivityDashboard() {
+  document.getElementById('activityOverlay').classList.add('hidden');
+  document.body.style.overflow='';
+}
+(function(){var el=document.getElementById('activityOverlay');if(el)el.addEventListener('click',function(e){if(e.target===this)closeActivityDashboard();});})();
+function fieldLabel(f){return f==='fc'?'FC Month':f==='cpp'?'Customer Payment Process':f==='status'?'Current Status':f;}
+function renderActivityTiles(){
+  var log=activityLog,total=log.length,today=new Date().toISOString().slice(0,10);
+  var todayN=log.filter(function(e){return e.date===today;}).length;
+  var uDocs=new Set(log.map(function(e){return e.key;})).size;
+  var uDays=new Set(log.map(function(e){return e.date;})).size;
+  var byF={fc:0,cpp:0,status:0};log.forEach(function(e){if(byF[e.field]!==undefined)byF[e.field]++;});
+  var tiles=[
+    {l:'Total Updates',v:total,c:'#5C3D8F'},{l:'Today',v:todayN,c:'#0070F2'},
+    {l:'Unique Docs',v:uDocs,c:'#188918'},{l:'Days Active',v:uDays,c:'#E9730C'},
+    {l:'FC Month',v:byF.fc,c:'#007373'},{l:'Payment Process',v:byF.cpp,c:'#007373'},{l:'Status',v:byF.status,c:'#007373'}
+  ];
+  document.getElementById('act-tiles').innerHTML=tiles.map(function(t){
+    return '<div style="flex:1;min-width:90px;padding:12px 14px;border-right:1px solid var(--bdr);text-align:center">'
+      +'<div style="font-size:10px;color:#6A6D70;text-transform:uppercase;letter-spacing:.4px">'+t.l+'</div>'
+      +'<div style="font-size:22px;font-weight:700;color:'+t.c+';margin:2px 0">'+t.v+'</div></div>';
+  }).join('');
+}
+function renderActivityChart(){
+  var log=activityLog;
+  var chartEl=document.getElementById('act-chart');
+  var labelEl=document.getElementById('act-chart-labels');
+  if(!log.length){chartEl.innerHTML='<div style="color:#9DA0A4;font-size:12px;padding:20px">No activity yet — edit cells to start tracking.</div>';labelEl.innerHTML='';return;}
+  var byDate={};log.forEach(function(e){byDate[e.date]=(byDate[e.date]||0)+1;});
+  var dates=Object.keys(byDate).sort().slice(-30);
+  var maxV=Math.max.apply(null,dates.map(function(d){return byDate[d];}));
+  var today=new Date().toISOString().slice(0,10);
+  chartEl.innerHTML=dates.map(function(d){
+    var h=maxV>0?Math.max(4,Math.round((byDate[d]/maxV)*110)):4;
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:18px">'
+      +'<div style="font-size:9px;color:#6A6D70">'+byDate[d]+'</div>'
+      +'<div style="width:100%;height:'+h+'px;background:'+(d===today?'#0070F2':'#9BBFEA')+';border-radius:3px 3px 0 0" title="'+d+': '+byDate[d]+' edits"></div>'
+      +'</div>';
+  }).join('');
+  labelEl.innerHTML=dates.map(function(d){
+    return '<div style="flex:1;min-width:18px;text-align:center;font-size:9px;overflow:hidden">'+d.slice(5)+'</div>';
+  }).join('');
+}
+function populateDateFilter(){
+  var dates=[...new Set(activityLog.map(function(e){return e.date;}))].sort().reverse();
+  var sel=document.getElementById('act-filter-date');
+  if(!sel) return;
+  sel.innerHTML='<option value="">All Dates</option>'+dates.map(function(d){return '<option value="'+d+'">'+d+'</option>';}).join('');
+}
+function renderActivityLog(){
+  var fd=document.getElementById('act-filter-date').value;
+  var ff=document.getElementById('act-filter-field').value;
+  var fc=document.getElementById('act-filter-cc').value;
+  var filtered=activityLog.filter(function(e){
+    if(fd&&e.date!==fd)return false;
+    if(ff&&e.field!==ff)return false;
+    if(fc&&e.cc!==fc)return false;
+    return true;
+  }).slice().reverse();
+  var tbody=document.getElementById('act-log-body');
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#9DA0A4;padding:16px">No activity yet.</td></tr>';return;}
+  tbody.innerHTML=filtered.slice(0,200).map(function(e,i){
+    var bg=i%2===0?'#fff':'#FAFAFA';
+    return '<tr style="background:'+bg+'">'
+      +'<td style="padding:4px 8px;color:#9DA0A4">'+(filtered.length-i)+'</td>'
+      +'<td style="padding:4px 8px">'+e.date+'</td>'
+      +'<td style="padding:4px 8px;color:#6A6D70">'+(e.ts?e.ts.slice(11,19):'')+'</td>'
+      +'<td style="padding:4px 8px"><span style="background:#E8F3FF;color:#0064D9;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600">'+e.cc+'</span></td>'
+      +'<td style="padding:4px 8px">'+e.bp+'</td>'
+      +'<td style="padding:4px 8px;font-family:monospace;font-size:10px">'+e.doc+'</td>'
+      +'<td style="padding:4px 8px"><span style="background:#F0E8FF;color:#5C3D8F;padding:1px 6px;border-radius:4px;font-size:10px">'+fieldLabel(e.field)+'</span></td>'
+      +'<td style="padding:4px 8px;color:#6A6D70;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+e.oldVal+'">'+e.oldVal+'</td>'
+      +'<td style="padding:4px 8px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+e.newVal+'">'+e.newVal+'</td>'
+      +'</tr>';
+  }).join('');
+  var meta=document.getElementById('act-meta');
+  if(meta) meta.textContent=filtered.length+' edit'+(filtered.length!==1?'s':'')+' (showing up to 200)';
+}
+function clearActivityLog(){
+  if(!confirm('Clear all activity history?')) return;
+  activityLog=[];saveEdits();
+  renderActivityTiles();renderActivityChart();renderActivityLog();
+}
+function exportActivityCSV(){
+  var rows=['Timestamp,Date,Time,Entity,BP#,Doc#,Field,Old Value,New Value'];
+  activityLog.forEach(function(e){
+    rows.push([e.ts,e.date,(e.ts?e.ts.slice(11,19):''),e.cc,e.bp,e.doc,fieldLabel(e.field),
+      '"'+(e.oldVal||'').replace(/"/g,'""')+'"',
+      '"'+(e.newVal||'').replace(/"/g,'""')+'"'].join(','));
+  });
+  var blob=new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ar_activity_2026-08-03.csv';a.click();URL.revokeObjectURL(a.href);
+}
+
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'summary' || tab === 'activity') renderDashboard();
+}
+
+function renderDashboard() {
+  if(document.getElementById('dash-risk-grid')) renderDashRisk();
+  if(document.getElementById('dash-act-tiles')) renderDashActivityTiles();
+  if(document.getElementById('dash-chart')) renderDashChart();
+  if(document.getElementById('dash-log-body')){renderDashLog();populateDashDateFilter();}
+}
+
+function renderDashRisk() {
+  var ccList = [
+    {cc:'0038',label:'CC0038',cur:'CNY',color:'#BB0000'},
+    {cc:'0073',label:'CC0073',cur:'TWD',color:'#C14700'},
+    {cc:'0074',label:'CC0074',cur:'HKD',color:'#C14700'},
+  ];
+  var cells = ccList.map(function(c) {
+    var ps = PARTNERS.filter(function(p){return p.cc===c.cc;});
+    var pd = ps.reduce(function(s,p){return s+p.total_pd;},0);
+    var tr = ps.filter(function(p){return p.term_risk;}).length;
+    var ei = ps.filter(function(p){return p.ehf_impact;}).length;
+    var ob = ps.filter(function(p){return p.ob_risk;}).length;
+    return '<div class="dash-risk-cell" style="border-color:'+c.color+';background:'+c.color+'10">'
+      +'<div style="font-size:11px;font-weight:700;color:'+c.color+'">'+c.label+'</div>'
+      +'<div style="font-size:18px;font-weight:700;color:'+c.color+';margin:4px 0">'+Math.round(pd).toLocaleString()+' <small style="font-size:10px">'+c.cur+'</small></div>'
+      +'<div style="font-size:10px;color:#6A6D70">'+ps.length+' accounts</div>'
+      +'<div style="margin-top:6px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap">'
+      +'<span style="background:#F0E0FF;color:#6600CC;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700">⚠ '+tr+' Term</span>'
+      +'<span style="background:#E0F5F5;color:#007373;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700">EHF '+ei+'</span>'
+      +'<span style="background:#FFF0E5;color:#8B3A00;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700">OB '+ob+'</span>'
+      +'</div></div>';
+  });
+  document.getElementById('dash-risk-grid').innerHTML = cells.join('');
+}
+
+function renderDashActivityTiles() {
+  var log = activityLog, today = new Date().toISOString().slice(0,10);
+  var tiles = [
+    {l:'Total Edits', v:log.length, c:'#5C3D8F'},
+    {l:'Today',       v:log.filter(function(e){return e.date===today;}).length, c:'#0070F2'},
+    {l:'Docs Touched',v:new Set(log.map(function(e){return e.key;})).size, c:'#188918'},
+    {l:'Days Active', v:new Set(log.map(function(e){return e.date;})).size, c:'#E9730C'},
+  ];
+  document.getElementById('dash-act-tiles').innerHTML = tiles.map(function(t){
+    return '<div style="text-align:center;min-width:80px">'
+      +'<div style="font-size:10px;color:#6A6D70;text-transform:uppercase">'+t.l+'</div>'
+      +'<div style="font-size:20px;font-weight:700;color:'+t.c+'">'+t.v+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function renderDashChart() {
+  var log = activityLog;
+  var chartEl = document.getElementById('dash-chart');
+  var labelEl = document.getElementById('dash-chart-labels');
+  if (!log.length) {
+    chartEl.innerHTML = '<div class="dash-empty">No edits recorded yet. Edit cells in the Worklist to start tracking.</div>';
+    labelEl.innerHTML = ''; return;
+  }
+  var byDate = {};
+  log.forEach(function(e){byDate[e.date]=(byDate[e.date]||0)+1;});
+  var dates = Object.keys(byDate).sort().slice(-30);
+  var maxV = Math.max.apply(null, dates.map(function(d){return byDate[d];}));
+  var today = new Date().toISOString().slice(0,10);
+  chartEl.innerHTML = dates.map(function(d){
+    var h = maxV>0 ? Math.max(4,Math.round((byDate[d]/maxV)*80)) : 4;
+    var isT = d===today;
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex:1;min-width:14px">'
+      +'<div style="font-size:8px;color:#6A6D70">'+byDate[d]+'</div>'
+      +'<div style="width:100%;height:'+h+'px;background:'+(isT?'#0070F2':'#9BBFEA')+';border-radius:2px 2px 0 0" title="'+d+': '+byDate[d]+'"></div>'
+      +'</div>';
+  }).join('');
+  labelEl.innerHTML = dates.map(function(d){
+    return '<div style="flex:1;min-width:14px;text-align:center;overflow:hidden;font-size:8px">'+d.slice(5)+'</div>';
+  }).join('');
+}
+
+function populateDashDateFilter() {
+  var dates=[...new Set(activityLog.map(function(e){return e.date;}))].sort().reverse();
+  var sel=document.getElementById('dash-filter-date');
+  if(!sel) return;
+  sel.innerHTML='<option value="">All Dates</option>'+dates.map(function(d){return '<option value="'+d+'">'+d+'</option>';}).join('');
+}
+
+function renderDashLog() {
+  var fd = document.getElementById('dash-filter-date').value;
+  var ff = document.getElementById('dash-filter-field').value;
+  var fc = document.getElementById('dash-filter-cc').value;
+  var filtered = activityLog.filter(function(e){
+    if(fd&&e.date!==fd) return false;
+    if(ff&&e.field!==ff) return false;
+    if(fc&&e.cc!==fc)   return false;
+    return true;
+  }).slice().reverse();
+  var tbody = document.getElementById('dash-log-body');
+  if (!filtered.length) {
+    tbody.innerHTML='<tr><td colspan="9" class="dash-empty">No edits yet — go to the Worklist tab and click ▸ Details to edit cells.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.slice(0,200).map(function(e,i){
+    var bg = i%2===0?'#fff':'#FAFAFA';
+    return '<tr style="background:'+bg+'">'
+      +'<td>'+(filtered.length-i)+'</td>'
+      +'<td>'+e.date+'</td>'
+      +'<td style="color:#6A6D70">'+(e.ts?e.ts.slice(11,19):'')+'</td>'
+      +'<td><span style="background:#E8F3FF;color:#0064D9;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600">'+e.cc+'</span></td>'
+      +'<td>'+e.bp+'</td>'
+      +'<td style="font-family:monospace;font-size:10px">'+e.doc+'</td>'
+      +'<td><span style="background:#F0E8FF;color:#5C3D8F;padding:1px 6px;border-radius:4px;font-size:10px">'+fieldLabel(e.field)+'</span></td>'
+      +'<td style="color:#6A6D70;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+e.oldVal+'">'+e.oldVal+'</td>'
+      +'<td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+e.newVal+'">'+e.newVal+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+
+// ── Unblock Request ───────────────────────────────────────────────────────────
+var _ubType = 'standard';
+
+function openUnblock(btn) {
+  var card = btn.closest('.partner-card');
+  var bp   = card.dataset.bp;
+  var name = card.querySelector('.partner-name').textContent.trim();
+  var cc   = card.dataset.cc;
+  var coll = card.dataset.collector || '';
+
+  document.getElementById('ub-title').textContent = 'Unblock Request — ' + name;
+  document.getElementById('ub-meta').textContent  = cc + '  ·  BP# ' + bp;
+  document.getElementById('ub-customer').value    = name;
+  document.getElementById('ub-erp').value         = bp;
+  document.getElementById('ub-collector').value   = coll;
+  document.getElementById('ub-entity').value      = cc;
+  document.getElementById('ub-opp-id').value      = '';
+  document.getElementById('ub-deal-type').value   = '';
+  document.getElementById('ub-contract-val').value= '';
+  document.getElementById('ub-contract-term').value='';
+  document.getElementById('ub-close-date').value  = '';
+  document.getElementById('ub-pay-broken').value  = 'No';
+  document.getElementById('ub-pay-broken-detail').value='';
+  document.getElementById('ub-pay-plan').value    = 'No';
+  document.getElementById('ub-pay-plan-detail').value='';
+  document.getElementById('ub-justification').value='';
+  document.getElementById('ub-status').textContent='';
+
+  // Pre-fill EHF impact from partner data
+  var partner = PARTNERS.find(function(p){return p.bp===bp;});
+  if (partner) {
+    document.getElementById('ub-ehf-impact').value =
+      partner.ehf_now > 0
+        ? partner.currency + ' ' + Math.round(partner.ehf_now).toLocaleString() + ' (EHF Now)'
+        : partner.ehf_me > 0
+          ? partner.currency + ' ' + Math.round(partner.ehf_me).toLocaleString() + ' (EHF @ ME)'
+          : 'N/A';
+  }
+
+  // Pre-fill AR table from DUN_DOCS + EHF_DETAILS
+  var docs = (DUN_DOCS[bp] || []).filter(function(d){return d.pd_amt > 0;}).slice(0, 15);
+  var ccy  = docs.length ? docs[0].ccy : '';
+  var ehfDet = (EHF_DETAILS && EHF_DETAILS[bp]) ? EHF_DETAILS[bp] : null;
+  // Build doc->ehf lookup from EHF_DETAILS
+  var ehfDocMap = {};
+  if (ehfDet && ehfDet.ehf_docs) {
+    ehfDet.ehf_docs.forEach(function(e){ ehfDocMap[e.doc] = e; });
+  }
+  var tbody = document.getElementById('ub-ar-body');
+  if (docs.length) {
+    var totLocal=0, totEUR=0, totEhfMe=0, totEhfQe=0, totEhfMeEur=0, totEhfQeEur=0;
+    var fmt = function(v){ return v ? v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : ''; };
+    var fmtI = function(v){ return v ? Math.round(v).toLocaleString() : '-'; };
+    var rows = docs.map(function(d) {
+      totLocal += d.pd_amt;
+      var ed = ehfDocMap[d.doc] || {};
+      var odMe  = d.od_me  !== undefined ? d.od_me  : (ed.od_me  !== undefined ? ed.od_me  : (d.dpd||0));
+      var odQe  = d.od_qe  !== undefined ? d.od_qe  : (ed.od_qe  !== undefined ? ed.od_qe  : '');
+      var ehfMe = d.ehf_me !== undefined ? d.ehf_me : (ed.ehf_me !== undefined ? ed.ehf_me : 0);
+      var ehfQe = d.ehf_qe !== undefined ? d.ehf_qe : (ed.ehf_qe !== undefined ? ed.ehf_qe : 0);
+      var eurAmt = d.eur_amt !== undefined ? d.eur_amt : 0;
+      var fxRatio = (d.amt && eurAmt) ? eurAmt / d.amt : 0;
+      var ehfMeEur = ehfMe>0 && fxRatio>0 ? Math.round(ehfMe*fxRatio*100)/100 : 0;
+      var ehfQeEur = ehfQe>0 && fxRatio>0 ? Math.round(ehfQe*fxRatio*100)/100 : 0;
+      totEhfMe += ehfMe; totEhfQe += ehfQe; totEUR += eurAmt;
+      totEhfMeEur += ehfMeEur; totEhfQeEur += ehfQeEur;
+      // Get fc/status from DUN_DOCS fields for text column
+      var text = d.fc ? d.fc + (d.status ? ' | ' + d.status.slice(0,30) : '') : (d.status ? d.status.slice(0,40) : '');
+      return '<tr>'
+        +'<td><input value="" placeholder="MA/CL/CS" style="width:60px"></td>'
+        +'<td><input value="'+d.doc+'" style="font-family:monospace;font-size:10px;width:120px" readonly></td>'
+        +'<td><input value="'+text.replace(/"/g,'&quot;')+'" style="min-width:160px" placeholder="Contract/description"></td>'
+        +'<td class="num"><input value="'+fmt(d.pd_amt)+'" data-raw="'+d.pd_amt+'" style="text-align:right;width:110px"> '+ccy+'</td>'
+        +'<td class="num"><input value="'+(eurAmt>0?fmt(eurAmt):'')+'" placeholder="0.00" style="text-align:right;width:90px"> EUR</td>'
+        +'<td class="num" style="color:'+(odMe>90?'#BB0000':odMe>60?'#E76500':'inherit')+'"><input value="'+odMe+'" style="text-align:right;width:55px"></td>'
+        +'<td class="num" style="color:'+(odQe>90?'#BB0000':odQe>60?'#E76500':'inherit')+'"><input value="'+odQe+'" style="text-align:right;width:55px"></td>'
+        +'<td class="num" style="color:'+(ehfMe>0?'#007373':'#9DA0A4')+'"><input value="'+(ehfMe>0?fmtI(ehfMe):'-')+'" style="text-align:right;width:90px"></td>'
+        +'<td class="num" style="color:'+(ehfQe>0?'#007373':'#9DA0A4')+'"><input value="'+(ehfQe>0?fmtI(ehfQe):'-')+'" style="text-align:right;width:90px"></td>'
+        +'<td><input value="" placeholder="Date or No" style="width:80px"></td>'
+        +'</tr>';
+    });
+    // Totals row
+    rows.push('<tr style="background:#F0F4F8;font-weight:700">'
+      +'<td colspan="3" style="padding:5px 8px"><strong>Total</strong></td>'
+      +'<td class="num" style="padding:5px 8px">'+totLocal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' '+ccy+'</td>'
+      +'<td class="num" style="padding:5px 8px;color:#0064D9;font-weight:700">'+fmt(totEUR)+' EUR</td>'
+      +'<td colspan="2"></td>'
+      +'<td class="num" style="padding:5px 8px;color:#007373">'+(totEhfMe>0?Math.round(totEhfMe).toLocaleString()+(totEhfMeEur>0?' ('+Math.round(totEhfMeEur).toLocaleString()+' EUR)':''):'0.00')+'</td>'
+      +'<td class="num" style="padding:5px 8px;color:#007373">'+(totEhfQe>0?Math.round(totEhfQe).toLocaleString()+(totEhfQeEur>0?' ('+Math.round(totEhfQeEur).toLocaleString()+' EUR)':''):'0.00')+'</td>'
+      +'<td></td>'
+      +'</tr>');
+    tbody.innerHTML = rows.join('');
+
+    // Auto-calculate EUR totals on local change (using fx rate input if added)
+    tbody.querySelectorAll('input[data-raw]').forEach(function(inp){
+      inp.addEventListener('change', ubRecalcTotals);
+    });
+  } else {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#9DA0A4;padding:12px">No overdue documents found</td></tr>';
+  }
+
+  _ubType = 'standard';
+  ubSelectType('standard');
+
+  document.getElementById('unblockOverlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeUnblock() {
+  document.getElementById('unblockOverlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+(function(){var el=document.getElementById('unblockOverlay');if(el)el.addEventListener('click',function(e){if(e.target===this)closeUnblock();});})();
+
+function ubSelectType(type) {
+  _ubType = type;
+  document.getElementById('ub-type-standard').classList.toggle('selected', type==='standard');
+  document.getElementById('ub-type-ehf').classList.toggle('selected', type==='ehf');
+
+  var badge = function(label, color) {
+    return '<span class="ub-approver-badge" style="background:'+color+'20;color:'+color+';border:1px solid '+color+'">'+label+'</span>';
+  };
+
+  var approvers, note;
+  // Determine from Open AR in EUR — placeholder logic, user will fill EUR
+  // Default: show both thresholds
+  if (type === 'standard') {
+    approvers = badge('CC RD','#0070F2') + badge('CC RD + RCFO (if ≥1m EUR)','#BB0000');
+    note = 'Standard unblock requires payment plan from customer in writing. Plans >14 days must be approved.';
+  } else {
+    approvers = badge('CC RD','#0070F2') + badge('CC RD + RCFO (if ≥150k EUR)','#BB0000');
+    note = 'EHF concession cases must be tracked in the GC Unblock Request Tracking file.';
+  }
+  document.getElementById('ub-approver-badges').innerHTML = approvers;
+  document.getElementById('ub-approver-note').textContent = note;
+}
+
+function ubRecalcTotals() {
+  // Recalculate EUR total row when local amounts change
+  var tbody = document.getElementById('ub-ar-body');
+  if (!tbody) return;
+  // Just visual feedback — user fills EUR manually
+}
+
+function ubBuildEmailText() {
+  var typeName = _ubType === 'ehf' ? 'Unblock with EHF Concession' : 'Standard Unblock (with Payment Plan)';
+  var customer = document.getElementById('ub-customer').value;
+  var erp      = document.getElementById('ub-erp').value;
+  var acctType = document.getElementById('ub-acct-type').value;
+  var collector= document.getElementById('ub-collector').value;
+  var entity   = document.getElementById('ub-entity').value;
+  var oppId    = document.getElementById('ub-opp-id').value || '[Opportunity ID]';
+  var dealType = document.getElementById('ub-deal-type').value || '[Deal Type]';
+  var contractVal  = document.getElementById('ub-contract-val').value || '[Contract Value]';
+  var contractTerm = document.getElementById('ub-contract-term').value || '[Contract Term]';
+  var closeDate    = document.getElementById('ub-close-date').value || '[Planned Close Date]';
+  var payBroken    = document.getElementById('ub-pay-broken').value;
+  var payBrokenDet = document.getElementById('ub-pay-broken-detail').value || 'N/A';
+  var payPlan      = document.getElementById('ub-pay-plan').value;
+  var payPlanDet   = document.getElementById('ub-pay-plan-detail').value || 'N/A';
+  var ehfImpact    = document.getElementById('ub-ehf-impact').value || 'N/A';
+  var justification= document.getElementById('ub-justification').value || '[Collector justification]';
+
+  // AR table rows
+  var arRows = '';
+  var tbody = document.getElementById('ub-ar-body');
+  if (tbody) {
+    var header = '  ' + ['AR LOB','Document#','Text','AR (Local)','AR (EUR)','OD ME','OD QE','EHF ME','EHF QE','Payment Plan']
+      .map(function(h){return h.padEnd(18);}).join('') + '\n';
+    arRows = header + '  ' + '-'.repeat(180) + '\n';
+    var trs = tbody.querySelectorAll('tr');
+    trs.forEach(function(tr, i) {
+      var inputs = tr.querySelectorAll('input');
+      if (inputs.length >= 8) {
+        arRows += '  ' + [].map.call(inputs, function(inp){
+          return (inp.value||inp.getAttribute('placeholder')||'').replace(/\s+/g,' ').trim().padEnd(18);
+        }).join('') + '\n';
+      }
+    });
+  }
+
+  return 'Subject: Unblock Request: ' + customer + ' (' + erp + ')\n\n'
+    + 'Dear [Approver],\n\n'
+    + 'I am writing to request a ' + typeName + ' for the account detailed below.\n\n'
+    + '1. ACCOUNT DETAILS\n'
+    + 'Customer/Partner Name: ' + customer + '\n'
+    + 'ERP ID: ' + erp + '\n'
+    + 'Account Type: ' + acctType + '\n'
+    + 'Collector: ' + collector + '\n'
+    + 'Entity: ' + entity + '\n\n'
+    + '2. NEW DEAL SUMMARY\n'
+    + 'Opportunity ID: ' + oppId + '\n'
+    + 'Deal Type: ' + dealType + '\n'
+    + 'Contract Value (ACV/TCV): ' + contractVal + '\n'
+    + 'Contract Term: ' + contractTerm + '\n'
+    + 'Planned Close Date: ' + closeDate + '\n\n'
+    + '3. OPEN AR & INVOICE DETAILS\n'
+    + 'LOB              Invoice #         Text              AR (Local)        AR (EUR)          OD Days ME        OD Days QE        EHF ME            EHF QE            Payment Plan\n'
+    + arRows + '\n'
+    + '4. PAYMENT PLAN SUMMARY\n'
+    + 'History of Payment Broken: ' + payBroken + (payBroken==='Yes' ? ' — ' + payBrokenDet : '') + '\n'
+    + 'Existing Approved Payment Plan: ' + payPlan + (payPlan==='Yes' ? ' — ' + payPlanDet : '') + '\n\n'
+    + '5. POTENTIAL EHF IMPACT\n'
+    + ehfImpact + '\n\n'
+    + '6. JUSTIFICATION\n'
+    + justification + '\n\n'
+    + 'Please review and provide your approval at your earliest convenience.\n\n'
+    + 'Kind regards,\n' + collector;
+}
+
+function ubOpenMail() {
+  var body = ubBuildEmailText();
+  var subj = 'Unblock Request: ' + document.getElementById('ub-customer').value + ' (' + document.getElementById('ub-erp').value + ')';
+  window.location.href = 'mailto:?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
+  document.getElementById('ub-status').textContent = '✓ Opened in mail';
+}
+function ubCopyEmail() {
+  navigator.clipboard.writeText(ubBuildEmailText()).then(function(){
+    document.getElementById('ub-status').textContent = '✓ Copied to clipboard';
+    setTimeout(function(){document.getElementById('ub-status').textContent='';},2500);
+  });
+}
+function ubPreview() {
+  var win = window.open('','_blank','width=700,height=600');
+  win.document.write('<pre style="font-family:monospace;font-size:12px;padding:20px;white-space:pre-wrap">'
+    + ubBuildEmailText().replace(/</g,'&lt;') + '</pre>');
+  win.document.close();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+// Render all 761 cards from PARTNERS on page load
+(function initCards() {
+  var ccMap = [
+    {cc:'0038', cardsId:'cards38', cntId:'cnt38', label:'CC0038', currency:'CNY'},
+    {cc:'0073', cardsId:'cards73', cntId:'cnt73', label:'CC0073', currency:'TWD'},
+    {cc:'0074', cardsId:'cards74', cntId:'cnt74', label:'CC0074', currency:'HKD'}
+  ];
+  ccMap.forEach(function(m) {
+    var rows = PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});
+    var el = document.getElementById(m.cardsId);
+    if (el) el.innerHTML = rows.map(function(p){return buildCardHTML(p.bp,p,m.label,m.currency);}).join('');
+    var cnt = document.getElementById(m.cntId);
+    if (cnt) cnt.textContent = rows.length + ' past-due accounts';
+  });
+})();
+refreshDropdowns();
+document.querySelectorAll('.partner-card').forEach(function(card) {
+  card.classList.toggle('has-term', card.dataset.term === 'true');
+  card.classList.toggle('has-ehf',  card.dataset.ehf  === 'true');
+});
+updateSummary();
+renderDashboard();
+
+function togglePaid(btn,e){e.stopPropagation();var key=btn.dataset.key,bp=btn.dataset.bp,wasPaid=editStore[key]&&editStore[key].paid==='yes',nowPaid=!wasPaid;if(!editStore[key])editStore[key]={};editStore[key].paid=nowPaid?'yes':'no';logActivity(key,'paid',wasPaid?'yes':'no',nowPaid?'yes':'no');saveEdits();applyPaidToRow(key,bp,nowPaid);updateIncomeBar();}
+function applyPaidToRow(key,bp,isPaid){var btn=document.querySelector('.paid-btn[data-key="'+key+'"]');if(!btn)return;var row=btn.closest('tr');if(!row)return;row.classList.toggle('row-paid',isPaid);var dc=row.querySelector('td:first-child'),badge=dc?dc.querySelector('.paid-badge'):null;if(isPaid&&!badge&&dc)dc.innerHTML+='<span class="paid-badge">Paid</span>';else if(!isPaid&&badge)badge.remove();btn.textContent=isPaid?'✓ Paid':'Mark Paid';btn.classList.toggle('is-paid',isPaid);}
+function calcIncome(){var inc={};Object.entries(editStore).forEach(function(e){var key=e[0],val=e[1];if(!val||val.paid!=='yes')return;var p=key.split('|'),cc=p[0],bp=p[1],doc=p[2],docs=DUN_DOCS[bp]||[],d=docs.find(function(x){return x.doc===doc;});if(!d)return;if(!inc[cc])inc[cc]={amount:0,count:0,currency:d.ccy};inc[cc].amount+=d.pd_amt;inc[cc].count++;});return inc;}
+function updateIncomeBar(){var bar=document.getElementById('income-bar');if(!bar)return;var inc=calcIncome();if(!Object.keys(inc).length){bar.innerHTML='<div class="income-title">💰 Income Collected</div><span style="font-size:12px;color:#4A9090">No payments marked yet</span>';return;}var blocks=Object.entries(inc).map(function(e){var cc=e[0],d=e[1];return '<div class="income-block"><div class="income-label">'+cc+'</div><div class="income-val">'+Math.round(d.amount).toLocaleString()+' <small style="font-size:10px">'+d.currency+'</small></div><div class="income-sub">'+d.count+' doc'+(d.count!==1?'s':'')+' paid</div></div>';});bar.innerHTML='<div class="income-title">💰 Income Collected</div>'+blocks.join('<div class="income-sep"></div>');}
+function loadXLSX(cb){if(typeof XLSX!=='undefined'){cb();return;}alert('SheetJS not loaded.');}
+function exportUnblockExcel() {
+  // Collect table data from ub-ar-body
+  var customer = document.getElementById('ub-customer').value || 'Unknown';
+  var erp      = document.getElementById('ub-erp').value || '';
+  var entity   = document.getElementById('ub-entity').value || '';
+  var tbody    = document.getElementById('ub-ar-body');
+  if(!tbody) return;
+
+  // Build rows
+  var headers = ['AR LOB','Document #','Text','AR Amount (Local)','AR Amount (EUR)',
+                 'OD Days by Month-End','OD Days by Q-End',
+                 'EHF Impact by M-End','EHF Impact by Q-End','Payment Plan'];
+  var rows = [headers];
+  var trs = tbody.querySelectorAll('tr');
+  trs.forEach(function(tr){
+    var inputs = tr.querySelectorAll('input');
+    var rowData = [];
+    inputs.forEach(function(inp){ rowData.push(inp.value||''); });
+    if(rowData.length >= 8) rows.push(rowData);
+  });
+
+  // Build CSV with BOM for Excel
+  var csv = '﻿';
+  csv += 'Customer:,' + customer + '\r\n';
+  csv += 'ERP#:,' + erp + '\r\n';
+  csv += 'Entity:,' + entity + '\r\n';
+  csv += '\r\n';
+  rows.forEach(function(r){
+    csv += r.map(function(c){
+      var s=String(c||'');
+      return (s.includes(',')||s.includes('"')||s.includes('\n')) ? '"'+s.replace(/"/g,'""')+'"' : s;
+    }).join(',') + '\r\n';
+  });
+
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Unblock_AR_'+customer.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30)+'_'+entity+'.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+
+<!-- FDL Modal -->
+<div class="modal-overlay hidden" id="fdlOverlay">
+  <div class="modal" id="fdlModal">
+    <div class="modal-header">
+      <div><h2 id="fdl-title">Final Demand Letter</h2><div class="modal-meta" id="fdl-meta"></div></div>
+      <button class="modal-close" onclick="closeFDL()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Step 1: Select documents -->
+      <div id="fdl-step1">
+        <div class="fdl-section-title" style="font-size:12px;font-weight:700;color:#6A6D70;text-transform:uppercase;margin-bottom:8px">Step 1 — Select Overdue Documents to Include</div>
+        <div class="fdl-sel-bar">
+          <label><input type="checkbox" id="fdl-chk-all" onchange="fdlSelAll(this)"> All</label>
+          <span style="color:#ccc">|</span>
+          <span class="fdl-sel-count" id="fdl-sel-count">0 selected</span>
+          <span class="fdl-sel-total" id="fdl-sel-total"></span>
+          <span style="color:#ccc">|</span>
+          <span class="fdl-sel-link" onclick="fdlSelOD(90)">OD&gt;90d</span>
+          <span class="fdl-sel-link" onclick="fdlSelOD(365)">OD&gt;365d</span>
+          <span class="fdl-sel-link" onclick="fdlSelClear()">Clear</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="fdl-docs-table">
+            <thead><tr>
+              <th style="width:30px"><input type="checkbox" id="fdl-hdr-chk" onchange="fdlSelAll(this)"></th>
+              <th>Document #</th><th>Net Due Date</th><th>Days OD</th><th class="num">OD Amount</th><th>Ccy</th>
+            </tr></thead>
+            <tbody id="fdl-docs-body"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;text-align:right">
+          <button class="btn-primary" onclick="fdlToStep2()" id="fdl-next-btn" disabled>Next: Edit Letter &#8594;</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Edit fields + Preview -->
+      <div id="fdl-step2" class="hidden">
+        <div class="fdl-section-title" style="font-size:12px;font-weight:700;color:#6A6D70;text-transform:uppercase;margin-bottom:8px">Step 2 — Edit Letter Fields</div>
+        <div class="fdl-edit-bar">
+          <div class="fdl-field wide"><label>Customer Name</label><input type="text" id="fdl-customer-name"></div>
+          <div class="fdl-field"><label>ERP #</label><input type="text" id="fdl-erp"></div>
+          <div class="fdl-field"><label>Payment Deadline</label><input type="date" id="fdl-deadline"></div>
+          <div class="fdl-field"><label>Collector Name</label><input type="text" id="fdl-collector-name"></div>
+          <div class="fdl-field"><label>Collector Phone</label><input type="text" id="fdl-collector-phone"></div>
+          <div class="fdl-field wide"><label>Collector Email</label><input type="text" id="fdl-collector-email"></div>
+        </div>
+        <div class="fdl-edit-bar" style="margin-top:-8px">
+          <div class="fdl-field"><label>Date</label><input type="date" id="fdl-date"></div>
+          <div class="fdl-field wide"><label>Customer Address</label><input type="text" id="fdl-address" placeholder="(CC0074 only)"></div>
+          <div class="fdl-field"><label>Attention</label><input type="text" id="fdl-attention" placeholder="(CC0074 only)"></div>
+          <button class="btn-secondary" style="align-self:flex-end;height:32px" onclick="fdlRefreshPreview()">&#8635; Refresh Preview</button>
+        </div>
+
+        <div class="fdl-section-title" style="font-size:12px;font-weight:700;color:#6A6D70;text-transform:uppercase;margin:12px 0 8px">Letter Preview (editable)</div>
+        <div id="fdl-preview-wrap" class="fdl-preview"><!-- filled by JS --></div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:space-between;align-items:center">
+          <button class="btn-secondary" onclick="fdlBack()">&larr; Back</button>
+          <button class="btn-primary" onclick="fdlConfirm()" id="fdl-confirm-btn">&#10003; Confirm &amp; Export PDF</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="font-size:11px;color:#6A6D70">
+      <span id="fdl-status"></span>
+    </div>
+  </div>
+</div>
+
+
+<!-- Unblock Request Modal -->
+<div class="modal-overlay hidden" id="unblockOverlay">
+  <div class="modal" id="unblockModal">
+    <div class="modal-header" style="background:linear-gradient(135deg,#4A2800,#E76500)">
+      <div><h2 id="ub-title">Unblock Request</h2><div class="modal-meta" id="ub-meta"></div></div>
+      <button class="modal-close" onclick="closeUnblock()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Request type -->
+      <div class="ub-section">
+        <div class="ub-label">1. Request Type</div>
+        <div class="ub-type-row">
+          <div class="ub-type-card selected" id="ub-type-standard" onclick="ubSelectType('standard')">
+            <div class="ub-type-title">Standard Unblock</div>
+            <div class="ub-type-desc">With payment plan &nbsp;|&nbsp; &lt;1m EUR → CC RD &nbsp;|&nbsp; ≥1m EUR → CC RD + RCFO</div>
+          </div>
+          <div class="ub-type-card" id="ub-type-ehf" onclick="ubSelectType('ehf')">
+            <div class="ub-type-title">Unblock with EHF Concession</div>
+            <div class="ub-type-desc">No exit criteria &nbsp;|&nbsp; &lt;150k EUR → CC RD &nbsp;|&nbsp; ≥150k EUR → CC RD + RCFO</div>
+          </div>
+        </div>
+        <div class="ub-approver-info" id="ub-approver-info">
+          <strong>Required Approver(s):</strong> <span id="ub-approver-badges"></span>
+          <div style="font-size:11px;color:#6A6D70;margin-top:4px" id="ub-approver-note"></div>
+        </div>
+      </div>
+
+      <!-- Account details -->
+      <div class="ub-section">
+        <div class="ub-label">2. Account Details</div>
+        <div class="ub-grid">
+          <div class="ub-field wide"><label>Customer / Partner Name</label><input type="text" id="ub-customer"></div>
+          <div class="ub-field"><label>ERP ID</label><input type="text" id="ub-erp"></div>
+          <div class="ub-field"><label>Account Type</label>
+            <select id="ub-acct-type"><option>Customer</option><option>Partner</option></select></div>
+          <div class="ub-field"><label>Collector</label><input type="text" id="ub-collector"></div>
+          <div class="ub-field"><label>Entity</label><input type="text" id="ub-entity" readonly></div>
+        </div>
+      </div>
+
+      <!-- New deal summary -->
+      <div class="ub-section">
+        <div class="ub-label">3. New Deal Summary</div>
+        <div class="ub-grid">
+          <div class="ub-field"><label>Opportunity ID</label><input type="text" id="ub-opp-id" placeholder="12345678"></div>
+          <div class="ub-field"><label>Deal Type</label>
+            <select id="ub-deal-type">
+              <option value="">Select…</option>
+              <option>S4 Solution Add-On</option><option>Cloud ERP</option>
+              <option>MA Renewal</option><option>Other</option>
+            </select></div>
+          <div class="ub-field"><label>Contract Value (ACV/TCV)</label><input type="text" id="ub-contract-val" placeholder="e.g. CNY 3M"></div>
+          <div class="ub-field"><label>Contract Term</label><input type="text" id="ub-contract-term" placeholder="e.g. 3 years"></div>
+          <div class="ub-field"><label>Planned Close Date</label><input type="text" id="ub-close-date" placeholder="e.g. September 2026"></div>
+        </div>
+      </div>
+
+      <!-- Open AR table -->
+      <div class="ub-section">
+        <div class="ub-label">4. Open AR & Invoice Details</div>
+        <div style="overflow-x:auto">
+          <table class="ub-table" id="ub-ar-table">
+            <thead><tr>
+              <th>AR LOB</th><th>Document#</th><th>Text</th>
+              <th class="num">AR amount in local currency</th>
+              <th class="num">AR amt in EUR</th>
+              <th class="num">OD days by Month_end</th>
+              <th class="num">OD days by Q-end</th>
+              <th class="num">EHF Impact by M-end</th>
+              <th class="num">EHF Impact by Q-end</th>
+              <th>Payment plan</th>
+            </tr></thead>
+            <tbody id="ub-ar-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Payment history -->
+      <div class="ub-section">
+        <div class="ub-label">5. Open AR & Payment Plan Summary</div>
+        <div class="ub-grid">
+          <div class="ub-field"><label>History of Payment Broken?</label>
+            <select id="ub-pay-broken"><option>No</option><option>Yes</option></select></div>
+          <div class="ub-field wide"><label>If Yes, details</label>
+            <input type="text" id="ub-pay-broken-detail" placeholder="e.g. 2024 MA, CNY 500K, 60 days overdue"></div>
+          <div class="ub-field"><label>Existing approved payment plan?</label>
+            <select id="ub-pay-plan"><option>No</option><option>Yes</option></select></div>
+          <div class="ub-field wide"><label>If Yes, details</label>
+            <input type="text" id="ub-pay-plan-detail" placeholder="e.g. Payment plan for current year's MA accepted June 2026"></div>
+        </div>
+      </div>
+
+      <!-- EHF impact & justification -->
+      <div class="ub-section">
+        <div class="ub-label">6. EHF Impact & Justification</div>
+        <div class="ub-grid">
+          <div class="ub-field wide"><label>Potential EHF Impact</label>
+            <input type="text" id="ub-ehf-impact" placeholder="e.g. CNY 40,000 from EHF (or N/A)"></div>
+          <div class="ub-field wide"><label>Collector's Recommendation / Justification</label>
+            <textarea id="ub-justification" rows="4" placeholder="Provide a concise summary justifying the request…"></textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="exportUnblockExcel()" style="border-color:#188918;color:#188918">📊 Export to Excel</button>
+      <button class="btn-primary" onclick="ubOpenMail()">&#128231; Open in Mail</button>
+      <button class="btn-secondary" onclick="ubCopyEmail()">&#128203; Copy Email</button>
+      <button class="btn-secondary" onclick="ubPreview()">&#128196; Preview Text</button>
+      <button class="btn-cancel" onclick="closeUnblock()">Cancel</button>
+      <span class="modal-status" id="ub-status"></span>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="xlsx.mini.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  // Clear stale empty contacts from localStorage if baked-in has more
+  try {
+    // Clear contacts unless they came from an uploaded file
+    var fromUpload = localStorage.getItem('ar_contacts_from_upload');
+    if(fromUpload !== '1') {
+      localStorage.removeItem('ar_contacts_data');
+    }
+  } catch(e){}
+  var _ok=loadDataFromStorage();
+  var cm=[{cc:'0038',ci:'cards38',ni:'cnt38',l:'CC0038',c:'CNY'},{cc:'0073',ci:'cards73',ni:'cnt73',l:'CC0073',c:'TWD'},{cc:'0074',ci:'cards74',ni:'cnt74',l:'CC0074',c:'HKD'}];
+  cm.forEach(function(m){var r=PARTNERS.filter(function(p){return p.cc===m.cc;}).sort(function(a,b){return b.total_pd-a.total_pd;});var e=document.getElementById(m.ci);if(e)e.innerHTML=r.map(function(p){return buildCardHTML(p.bp,p,m.l,m.c);}).join('');var n=document.getElementById(m.ni);if(n)n.textContent=r.length+' past-due accounts';});
+  // Contact fields rendered inline by buildCardHTML
+  var rb=document.getElementById('ds-restore-btn');
+  var stat=document.getElementById('ds-proc-status');
+  if(_ok&&PARTNERS.length>0){
+    if(rb)rb.style.display='';
+    var mo=localStorage.getItem('ar_data_month')||'';
+    var cnt=PARTNERS.filter(function(p){return p.total_pd>0;}).length;
+    if(stat){stat.textContent='✓ Data loaded ('+mo+', '+cnt+' accounts) — click ↺ to reload cards';stat.style.color='#188918';}
+  } else {
+    showWorlistEmptyState();
+    if(rb)rb.style.display='none';
+  }
+  refreshDropdowns();
+  document.querySelectorAll('.partner-card').forEach(function(c){c.classList.toggle('has-term',c.dataset.term==='true');c.classList.toggle('has-ehf',c.dataset.ehf==='true');});
+  updateIncomeBar();
+  (function(){var e=document.getElementById('dunningOverlay');if(e)e.addEventListener('click',function(ev){if(ev.target===this)closeDunning();});})();
+  (function(){var e=document.getElementById('fdlOverlay');if(e)e.addEventListener('click',function(ev){if(ev.target===this)closeFDL();});})();
+  (function(){var e=document.getElementById('unblockOverlay');if(e)e.addEventListener('click',function(ev){if(ev.target===this)closeUnblock();});})();
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDunning();closeFDL();closeUnblock();}});
+  document.addEventListener('click',function(){var m=document.getElementById('exportMenu');if(m)m.classList.remove('open');});
+});
+</script>
+</body>
+</html>
