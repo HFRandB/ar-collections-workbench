@@ -45,6 +45,7 @@ class AggregatedLOB:
     doc_numbers: list = field(default_factory=list)
     ref_doc_numbers: list = field(default_factory=list)
     texts: list = field(default_factory=list)
+    rows: list = field(default_factory=list)  # original MasterReportRow list
 
 
 def _to_date(val) -> Optional[date]:
@@ -127,4 +128,5 @@ def aggregate_rows(rows: list) -> 'AggregatedLOB':
         doc_numbers=[r.doc_number for r in rows],
         ref_doc_numbers=[r.ref_doc_number for r in rows],
         texts=[r.text for r in rows],
+        rows=rows,
     )

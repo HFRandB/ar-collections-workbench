@@ -64,6 +64,18 @@ def phase_data(args) -> dict:
     today = date.today()
     deadline = add_business_days(today, 14, region)
     od_days = (today - agg.earliest_net_due_date).days if agg.earliest_net_due_date else 0
+    per_row = [
+        {
+            'doc_number': r.doc_number,
+            'ref_doc_number': r.ref_doc_number,
+            'amount': r.local_currency_amt,
+            'posting_date': r.posting_date.isoformat() if r.posting_date else None,
+            'net_due_date': r.net_due_date.isoformat() if r.net_due_date else None,
+            'fapiao_date': r.fapiao_date.isoformat() if r.fapiao_date else None,
+            'text': r.text,
+        }
+        for r in agg.rows
+    ]
     return {
         'status': 'ok',
         'company_code': cc,
@@ -76,6 +88,7 @@ def phase_data(args) -> dict:
         'total_amount': agg.total_amount,
         'doc_numbers': agg.doc_numbers,
         'ref_doc_numbers': agg.ref_doc_numbers,
+        'per_row_data': per_row,
         'earliest_posting_date': agg.earliest_posting_date.isoformat() if agg.earliest_posting_date else None,
         'earliest_net_due_date': agg.earliest_net_due_date.isoformat() if agg.earliest_net_due_date else None,
         'earliest_fapiao_date': agg.earliest_fapiao_date.isoformat() if agg.earliest_fapiao_date else None,
@@ -83,9 +96,9 @@ def phase_data(args) -> dict:
         'deadline': deadline.isoformat(),
         'customer_emails': get_customer_emails(args.sold_to),
         'next_step': {
-            '0038': 'Search SharePoint VAT folder for fapiao files matching doc_numbers; filenames are dzfp_{number}_{ISSUER_name}_{ts}.xml — the middle name is SAP issuer entity, NOT customer. Use web search on customer_name_en to find Chinese customer name.',
-            '0073': 'Web-search customer_name_en to find Traditional Chinese company name; use ref_doc_numbers as invoice numbers',
-            '0074': 'Web-search customer_name_en to find Chinese company name; use doc_numbers as invoice numbers',
+            '0038': 'Search SharePoint VAT folder for fapiao files matching doc_numbers; filenames are dzfp_{number}_{ISSUER_name}_{ts}.xml — the middle name is SAP issuer entity, NOT customer. Use web search on customer_name_en to find Chinese customer name. Pass one --fapiao-numbers, --fapiao-dates, --fapiao-amounts entry per row using per_row_data amounts.',
+            '0073': 'Web-search customer_name_en to find Traditional Chinese company name; per_row_data has one entry per ref_doc_number with individual amounts.',
+            '0074': 'Web-search customer_name_en to find Chinese company name; per_row_data has one entry per doc_number with individual amounts.',
         }.get(cc, ''),
     }
 
@@ -104,20 +117,33 @@ def phase_generate(args) -> dict:
 
     fapiao_numbers = [x.strip() for x in (args.fapiao_numbers or '').split(';') if x.strip()]
     fapiao_dates = [x.strip() for x in (args.fapiao_dates or '').split(';') if x.strip()]
+    fapiao_amounts = [x.strip() for x in (args.fapiao_amounts or '').split(';') if x.strip()]
 
     if cc == '0038':
         if fapiao_numbers:
-            inv_date = date.fromisoformat(fapiao_dates[0]) if fapiao_dates else (agg.earliest_fapiao_date or today)
-            due = inv_date + timedelta(days=30)
-            od = max(0, (today - due).days)
-            invoice_rows = [{
-                'invoice_no': '; '.join(fapiao_numbers),
-                'invoice_date': inv_date,
-                'due_date': due,
-                'overdue_days': od,
-                'amount': agg.total_amount,
-                'description': agg.texts[0] if agg.texts else '',
-            }]
+            # Build one row per fapiao number
+            # Amounts: use --fapiao-amounts if provided, else distribute from master report rows 1:1,
+            # else fall back to equal share of total
+            row_amounts = agg.rows  # individual master report rows
+            invoice_rows = []
+            for i, fap_no in enumerate(fapiao_numbers):
+                inv_date = date.fromisoformat(fapiao_dates[i]) if i < len(fapiao_dates) else (agg.earliest_fapiao_date or today)
+                due = inv_date + timedelta(days=30)
+                od = max(0, (today - due).days)
+                if fapiao_amounts and i < len(fapiao_amounts):
+                    amt = float(fapiao_amounts[i].replace(',', ''))
+                elif len(row_amounts) == len(fapiao_numbers):
+                    amt = row_amounts[i].local_currency_amt
+                else:
+                    amt = agg.total_amount / len(fapiao_numbers)
+                invoice_rows.append({
+                    'invoice_no': fap_no,
+                    'invoice_date': inv_date,
+                    'due_date': due,
+                    'overdue_days': od,
+                    'amount': amt,
+                    'description': agg.texts[i] if i < len(agg.texts) else '',
+                })
         else:
             inv_date = agg.earliest_fapiao_date or today
             due = agg.earliest_net_due_date or today
@@ -130,27 +156,29 @@ def phase_generate(args) -> dict:
                 'description': agg.texts[0] if agg.texts else '',
             }]
     elif cc == '0073':
-        inv_date = agg.earliest_posting_date or today
-        due = agg.earliest_net_due_date or today
-        invoice_rows = [{
-            'invoice_no': '; '.join(agg.ref_doc_numbers) if agg.ref_doc_numbers else '',
-            'invoice_date': inv_date,
-            'due_date': due,
-            'overdue_days': max(0, (today - due).days),
-            'amount': agg.total_amount,
-            'description': agg.texts[0] if agg.texts else '',
-        }]
+        invoice_rows = []
+        for r in agg.rows:
+            due = r.net_due_date or today
+            invoice_rows.append({
+                'invoice_no': r.ref_doc_number,
+                'invoice_date': r.posting_date or today,
+                'due_date': due,
+                'overdue_days': max(0, (today - due).days),
+                'amount': r.local_currency_amt,
+                'description': r.text,
+            })
     else:  # 0074
-        inv_date = agg.earliest_posting_date or today
-        due = agg.earliest_net_due_date or today
-        invoice_rows = [{
-            'invoice_no': '; '.join(agg.doc_numbers) if agg.doc_numbers else '',
-            'invoice_date': inv_date,
-            'due_date': due,
-            'overdue_days': max(0, (today - due).days),
-            'amount': agg.total_amount,
-            'description': agg.texts[0] if agg.texts else '',
-        }]
+        invoice_rows = []
+        for r in agg.rows:
+            due = r.net_due_date or today
+            invoice_rows.append({
+                'invoice_no': r.doc_number,
+                'invoice_date': r.posting_date or today,
+                'due_date': due,
+                'overdue_days': max(0, (today - due).days),
+                'amount': r.local_currency_amt,
+                'description': r.text,
+            })
 
     os.makedirs('/tmp/fdl_output', exist_ok=True)
     name_cn = args.customer_name_cn or ''
@@ -233,6 +261,7 @@ def main():
     parser.add_argument('--customer-name-cn', default='')
     parser.add_argument('--fapiao-numbers', default='')
     parser.add_argument('--fapiao-dates', default='')
+    parser.add_argument('--fapiao-amounts', default='', help='Per-fapiao amounts (semicolon-separated, 0038 only)')
     parser.add_argument('--attention', default='')
     parser.add_argument('--customer-address', default='')
     parser.add_argument('--deadline')
