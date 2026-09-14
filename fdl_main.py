@@ -4,7 +4,7 @@ FDL Generator CLI — called by Claude Code to generate Final Demand Letters.
 
 Phase 1: Extract data from master report
   python3 fdl_main.py --phase data --sold-to 1302690 --lob CL \\
-    [--master-report path/to/report.xlsx]
+    --master-report path/to/Master_Report_GC_*.xlsx
 
 Phase 2: Generate DOCX + PDF with complete data
   python3 fdl_main.py --phase generate \\
@@ -18,6 +18,8 @@ Phase 2: Generate DOCX + PDF with complete data
     [--customer-address "Suite 100, HK"] \\
     [--deadline 2026-09-30] \\
     [--master-report path/to/report.xlsx]
+
+Claude Code asks the user to provide the Master Report file at the start of each session.
 """
 import argparse, glob, json, os, sys
 from datetime import date, timedelta
@@ -31,14 +33,17 @@ from fdl_pdf import build_pdf_filename, generate_pdf
 
 
 def find_master_report() -> str:
-    pattern = os.path.expanduser('~/Downloads/Master Report_GC_*.xlsx')
-    files = sorted(glob.glob(pattern), key=os.path.getmtime, reverse=True)
-    if not files:
-        raise FileNotFoundError(
-            "No Master Report_GC_*.xlsx found in ~/Downloads. "
-            "Specify --master-report path."
-        )
-    return files[0]
+    # Check ~/Downloads as fallback (user may have placed it there)
+    dl_files = sorted(
+        glob.glob(os.path.expanduser('~/Downloads/Master Report_GC_*.xlsx')),
+        key=os.path.getmtime, reverse=True
+    )
+    if dl_files:
+        return dl_files[0]
+    raise FileNotFoundError(
+        "Master Report not found. Please share the Master Report_GC_*.xlsx file "
+        "(drag it into the chat or provide the file path)."
+    )
 
 
 def _region_for_cc(cc: str) -> str:
@@ -221,7 +226,7 @@ def main():
     parser.add_argument('--phase', choices=['data', 'generate'], required=True)
     parser.add_argument('--sold-to', required=True)
     parser.add_argument('--lob', required=True)
-    parser.add_argument('--master-report')
+    parser.add_argument('--master-report', help='Path to Master Report_GC_*.xlsx (required if not in ~/Downloads/)')
     parser.add_argument('--collector-name', default='')
     parser.add_argument('--collector-phone', default='')
     parser.add_argument('--collector-email', default='')
