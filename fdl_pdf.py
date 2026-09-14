@@ -1,5 +1,4 @@
 import os, shutil, subprocess, tempfile
-from docx2pdf import convert
 
 _CC_LABELS = {'0038': 'CN 0038', '0073': 'TW 0073', '0074': 'HK 0074'}
 

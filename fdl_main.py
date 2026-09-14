@@ -78,7 +78,7 @@ def phase_data(args) -> dict:
         'deadline': deadline.isoformat(),
         'customer_emails': get_customer_emails(args.sold_to),
         'next_step': {
-            '0038': 'Search SharePoint VAT folder for fapiao files matching customer_name_en; extract fapiao numbers + Chinese name from filenames (dzfp_{number}_{chinese_name}_{ts}.xml)',
+            '0038': 'Search SharePoint VAT folder for fapiao files matching doc_numbers; filenames are dzfp_{number}_{ISSUER_name}_{ts}.xml — the middle name is SAP issuer entity, NOT customer. Use web search on customer_name_en to find Chinese customer name.',
             '0073': 'Web-search customer_name_en to find Traditional Chinese company name; use ref_doc_numbers as invoice numbers',
             '0074': 'Web-search customer_name_en to find Chinese company name; use doc_numbers as invoice numbers',
         }.get(cc, ''),
@@ -199,7 +199,7 @@ def phase_generate(args) -> dict:
     }
     cn_part = f' {name_cn}' if name_cn else ''
     if cc in ('0038', '0073'):
-        subject = f'最终催款通知 - {args.sold_to} {agg.sold_to_name}{cn_part}'
+        subject = f'最終催款通知 - {args.sold_to} {agg.sold_to_name}{cn_part}' if cc == '0073' else f'最终催款通知 - {args.sold_to} {agg.sold_to_name}{cn_part}'
     else:
         subject = f'Final Demand Notice - {args.sold_to} {agg.sold_to_name}{cn_part}'
 
