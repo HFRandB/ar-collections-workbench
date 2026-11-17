@@ -53,32 +53,32 @@ body{font-family:"72","72full",Arial,sans-serif;background:#F5F6F7;color:#1C2B33
 .error-msg{background:#FFF0F0;border:1px solid #FFAAAA;border-radius:8px;padding:12px 16px;color:#BB0000;font-size:13px;margin-top:12px}
 .info-box{background:#EEF6FF;border:1px solid #BDDAFF;border-radius:8px;padding:12px 16px;font-size:12px;color:#0046A0;margin-top:8px}
 .info-box b{font-weight:700}
+.debug-box{background:#FFFBE6;border:1px solid #E8C840;border-radius:8px;padding:10px 14px;font-size:11px;color:#5A4000;margin-top:8px;font-family:monospace;display:none}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div>
-    <h1>🔍 EHF Lookup</h1>
-    <p>Greater China &nbsp;·&nbsp; CC0038 · CC0073 · CC0074 &nbsp;·&nbsp; Per Sold-To EHF Tracking Table</p>
+    <h1>&#128269; EHF Lookup</h1>
+    <p>Greater China &nbsp;&middot;&nbsp; CC0038 &middot; CC0073 &middot; CC0074 &nbsp;&middot;&nbsp; Per Sold-To EHF Tracking Table</p>
   </div>
-  <a class="back-btn" href="AR_Dashboard_2026-08-03.html">← Dashboard</a>
+  <a class="back-btn" href="AR_Dashboard_2026-08-03.html">&#8592; Dashboard</a>
 </div>
 
 <div class="container">
 
-  <!-- Input card -->
   <div class="card">
     <h2>Lookup Parameters</h2>
     <div class="input-row">
       <div class="input-group">
         <label>Sold-to Party Number(s)</label>
-        <input type="text" id="soldToInput" placeholder="e.g. 1176363, 26383, 1605871">
+        <input type="text" id="soldToInput" placeholder="e.g. 1176363, 26383, 1821507">
       </div>
       <div class="input-group">
-        <label>By Document Excel File</label>
+        <label>Excel File (Master Report or By Document)</label>
         <label class="file-label">
-          📂 Choose File&hellip;
+          &#128194; Choose File&hellip;
           <input type="file" id="fileInput" accept=".xlsx,.xls">
         </label>
         <div class="file-status" id="fileStatus">No file selected</div>
@@ -88,15 +88,15 @@ body{font-family:"72","72full",Arial,sans-serif;background:#F5F6F7;color:#1C2B33
     <div id="errorMsg"></div>
     <div class="info-box" style="margin-top:14px">
       <b>Rules applied automatically:</b>
-      CDC- prefix on LOB only when Bill-to = 1420822 &nbsp;·&nbsp;
-      OD days calculated live from Net Due Date vs current M-end &amp; Q-end &nbsp;·&nbsp;
-      EHF amount = ex-tax (0038: SW 13% / others 6%; 0073: 5%; 0074: 0%) when MEC OD &gt;90d &nbsp;·&nbsp;
-      Potential EHF = ex-tax when QEC OD &gt;90 &amp; MEC OD ≤90 &nbsp;·&nbsp;
+      CDC- prefix on LOB only when Bill-to = 1420822 &nbsp;&middot;&nbsp;
+      OD days calculated live: Net Due Date vs current M-end &amp; Q-end &nbsp;&middot;&nbsp;
+      EHF amount = ex-tax (0038: SW 13% / others 6%; 0073: 5%; 0074: 0%) when MEC OD &gt;90d &nbsp;&middot;&nbsp;
+      Potential EHF = ex-tax when QEC OD &gt;90 &amp; MEC OD &le;90 &nbsp;&middot;&nbsp;
       CC0038 Bill-to 1420822 rebate items excluded
     </div>
+    <div class="debug-box" id="debugBox"></div>
   </div>
 
-  <!-- Results -->
   <div id="resultsArea"></div>
 
 </div>
@@ -104,7 +104,7 @@ body{font-family:"72","72full",Arial,sans-serif;background:#F5F6F7;color:#1C2B33
 <script src="xlsx.mini.min.js"></script>
 <script>
 
-// ── Tax rates ──────────────────────────────────────────────────────────────
+// ── Tax rates ───────────────────────────────────────────────────────────────
 function getTaxRate(cc, lobRaw) {
   var ccNorm = String(cc || '').replace(/^0+/, '') || '0';
   var lobU   = String(lobRaw || '').toUpperCase().trim();
@@ -129,7 +129,42 @@ function fmtNum(n) {
   return n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Date / OD helpers ────────────────────────────────────────────────────────
+function getMonthEnd() {
+  var d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+}
+function getQuarterEnd() {
+  var d = new Date();
+  var endMonth = Math.floor(d.getMonth() / 3) * 3 + 3;
+  return new Date(d.getFullYear(), endMonth, 0);
+}
+function parseExcelDate(v) {
+  if (v === null || v === undefined || v === '') return null;
+  if (v instanceof Date) {
+    return new Date(v.getFullYear(), v.getMonth(), v.getDate());
+  }
+  if (typeof v === 'number' && v > 1000) {
+    // Excel serial date
+    var d = new Date(Math.round((v - 25569) * 86400000));
+    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  }
+  var s = String(v).replace(/\//g, '-').substring(0, 10);
+  var parts = s.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    return new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  }
+  return null;
+}
+function calcOD(rawDate, targetDate) {
+  var due = parseExcelDate(rawDate);
+  if (!due || isNaN(due.getTime())) return 0;
+  var tgt = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+  var diff = Math.round((tgt.getTime() - due.getTime()) / 86400000);
+  return Math.max(0, diff);
+}
+
+// ── Other helpers ────────────────────────────────────────────────────────────
 function getUnblockType(perma, pblock, cblock, dlock) {
   var parts = [];
   if (String(perma  || '').trim()) parts.push('Perma Block');
@@ -159,45 +194,19 @@ function findCol(headers, candidates) {
   return -1;
 }
 
-// ── Date / OD helpers ───────────────────────────────────────────────────────
-function getMonthEnd() {
-  var d = new Date();
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0); // last day of current month
-}
-function getQuarterEnd() {
-  var d = new Date();
-  var endMonth = Math.floor(d.getMonth() / 3) * 3 + 3; // 3, 6, 9, or 12
-  return new Date(d.getFullYear(), endMonth, 0); // last day of current quarter
-}
-function parseExcelDate(v) {
-  if (!v && v !== 0) return null;
-  if (v instanceof Date) return new Date(v.getFullYear(), v.getMonth(), v.getDate());
-  if (typeof v === 'number') {
-    // Excel serial date → JS Date (UTC offset fix included)
-    var d = new Date(Math.round((v - 25569) * 86400000));
-    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-  }
-  // String: "2026/11/20" or "2026-11-20"
-  var s = String(v).replace(/\//g, '-').substring(0, 10);
-  var parts = s.split('-');
-  if (parts.length === 3) return new Date(+parts[0], +parts[1] - 1, +parts[2]);
-  return null;
-}
-function calcOD(rawDate, targetDate) {
-  var due = parseExcelDate(rawDate);
-  if (!due) return 0;
-  var tgt = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
-  var diff = Math.round((tgt - due) / 86400000);
-  return Math.max(0, diff);
-}
-
 function escHtml(s) {
   return String(s || '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
 }
 
-// ── State ──────────────────────────────────────────────────────────────────
+function showDebug(msg) {
+  var el = document.getElementById('debugBox');
+  el.style.display = 'block';
+  el.innerHTML = msg;
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
 var workbook = null;
 
 document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -207,7 +216,7 @@ document.getElementById('fileInput').addEventListener('change', function(e) {
   reader.onload = function(ev) {
     try {
       workbook = XLSX.read(new Uint8Array(ev.target.result), {type: 'array', cellDates: true});
-      document.getElementById('fileStatus').textContent = '✓ ' + file.name;
+      document.getElementById('fileStatus').textContent = '&#10003; ' + file.name;
       document.getElementById('fileStatus').style.color = '#188918';
       updateBtn();
     } catch(ex) {
@@ -226,23 +235,23 @@ function updateBtn() {
 
 function showError(msg) {
   document.getElementById('errorMsg').innerHTML =
-    '<div class="error-msg">⚠️ ' + escHtml(msg) + '</div>';
+    '<div class="error-msg">&#9888;&#65039; ' + escHtml(msg) + '</div>';
 }
 function clearError() { document.getElementById('errorMsg').innerHTML = ''; }
 
-// ── Main ───────────────────────────────────────────────────────────────────
+// ── Main ─────────────────────────────────────────────────────────────────────
 function runLookup() {
   clearError();
   if (!workbook) { showError('Please select an Excel file first.'); return; }
 
-  var raw = document.getElementById('soldToInput').value.trim();
-  if (!raw) { showError('Please enter at least one sold-to party number.'); return; }
+  var rawInput = document.getElementById('soldToInput').value.trim();
+  if (!rawInput) { showError('Please enter at least one sold-to party number.'); return; }
 
   var soldToSet = {};
-  raw.split(',').forEach(function(s) { var v = s.trim(); if (v) soldToSet[v] = true; });
+  rawInput.split(',').forEach(function(s) { var v = s.trim(); if (v) soldToSet[v] = true; });
 
   // Find sheet
-  var pref = ['By Document', 'By Document#', 'Master Report'];
+  var pref = ['By Document', 'By Document#', 'GC AR', 'Master Report'];
   var sheetName = null;
   for (var pi = 0; pi < pref.length; pi++) {
     if (workbook.SheetNames.indexOf(pref[pi]) !== -1) { sheetName = pref[pi]; break; }
@@ -252,18 +261,22 @@ function runLookup() {
   var ws   = workbook.Sheets[sheetName];
   var rows = XLSX.utils.sheet_to_json(ws, {header: 1, defval: null, raw: true});
 
-  // Detect header row
+  // Detect header row (search up to row 15)
   var headerIdx = -1;
   var headers   = [];
-  for (var ri = 0; ri < Math.min(rows.length, 10); ri++) {
-    var row = rows[ri].map(function(h) { return String(h || '').trim(); });
+  for (var ri = 0; ri < Math.min(rows.length, 15); ri++) {
+    if (!rows[ri]) continue;
+    var row = rows[ri].map(function(h) { return String(h === null || h === undefined ? '' : h).trim(); });
     if (row.indexOf('Sold-to Number') !== -1 || row.indexOf('Company Code') !== -1) {
       headerIdx = ri;
       headers   = row;
       break;
     }
   }
-  if (headerIdx === -1) { showError('Header row not found in sheet "' + sheetName + '".'); return; }
+  if (headerIdx === -1) {
+    showError('Header row not found. Sheets: ' + workbook.SheetNames.join(', '));
+    return;
+  }
 
   // Map columns
   var iCC    = findCol(headers, ['Company Code']);
@@ -275,7 +288,7 @@ function runLookup() {
   var iAMT   = findCol(headers, ['Document Amount', 'Local Currency Amt']);
   var iCURR  = findCol(headers, ['Doc currency', 'Doc Currency', 'Local Currency']);
   var iTXT   = findCol(headers, ['Text']);
-  var iNDD   = findCol(headers, ['Net Due Date']);   // used to calculate OD days dynamically
+  var iNDD   = findCol(headers, ['Net Due Date']);
   var iPERMA = findCol(headers, ['PermaBlock']);
   var iPBLK  = findCol(headers, ['Payment Block']);
   var iCBLK  = findCol(headers, ['Clearing Lock']);
@@ -284,14 +297,35 @@ function runLookup() {
   var iP2P   = findCol(headers, ['Promise-to-Pay ID', 'PromiseToPayID']);
   var iP2PDT = findCol(headers, ['P2P Date Promised', 'Promise2Pay Date']);
 
-  function gv(row, idx) { var v = (idx === -1 || idx >= row.length) ? null : row[idx]; return v === null || v === undefined ? '' : v; }
+  // Debug info (visible on page)
+  var dbg = 'Sheet: ' + sheetName + ' | Header row: ' + headerIdx +
+            ' | iSTN=' + iSTN + ' iNDD=' + iNDD + ' iLOB=' + iLOB +
+            ' iBTN=' + iBTN + ' iAMT=' + iAMT + ' iCURR=' + iCURR;
+  if (rows.length > headerIdx + 1) {
+    var sr = rows[headerIdx + 1];
+    var nddSample = sr ? sr[iNDD] : '?';
+    dbg += ' | sample NDD=' + nddSample + ' (type=' + typeof nddSample + ')';
+    dbg += ' | parsed=' + parseExcelDate(nddSample);
+    dbg += ' | M-end=' + getMonthEnd() + ' Q-end=' + getQuarterEnd();
+    dbg += ' | OD-M=' + calcOD(nddSample, getMonthEnd()) + ' OD-Q=' + calcOD(nddSample, getQuarterEnd());
+  }
+  showDebug(dbg);
 
-  // Collect
+  function gv(row, idx) {
+    if (idx === -1 || !row || idx >= row.length) return '';
+    var v = row[idx];
+    return (v === null || v === undefined) ? '' : v;
+  }
+
   var groups = {};
   Object.keys(soldToSet).forEach(function(st) { groups[st] = []; });
 
+  var mEnd = getMonthEnd();
+  var qEnd = getQuarterEnd();
+
   for (var di = headerIdx + 1; di < rows.length; di++) {
     var row    = rows[di];
+    if (!row) continue;
     var soldto = String(gv(row, iSTN)).trim();
     if (!soldToSet[soldto]) continue;
 
@@ -303,26 +337,31 @@ function runLookup() {
 
     if (amt <= 0) continue;
 
-    // CC0038 + Bill-to 1420822 → exclude rebate
-    var ccNorm = cc.replace(/^0+/,'') || '0';
+    // CC0038 + Bill-to 1420822 + rebate text = exclude
+    var ccNorm = cc.replace(/^0+/, '') || '0';
     if (ccNorm === '38' && btp === '1420822' && text.toLowerCase().indexOf('rebate') !== -1) continue;
 
     var custNm  = String(gv(row, iSTNM)).trim();
     var docNum  = String(gv(row, iDOC)).trim();
     var curr    = String(gv(row, iCURR)).trim();
-    var ndd     = gv(row, iNDD);
-    var mecOd   = calcOD(ndd, getMonthEnd());
-    var qecOd   = calcOD(ndd, getQuarterEnd());
+
+    // OD days calculated live from Net Due Date
+    var ndd    = gv(row, iNDD);
+    var mecOd  = calcOD(ndd, mEnd);
+    var qecOd  = calcOD(ndd, qEnd);
+
+    // LOB: CDC- prefix only for Bill-to 1420822
     var lobDisp = (btp === '1420822') ? 'CDC-' + lobRaw : lobRaw;
-    var ehfAmt  = mecOd > 90 ? exTax(amt, cc, lobRaw) : 0;
+
+    var ehfAmt   = mecOd > 90 ? exTax(amt, cc, lobRaw) : 0;
     var potential = (qecOd > 90 && mecOd <= 90) ? exTax(amt, cc, lobRaw) : 0;
 
     groups[soldto].push({
       lob: lobDisp, customer: soldto, custNm: custNm, docNum: docNum,
       arAmt: amt, curr: curr, mecOd: mecOd, qecOd: qecOd,
       potential: potential, ehfAmt: ehfAmt,
-      unblock:  getUnblockType(gv(row, iPERMA), gv(row, iPBLK), gv(row, iCBLK), gv(row, iDLK)),
-      payPlan:  getPaymentPlan(gv(row, iINST), gv(row, iP2P), gv(row, iP2PDT))
+      unblock: getUnblockType(gv(row, iPERMA), gv(row, iPBLK), gv(row, iCBLK), gv(row, iDLK)),
+      payPlan: getPaymentPlan(gv(row, iINST), gv(row, iP2P), gv(row, iP2PDT))
     });
   }
 
@@ -336,7 +375,6 @@ function runLookup() {
       html += '<div class="card"><div class="empty-msg">No AR documents found for Sold-to <strong>' + escHtml(st) + '</strong></div></div>';
       return;
     }
-
     var custNm   = rws[0].custNm || st;
     var curr     = rws[0].curr;
     var totalAR  = rws.reduce(function(s,r){ return s + r.arAmt;     }, 0);
@@ -347,19 +385,16 @@ function runLookup() {
 
     html += '<div class="card table-section">';
     html += '<h3>' + escHtml(custNm) + '</h3>';
-    html += '<div class="cust-sub">Sold-to: <strong>' + escHtml(st) + '</strong> &nbsp;·&nbsp; ' + rws.length + ' document(s) &nbsp;·&nbsp; ' + curr + '</div>';
+    html += '<div class="cust-sub">Sold-to: <strong>' + escHtml(st) + '</strong> &nbsp;&middot;&nbsp; ' + rws.length + ' document(s) &nbsp;&middot;&nbsp; ' + curr + '</div>';
 
-    // KPIs
     html += '<div class="summary-bar">';
-    html += '<div class="kpi"><div class="kpi-label">Total AR (with VAT)</div><div class="kpi-val">' + fmtNum(totalAR) + '</div><div class="kpi-sub">' + curr + ' &nbsp;·&nbsp; ' + rws.length + ' docs</div></div>';
-    html += '<div class="kpi red"><div class="kpi-label">EHF Amount (ex-tax, MEC OD&gt;90)</div><div class="kpi-val">' + fmtNum(totalEHF) + '</div><div class="kpi-sub">' + curr + ' &nbsp;·&nbsp; ' + ehfCnt + ' doc(s)</div></div>';
-    html += '<div class="kpi yellow"><div class="kpi-label">Potential EHF by Q-end</div><div class="kpi-val">' + fmtNum(totalPot) + '</div><div class="kpi-sub">' + curr + ' &nbsp;·&nbsp; ' + potCnt + ' doc(s)</div></div>';
+    html += '<div class="kpi"><div class="kpi-label">Total AR (with VAT)</div><div class="kpi-val">' + fmtNum(totalAR) + '</div><div class="kpi-sub">' + curr + ' &nbsp;&middot;&nbsp; ' + rws.length + ' docs</div></div>';
+    html += '<div class="kpi red"><div class="kpi-label">EHF Amount (ex-tax, MEC OD&gt;90)</div><div class="kpi-val">' + fmtNum(totalEHF) + '</div><div class="kpi-sub">' + curr + ' &nbsp;&middot;&nbsp; ' + ehfCnt + ' doc(s)</div></div>';
+    html += '<div class="kpi yellow"><div class="kpi-label">Potential EHF by Q-end</div><div class="kpi-val">' + fmtNum(totalPot) + '</div><div class="kpi-sub">' + curr + ' &nbsp;&middot;&nbsp; ' + potCnt + ' doc(s)</div></div>';
     html += '</div>';
 
-    // Legend
-    html += '<div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#FFD0D0"></div>EHF — MEC OD &gt;90 days</div><div class="legend-item"><div class="legend-dot" style="background:#FFF8C0"></div>Potential EHF — QEC OD &gt;90, MEC OD ≤90</div></div>';
+    html += '<div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#FFD0D0"></div>EHF &mdash; MEC OD &gt;90 days</div><div class="legend-item"><div class="legend-dot" style="background:#FFF8C0"></div>Potential EHF &mdash; QEC OD &gt;90, MEC OD &le;90</div></div>';
 
-    // Table
     html += '<div class="tbl-wrap"><table class="tbl"><thead><tr>';
     var cols = ['LOB','Customer','Customer Name','Ref. document number',
                 'AR amount with VAT','Doc currency','OD days by M-end','OD days by Q-end',
@@ -386,7 +421,6 @@ function runLookup() {
       html += '</tr>';
     });
 
-    // Total row
     html += '<tr class="total-row">';
     html += '<td colspan="4" style="font-weight:700">TOTAL</td>';
     html += '<td class="num">' + fmtNum(totalAR) + '</td>';
