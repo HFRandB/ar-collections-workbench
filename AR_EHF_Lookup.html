@@ -53,7 +53,7 @@ body{font-family:"72","72full",Arial,sans-serif;background:#F5F6F7;color:#1C2B33
 .error-msg{background:#FFF0F0;border:1px solid #FFAAAA;border-radius:8px;padding:12px 16px;color:#BB0000;font-size:13px;margin-top:12px}
 .info-box{background:#EEF6FF;border:1px solid #BDDAFF;border-radius:8px;padding:12px 16px;font-size:12px;color:#0046A0;margin-top:8px}
 .info-box b{font-weight:700}
-.debug-box{background:#FFFBE6;border:1px solid #E8C840;border-radius:8px;padding:10px 14px;font-size:11px;color:#5A4000;margin-top:8px;font-family:monospace;display:none}
+
 </style>
 </head>
 <body>
@@ -94,7 +94,7 @@ body{font-family:"72","72full",Arial,sans-serif;background:#F5F6F7;color:#1C2B33
       Potential EHF = ex-tax when QEC OD &gt;90 &amp; MEC OD &le;90 &nbsp;&middot;&nbsp;
       CC0038 Bill-to 1420822 rebate items excluded
     </div>
-    <div class="debug-box" id="debugBox"></div>
+
   </div>
 
   <div id="resultsArea"></div>
@@ -200,12 +200,6 @@ function escHtml(s) {
     .replace(/"/g,'&quot;');
 }
 
-function showDebug(msg) {
-  var el = document.getElementById('debugBox');
-  el.style.display = 'block';
-  el.innerHTML = msg;
-}
-
 // ── State ────────────────────────────────────────────────────────────────────
 var workbook = null;
 
@@ -297,28 +291,15 @@ function runLookup() {
   var iP2P   = findCol(headers, ['Promise-to-Pay ID', 'PromiseToPayID']);
   var iP2PDT = findCol(headers, ['P2P Date Promised', 'Promise2Pay Date']);
 
-  // Debug info (visible on page)
-  var dbg = 'Sheet: ' + sheetName + ' | Header row: ' + headerIdx +
-            ' | iSTN=' + iSTN + ' iNDD=' + iNDD + ' iLOB=' + iLOB +
-            ' iBTN=' + iBTN + ' iAMT=' + iAMT + ' iCURR=' + iCURR;
-  if (rows.length > headerIdx + 1) {
-    var sr = rows[headerIdx + 1];
-    var nddSample = sr ? sr[iNDD] : '?';
-    dbg += ' | sample NDD=' + nddSample + ' (type=' + typeof nddSample + ')';
-    dbg += ' | parsed=' + parseExcelDate(nddSample);
-    dbg += ' | M-end=' + getMonthEnd() + ' Q-end=' + getQuarterEnd();
-    dbg += ' | OD-M=' + calcOD(nddSample, getMonthEnd()) + ' OD-Q=' + calcOD(nddSample, getQuarterEnd());
-  }
-  showDebug(dbg);
-
   function gv(row, idx) {
     if (idx === -1 || !row || idx >= row.length) return '';
     var v = row[idx];
     return (v === null || v === undefined) ? '' : v;
   }
 
-  var groups = {};
-  Object.keys(soldToSet).forEach(function(st) { groups[st] = []; });
+  // Accumulate rows grouped by soldto + docNum (one row per Ref. document number)
+  var acc = {};   // acc[soldto][docNum] = aggregated record
+  Object.keys(soldToSet).forEach(function(st) { acc[st] = {}; });
 
   var mEnd = getMonthEnd();
   var qEnd = getQuarterEnd();
@@ -342,28 +323,43 @@ function runLookup() {
     if (ccNorm === '38' && btp === '1420822' && text.toLowerCase().indexOf('rebate') !== -1) continue;
 
     var custNm  = String(gv(row, iSTNM)).trim();
-    var docNum  = String(gv(row, iDOC)).trim();
+    var docNum  = String(gv(row, iDOC)).trim() || ('__' + di);
     var curr    = String(gv(row, iCURR)).trim();
-
-    // OD days calculated live from Net Due Date
-    var ndd    = gv(row, iNDD);
-    var mecOd  = calcOD(ndd, mEnd);
-    var qecOd  = calcOD(ndd, qEnd);
-
-    // LOB: CDC- prefix only for Bill-to 1420822
+    var ndd     = gv(row, iNDD);
+    var mecOd   = calcOD(ndd, mEnd);
+    var qecOd   = calcOD(ndd, qEnd);
     var lobDisp = (btp === '1420822') ? 'CDC-' + lobRaw : lobRaw;
 
-    var ehfAmt   = mecOd > 90 ? exTax(amt, cc, lobRaw) : 0;
-    var potential = (qecOd > 90 && mecOd <= 90) ? exTax(amt, cc, lobRaw) : 0;
-
-    groups[soldto].push({
-      lob: lobDisp, customer: soldto, custNm: custNm, docNum: docNum,
-      arAmt: amt, curr: curr, mecOd: mecOd, qecOd: qecOd,
-      potential: potential, ehfAmt: ehfAmt,
-      unblock: getUnblockType(gv(row, iPERMA), gv(row, iPBLK), gv(row, iCBLK), gv(row, iDLK)),
-      payPlan: getPaymentPlan(gv(row, iINST), gv(row, iP2P), gv(row, iP2PDT))
-    });
+    if (!acc[soldto][docNum]) {
+      acc[soldto][docNum] = {
+        lob: lobDisp, cc: cc, lobRaw: lobRaw,
+        customer: soldto, custNm: custNm, docNum: docNum,
+        arAmt: 0, curr: curr, mecOd: mecOd, qecOd: qecOd,
+        unblock: getUnblockType(gv(row, iPERMA), gv(row, iPBLK), gv(row, iCBLK), gv(row, iDLK)),
+        payPlan: getPaymentPlan(gv(row, iINST), gv(row, iP2P), gv(row, iP2PDT))
+      };
+    }
+    var a = acc[soldto][docNum];
+    a.arAmt += amt;
+    if (mecOd > a.mecOd) a.mecOd = mecOd;
+    if (qecOd > a.qecOd) a.qecOd = qecOd;
   }
+
+  // Build flat grouped arrays with impact calculations
+  var groups = {};
+  Object.keys(soldToSet).forEach(function(st) {
+    groups[st] = Object.keys(acc[st]).map(function(dk) {
+      var a = acc[st][dk];
+      var ar = Math.round(a.arAmt * 100) / 100;
+      return {
+        lob: a.lob, customer: a.customer, custNm: a.custNm, docNum: a.docNum,
+        arAmt: ar, curr: a.curr, mecOd: a.mecOd, qecOd: a.qecOd,
+        mecImpact: a.mecOd > 90 ? exTax(ar, a.cc, a.lobRaw) : 0,  // Potential EHF by M-end
+        qecImpact: a.qecOd > 90 ? exTax(ar, a.cc, a.lobRaw) : 0,  // Potential EHF by Q-end
+        unblock: a.unblock, payPlan: a.payPlan
+      };
+    });
+  });
 
   // Render
   var html = '';
@@ -377,11 +373,11 @@ function runLookup() {
     }
     var custNm   = rws[0].custNm || st;
     var curr     = rws[0].curr;
-    var totalAR  = rws.reduce(function(s,r){ return s + r.arAmt;     }, 0);
-    var totalEHF = rws.reduce(function(s,r){ return s + r.ehfAmt;    }, 0);
-    var totalPot = rws.reduce(function(s,r){ return s + r.potential; }, 0);
-    var ehfCnt   = rws.filter(function(r){ return r.ehfAmt    > 0; }).length;
-    var potCnt   = rws.filter(function(r){ return r.potential > 0; }).length;
+    var totalAR  = rws.reduce(function(s,r){ return s + r.arAmt;      }, 0);
+    var totalMec = rws.reduce(function(s,r){ return s + r.mecImpact;  }, 0);
+    var totalQec = rws.reduce(function(s,r){ return s + r.qecImpact;  }, 0);
+    var mecCnt   = rws.filter(function(r){ return r.mecImpact > 0; }).length;
+    var qecCnt   = rws.filter(function(r){ return r.qecImpact > 0; }).length;
 
     html += '<div class="card table-section">';
     html += '<h3>' + escHtml(custNm) + '</h3>';
@@ -389,22 +385,23 @@ function runLookup() {
 
     html += '<div class="summary-bar">';
     html += '<div class="kpi"><div class="kpi-label">Total AR (with VAT)</div><div class="kpi-val">' + fmtNum(totalAR) + '</div><div class="kpi-sub">' + curr + ' &nbsp;&middot;&nbsp; ' + rws.length + ' docs</div></div>';
-    html += '<div class="kpi red"><div class="kpi-label">EHF Amount (ex-tax, MEC OD&gt;90)</div><div class="kpi-val">' + fmtNum(totalEHF) + '</div><div class="kpi-sub">' + curr + ' &nbsp;&middot;&nbsp; ' + ehfCnt + ' doc(s)</div></div>';
-    html += '<div class="kpi yellow"><div class="kpi-label">Potential EHF by Q-end</div><div class="kpi-val">' + fmtNum(totalPot) + '</div><div class="kpi-sub">' + curr + ' &nbsp;&middot;&nbsp; ' + potCnt + ' doc(s)</div></div>';
+    html += '<div class="kpi red"><div class="kpi-label">Potential EHF Concession by M-end</div><div class="kpi-val">' + fmtNum(totalMec) + '</div><div class="kpi-sub">' + curr + ' &nbsp;&middot;&nbsp; ' + mecCnt + ' doc(s)</div></div>';
+    html += '<div class="kpi yellow"><div class="kpi-label">Potential EHF Concession by Q-end</div><div class="kpi-val">' + fmtNum(totalQec) + '</div><div class="kpi-sub">' + curr + ' &nbsp;&middot;&nbsp; ' + qecCnt + ' doc(s)</div></div>';
     html += '</div>';
 
-    html += '<div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#FFD0D0"></div>EHF &mdash; MEC OD &gt;90 days</div><div class="legend-item"><div class="legend-dot" style="background:#FFF8C0"></div>Potential EHF &mdash; QEC OD &gt;90, MEC OD &le;90</div></div>';
+    html += '<div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#FFD0D0"></div>MEC OD &gt;90 days</div><div class="legend-item"><div class="legend-dot" style="background:#FFF8C0"></div>QEC OD &gt;90 days (MEC &le;90)</div></div>';
 
     html += '<div class="tbl-wrap"><table class="tbl"><thead><tr>';
     var cols = ['LOB','Customer','Customer Name','Ref. document number',
                 'AR amount with VAT','Doc currency','OD days by M-end','OD days by Q-end',
-                'Potential EHF concession impact by Q-end','EHF amount',
+                'Potential EHF concession impact by Q-end',
+                'Potential EHF concession impact by M-end',
                 'Unblock type','Payment Plan'];
     cols.forEach(function(h){ html += '<th>' + escHtml(h) + '</th>'; });
     html += '</tr></thead><tbody>';
 
     rws.forEach(function(r) {
-      var cls = r.ehfAmt > 0 ? 'ehf-red' : (r.potential > 0 ? 'ehf-yellow' : '');
+      var cls = r.mecImpact > 0 ? 'ehf-red' : (r.qecImpact > 0 ? 'ehf-yellow' : '');
       html += '<tr class="' + cls + '">';
       html += '<td>' + escHtml(r.lob) + '</td>';
       html += '<td>' + escHtml(r.customer) + '</td>';
@@ -414,8 +411,8 @@ function runLookup() {
       html += '<td>' + escHtml(r.curr) + '</td>';
       html += '<td class="num">' + r.mecOd + '</td>';
       html += '<td class="num">' + r.qecOd + '</td>';
-      html += '<td class="num">' + (r.potential > 0 ? fmtNum(r.potential) : '0.00') + '</td>';
-      html += '<td class="num">' + (r.ehfAmt    > 0 ? fmtNum(r.ehfAmt)    : '0.00') + '</td>';
+      html += '<td class="num">' + fmtNum(r.qecImpact) + '</td>';
+      html += '<td class="num">' + fmtNum(r.mecImpact) + '</td>';
       html += '<td>' + escHtml(r.unblock) + '</td>';
       html += '<td>' + escHtml(r.payPlan) + '</td>';
       html += '</tr>';
@@ -426,8 +423,8 @@ function runLookup() {
     html += '<td class="num">' + fmtNum(totalAR) + '</td>';
     html += '<td>' + escHtml(curr) + '</td>';
     html += '<td></td><td></td>';
-    html += '<td class="num">' + fmtNum(totalPot) + '</td>';
-    html += '<td class="num">' + fmtNum(totalEHF) + '</td>';
+    html += '<td class="num">' + fmtNum(totalQec) + '</td>';
+    html += '<td class="num">' + fmtNum(totalMec) + '</td>';
     html += '<td colspan="2"></td>';
     html += '</tr>';
 
