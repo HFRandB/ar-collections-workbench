@@ -280,7 +280,7 @@ function runLookup() {
     var curr    = String(gv(row, iCURR)).trim();
     var mecOd   = Math.round(parseFloat(gv(row, iMEC)) || 0);
     var qecOd   = Math.round(parseFloat(gv(row, iQEC)) || 0);
-    var lobDisp = 'CDC-' + lobRaw;
+    var lobDisp = (btp === '1420822') ? 'CDC-' + lobRaw : lobRaw;
     var ehfAmt  = mecOd > 90 ? exTax(amt, cc, lobRaw) : 0;
     var potential = (qecOd > 90 && mecOd <= 90) ? exTax(amt, cc, lobRaw) : 0;
 
