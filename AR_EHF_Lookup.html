@@ -217,7 +217,7 @@ function runLookup() {
   if (!sheetName) sheetName = workbook.SheetNames[0];
 
   var ws   = workbook.Sheets[sheetName];
-  var rows = XLSX.utils.sheet_to_json(ws, {header: 1, defval: '', raw: false});
+  var rows = XLSX.utils.sheet_to_json(ws, {header: 1, defval: null, raw: true});
 
   // Detect header row
   var headerIdx = -1;
@@ -252,7 +252,7 @@ function runLookup() {
   var iP2P   = findCol(headers, ['Promise-to-Pay ID', 'PromiseToPayID']);
   var iP2PDT = findCol(headers, ['P2P Date Promised', 'Promise2Pay Date']);
 
-  function gv(row, idx) { return idx === -1 || idx >= row.length ? '' : (row[idx] || ''); }
+  function gv(row, idx) { var v = (idx === -1 || idx >= row.length) ? null : row[idx]; return v === null || v === undefined ? '' : v; }
 
   // Collect
   var groups = {};
@@ -267,7 +267,7 @@ function runLookup() {
     var lobRaw = String(gv(row, iLOB)).trim();
     var btp    = String(gv(row, iBTN)).trim();
     var text   = String(gv(row, iTXT)).trim();
-    var amt    = parseFloat(String(gv(row, iAMT)).replace(/,/g,'')) || 0;
+    var amt    = parseFloat(gv(row, iAMT)) || 0;
 
     if (amt <= 0) continue;
 
@@ -278,8 +278,8 @@ function runLookup() {
     var custNm  = String(gv(row, iSTNM)).trim();
     var docNum  = String(gv(row, iDOC)).trim();
     var curr    = String(gv(row, iCURR)).trim();
-    var mecOd   = parseInt(String(gv(row, iMEC)), 10) || 0;
-    var qecOd   = parseInt(String(gv(row, iQEC)), 10) || 0;
+    var mecOd   = Math.round(parseFloat(gv(row, iMEC)) || 0);
+    var qecOd   = Math.round(parseFloat(gv(row, iQEC)) || 0);
     var lobDisp = 'CDC-' + lobRaw;
     var ehfAmt  = mecOd > 90 ? exTax(amt, cc, lobRaw) : 0;
     var potential = (qecOd > 90 && mecOd <= 90) ? exTax(amt, cc, lobRaw) : 0;
