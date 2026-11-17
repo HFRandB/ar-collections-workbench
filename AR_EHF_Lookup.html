@@ -201,7 +201,49 @@ function escHtml(s) {
 }
 
 // ── State ────────────────────────────────────────────────────────────────────
-var workbook = null;
+var workbook    = null;
+var lastResults = null;   // stored for Excel export
+
+function exportToExcel() {
+  if (!lastResults || !lastResults.length) return;
+  var wb = XLSX.utils.book_new();
+  var COLS = ['LOB','Customer','Customer Name','Ref. document number',
+              'AR amount with VAT','Doc currency','OD days by M-end','OD days by Q-end',
+              'Potential EHF concession impact by Q-end',
+              'Potential EHF concession impact by M-end',
+              'Unblock type','Payment Plan'];
+  lastResults.forEach(function(grp) {
+    var rws = grp.rows;
+    if (!rws.length) return;
+    var aoa = [COLS];
+    rws.forEach(function(r) {
+      aoa.push([r.lob, r.customer, r.custNm, r.docNum,
+                r.arAmt, r.curr, r.mecOd, r.qecOd,
+                r.qecImpact, r.mecImpact, r.unblock, r.payPlan]);
+    });
+    var totalAR  = rws.reduce(function(s,r){ return s+r.arAmt; }, 0);
+    var totalMec = rws.reduce(function(s,r){ return s+r.mecImpact; }, 0);
+    var totalQec = rws.reduce(function(s,r){ return s+r.qecImpact; }, 0);
+    aoa.push(['TOTAL','','','',Math.round(totalAR*100)/100,rws[0].curr||'','','',
+              Math.round(totalQec*100)/100,Math.round(totalMec*100)/100,'','']);
+    var sheetName = (rws[0].custNm || grp.st).replace(/[\\\/\?\*\[\]:]/g,'_').substring(0,28) + '_' + grp.st.substring(0,3);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), sheetName);
+  });
+  var today = new Date();
+  var ds = today.getFullYear() + ('0'+(today.getMonth()+1)).slice(-2) + ('0'+today.getDate()).slice(-2);
+  try {
+    XLSX.writeFile(wb, 'EHF_Lookup_' + ds + '.xlsx');
+  } catch(e) {
+    // Fallback for browsers where writeFile is unavailable
+    var out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+    var blob = new Blob([out], {type:'application/octet-stream'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = 'EHF_Lookup_' + ds + '.xlsx';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+}
 
 document.getElementById('fileInput').addEventListener('change', function(e) {
   var file = e.target.files[0];
@@ -432,7 +474,14 @@ function runLookup() {
     html += '</div>';
   });
 
-  document.getElementById('resultsArea').innerHTML = html;
+  // Store for export
+  lastResults = keys.map(function(st){ return {st: st, rows: groups[st]}; });
+
+  // Add export button above results
+  var exportBar = '<div style="display:flex;justify-content:flex-end;margin-bottom:12px">' +
+    '<button class="btn" style="background:#188918;font-size:13px;padding:9px 20px" onclick="exportToExcel()">&#8681; Export to Excel (.xlsx)</button>' +
+    '</div>';
+  document.getElementById('resultsArea').innerHTML = exportBar + html;
 }
 </script>
 </body>
