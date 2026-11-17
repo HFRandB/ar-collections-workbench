@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EHF Lookup — AR Collections</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"72","72full",Arial,sans-serif;background:#F5F6F7;color:#1C2B33;min-height:100vh}
+.header{background:linear-gradient(135deg,#1C2B33 0%,#0070F2 100%);color:#fff;padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header h1{font-size:22px;font-weight:700}
+.header p{opacity:.8;font-size:13px;margin-top:4px}
+.back-btn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 16px;font-size:13px;text-decoration:none;cursor:pointer;transition:background .2s;font-weight:600}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+.container{max-width:1500px;margin:32px auto;padding:0 32px}
+.card{background:#fff;border:1px solid #E0E0E0;border-radius:12px;padding:24px;margin-bottom:24px}
+.card h2{font-size:16px;font-weight:700;margin-bottom:16px;color:#1C2B33}
+.input-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.input-group{display:flex;flex-direction:column;gap:6px}
+.input-group label{font-size:12px;font-weight:600;color:#6A6D70;letter-spacing:.3px}
+.input-group input[type="text"]{border:1px solid #D0D0D0;border-radius:8px;padding:10px 14px;font-size:14px;width:340px;outline:none;transition:border-color .2s}
+.input-group input[type="text"]:focus{border-color:#0070F2;box-shadow:0 0 0 2px rgba(0,112,242,.12)}
+.file-label{display:inline-flex;align-items:center;gap:8px;background:#F0F5FF;border:1px solid #B0C8F0;border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;color:#0064D9;font-weight:600;transition:background .2s;white-space:nowrap}
+.file-label:hover{background:#E0EDFF}
+.file-label input{display:none}
+.btn{background:#0070F2;color:#fff;border:none;border-radius:8px;padding:11px 28px;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;white-space:nowrap;letter-spacing:.2px}
+.btn:hover{background:#0057C2}
+.btn:disabled{background:#B0C8F0;cursor:not-allowed}
+.file-status{font-size:12px;color:#6A6D70;margin-top:4px;min-height:16px}
+.table-section{margin-bottom:32px}
+.table-section h3{font-size:16px;font-weight:700;color:#1C2B33;margin-bottom:3px}
+.cust-sub{font-size:12px;color:#6A6D70;margin-bottom:14px}
+.summary-bar{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.kpi{background:#F0F5FF;border:1px solid #C0D8F8;border-radius:8px;padding:10px 18px;min-width:170px}
+.kpi-label{font-size:10px;color:#6A6D70;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.kpi-val{font-size:20px;font-weight:700;color:#0070F2;margin-top:3px;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:11px;color:#9DA0A4;margin-top:2px}
+.kpi.red{background:#FFF0F0;border-color:#F0B0B0}.kpi.red .kpi-val{color:#BB0000}
+.kpi.yellow{background:#FFFBE6;border-color:#E8C840}.kpi.yellow .kpi-val{color:#7A5800}
+.tbl-wrap{overflow-x:auto;margin-top:8px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
+.tbl th{background:#1C2B33;color:#fff;padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.3px}
+.tbl td{padding:7px 10px;border-bottom:1px solid #F0F0F0;vertical-align:middle}
+.tbl tr:hover td{background:#F5F8FF}
+.tbl tr.ehf-red td{background:#FFF0F0}
+.tbl tr.ehf-yellow td{background:#FFFCEC}
+.tbl td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl tr.total-row td{background:#EDF3FF;font-weight:700;border-top:2px solid #0070F2}
+.legend{display:flex;gap:20px;font-size:11px;color:#6A6D70;margin-top:6px}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:13px;height:13px;border-radius:3px;flex-shrink:0}
+.empty-msg{color:#9DA0A4;font-size:14px;padding:40px;text-align:center}
+.error-msg{background:#FFF0F0;border:1px solid #FFAAAA;border-radius:8px;padding:12px 16px;color:#BB0000;font-size:13px;margin-top:12px}
+.info-box{background:#EEF6FF;border:1px solid #BDDAFF;border-radius:8px;padding:12px 16px;font-size:12px;color:#0046A0;margin-top:8px}
+.info-box b{font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🔍 EHF Lookup</h1>
+    <p>Greater China &nbsp;·&nbsp; CC0038 · CC0073 · CC0074 &nbsp;·&nbsp; Per Sold-To EHF Tracking Table</p>
+  </div>
+  <a class="back-btn" href="AR_Dashboard_2026-08-03.html">← Dashboard</a>
+</div>
+
+<div class="container">
+
+  <!-- Input card -->
+  <div class="card">
+    <h2>Lookup Parameters</h2>
+    <div class="input-row">
+      <div class="input-group">
+        <label>Sold-to Party Number(s)</label>
+        <input type="text" id="soldToInput" placeholder="e.g. 1176363, 26383, 1605871">
+      </div>
+      <div class="input-group">
+        <label>By Document Excel File</label>
+        <label class="file-label">
+          📂 Choose File&hellip;
+          <input type="file" id="fileInput" accept=".xlsx,.xls">
+        </label>
+        <div class="file-status" id="fileStatus">No file selected</div>
+      </div>
+      <button class="btn" id="lookupBtn" onclick="runLookup()" disabled>Generate Tables</button>
+    </div>
+    <div id="errorMsg"></div>
+    <div class="info-box" style="margin-top:14px">
+      <b>Rules applied automatically:</b>
+      CDC- prefix on all LOBs &nbsp;·&nbsp;
+      EHF amount = ex-tax (0038: SW 13% / others 6%; 0073: 5%; 0074: 0%) when MEC OD &gt;90d &nbsp;·&nbsp;
+      Potential EHF = ex-tax when QEC OD &gt;90 &amp; MEC OD ≤90 &nbsp;·&nbsp;
+      CC0038 Bill-to 1420822 rebate items excluded
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsArea"></div>
+
+</div>
+
+<script src="xlsx.mini.min.js"></script>
+<script>
+
+// ── Tax rates ──────────────────────────────────────────────────────────────
+function getTaxRate(cc, lobRaw) {
+  var ccNorm = String(cc || '').replace(/^0+/, '') || '0';
+  var lobU   = String(lobRaw || '').toUpperCase().trim();
+  if (ccNorm === '38') {
+    if (lobU === 'SW' || lobU.indexOf('SW ') === 0 || lobU.indexOf('SW-') === 0 ||
+        lobU.indexOf(' SW') !== -1 || lobU.indexOf('(SW)') !== -1) return 0.13;
+    return 0.06;
+  }
+  if (ccNorm === '73') return 0.05;
+  if (ccNorm === '74') return 0.00;
+  return 0.06;
+}
+
+function exTax(amt, cc, lobRaw) {
+  var rate = getTaxRate(cc, lobRaw);
+  if (rate === 0) return Math.round(amt * 100) / 100;
+  return Math.round(amt / (1 + rate) * 100) / 100;
+}
+
+function fmtNum(n) {
+  if (n === null || n === undefined || isNaN(n)) return '';
+  return n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function getUnblockType(perma, pblock, cblock, dlock) {
+  var parts = [];
+  if (String(perma  || '').trim()) parts.push('Perma Block');
+  if (String(pblock || '').trim()) parts.push('Payment Block (' + pblock + ')');
+  if (String(cblock || '').trim()) parts.push('Clearing Lock (' + cblock + ')');
+  if (String(dlock  || '').trim()) parts.push('Dunning Lock (' + dlock + ')');
+  return parts.length ? parts.join(' | ') : 'Not blocked';
+}
+
+function getPaymentPlan(instId, p2pId, p2pDate) {
+  var parts = [];
+  if (String(instId || '').trim()) parts.push('Instalment Plan: ' + instId);
+  if (String(p2pId  || '').trim()) {
+    var ds = p2pDate ? String(p2pDate).substring(0, 10) : '';
+    parts.push('P2P: ' + p2pId + (ds ? ' (Due: ' + ds + ')' : ''));
+  }
+  return parts.length ? parts.join(' | ') : 'No written payment plan';
+}
+
+function findCol(headers, candidates) {
+  for (var ci = 0; ci < candidates.length; ci++) {
+    var name = candidates[ci].toLowerCase();
+    for (var i = 0; i < headers.length; i++) {
+      if (headers[i] && String(headers[i]).toLowerCase().indexOf(name) !== -1) return i;
+    }
+  }
+  return -1;
+}
+
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+var workbook = null;
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      workbook = XLSX.read(new Uint8Array(ev.target.result), {type: 'array', cellDates: false});
+      document.getElementById('fileStatus').textContent = '✓ ' + file.name;
+      document.getElementById('fileStatus').style.color = '#188918';
+      updateBtn();
+    } catch(ex) {
+      showError('Cannot parse Excel file: ' + ex.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('soldToInput').addEventListener('input', updateBtn);
+
+function updateBtn() {
+  var hasSoldTo = document.getElementById('soldToInput').value.trim() !== '';
+  document.getElementById('lookupBtn').disabled = !(workbook && hasSoldTo);
+}
+
+function showError(msg) {
+  document.getElementById('errorMsg').innerHTML =
+    '<div class="error-msg">⚠️ ' + escHtml(msg) + '</div>';
+}
+function clearError() { document.getElementById('errorMsg').innerHTML = ''; }
+
+// ── Main ───────────────────────────────────────────────────────────────────
+function runLookup() {
+  clearError();
+  if (!workbook) { showError('Please select an Excel file first.'); return; }
+
+  var raw = document.getElementById('soldToInput').value.trim();
+  if (!raw) { showError('Please enter at least one sold-to party number.'); return; }
+
+  var soldToSet = {};
+  raw.split(',').forEach(function(s) { var v = s.trim(); if (v) soldToSet[v] = true; });
+
+  // Find sheet
+  var pref = ['By Document', 'By Document#', 'Master Report'];
+  var sheetName = null;
+  for (var pi = 0; pi < pref.length; pi++) {
+    if (workbook.SheetNames.indexOf(pref[pi]) !== -1) { sheetName = pref[pi]; break; }
+  }
+  if (!sheetName) sheetName = workbook.SheetNames[0];
+
+  var ws   = workbook.Sheets[sheetName];
+  var rows = XLSX.utils.sheet_to_json(ws, {header: 1, defval: '', raw: false});
+
+  // Detect header row
+  var headerIdx = -1;
+  var headers   = [];
+  for (var ri = 0; ri < Math.min(rows.length, 10); ri++) {
+    var row = rows[ri].map(function(h) { return String(h || '').trim(); });
+    if (row.indexOf('Sold-to Number') !== -1 || row.indexOf('Company Code') !== -1) {
+      headerIdx = ri;
+      headers   = row;
+      break;
+    }
+  }
+  if (headerIdx === -1) { showError('Header row not found in sheet "' + sheetName + '".'); return; }
+
+  // Map columns
+  var iCC    = findCol(headers, ['Company Code']);
+  var iSTN   = findCol(headers, ['Sold-to Number']);
+  var iSTNM  = findCol(headers, ['Sold-To Party Name']);
+  var iBTN   = findCol(headers, ['Bill-to Number']);
+  var iDOC   = findCol(headers, ['Document Number']);
+  var iLOB   = findCol(headers, ['Line of Business']);
+  var iAMT   = findCol(headers, ['Document Amount']);
+  var iCURR  = findCol(headers, ['Doc Currency', 'Doc currency']);
+  var iTXT   = findCol(headers, ['Text']);
+  var iMEC   = findCol(headers, ['Days Past Due @ MEC', 'Days Past Due @ M']);
+  var iQEC   = findCol(headers, ['Days Past Due @ QEC', 'Days Past Due @ Q']);
+  var iPERMA = findCol(headers, ['PermaBlock']);
+  var iPBLK  = findCol(headers, ['Payment Block']);
+  var iCBLK  = findCol(headers, ['Clearing Lock']);
+  var iDLK   = findCol(headers, ['Dunn Lock Reason', 'DunnLockReason']);
+  var iINST  = findCol(headers, ['Installment Plan ID', 'InstallmntPlan ID']);
+  var iP2P   = findCol(headers, ['Promise-to-Pay ID', 'PromiseToPayID']);
+  var iP2PDT = findCol(headers, ['P2P Date Promised', 'Promise2Pay Date']);
+
+  function gv(row, idx) { return idx === -1 || idx >= row.length ? '' : (row[idx] || ''); }
+
+  // Collect
+  var groups = {};
+  Object.keys(soldToSet).forEach(function(st) { groups[st] = []; });
+
+  for (var di = headerIdx + 1; di < rows.length; di++) {
+    var row    = rows[di];
+    var soldto = String(gv(row, iSTN)).trim();
+    if (!soldToSet[soldto]) continue;
+
+    var cc     = String(gv(row, iCC)).trim();
+    var lobRaw = String(gv(row, iLOB)).trim();
+    var btp    = String(gv(row, iBTN)).trim();
+    var text   = String(gv(row, iTXT)).trim();
+    var amt    = parseFloat(String(gv(row, iAMT)).replace(/,/g,'')) || 0;
+
+    if (amt <= 0) continue;
+
+    // CC0038 + Bill-to 1420822 → exclude rebate
+    var ccNorm = cc.replace(/^0+/,'') || '0';
+    if (ccNorm === '38' && btp === '1420822' && text.toLowerCase().indexOf('rebate') !== -1) continue;
+
+    var custNm  = String(gv(row, iSTNM)).trim();
+    var docNum  = String(gv(row, iDOC)).trim();
+    var curr    = String(gv(row, iCURR)).trim();
+    var mecOd   = parseInt(String(gv(row, iMEC)), 10) || 0;
+    var qecOd   = parseInt(String(gv(row, iQEC)), 10) || 0;
+    var lobDisp = 'CDC-' + lobRaw;
+    var ehfAmt  = mecOd > 90 ? exTax(amt, cc, lobRaw) : 0;
+    var potential = (qecOd > 90 && mecOd <= 90) ? exTax(amt, cc, lobRaw) : 0;
+
+    groups[soldto].push({
+      lob: lobDisp, customer: soldto, custNm: custNm, docNum: docNum,
+      arAmt: amt, curr: curr, mecOd: mecOd, qecOd: qecOd,
+      potential: potential, ehfAmt: ehfAmt,
+      unblock:  getUnblockType(gv(row, iPERMA), gv(row, iPBLK), gv(row, iCBLK), gv(row, iDLK)),
+      payPlan:  getPaymentPlan(gv(row, iINST), gv(row, iP2P), gv(row, iP2PDT))
+    });
+  }
+
+  // Render
+  var html = '';
+  var keys = Object.keys(soldToSet).sort();
+
+  keys.forEach(function(st) {
+    var rws = groups[st];
+    if (!rws.length) {
+      html += '<div class="card"><div class="empty-msg">No AR documents found for Sold-to <strong>' + escHtml(st) + '</strong></div></div>';
+      return;
+    }
+
+    var custNm   = rws[0].custNm || st;
+    var curr     = rws[0].curr;
+    var totalAR  = rws.reduce(function(s,r){ return s + r.arAmt;     }, 0);
+    var totalEHF = rws.reduce(function(s,r){ return s + r.ehfAmt;    }, 0);
+    var totalPot = rws.reduce(function(s,r){ return s + r.potential; }, 0);
+    var ehfCnt   = rws.filter(function(r){ return r.ehfAmt    > 0; }).length;
+    var potCnt   = rws.filter(function(r){ return r.potential > 0; }).length;
+
+    html += '<div class="card table-section">';
+    html += '<h3>' + escHtml(custNm) + '</h3>';
+    html += '<div class="cust-sub">Sold-to: <strong>' + escHtml(st) + '</strong> &nbsp;·&nbsp; ' + rws.length + ' document(s) &nbsp;·&nbsp; ' + curr + '</div>';
+
+    // KPIs
+    html += '<div class="summary-bar">';
+    html += '<div class="kpi"><div class="kpi-label">Total AR (with VAT)</div><div class="kpi-val">' + fmtNum(totalAR) + '</div><div class="kpi-sub">' + curr + ' &nbsp;·&nbsp; ' + rws.length + ' docs</div></div>';
+    html += '<div class="kpi red"><div class="kpi-label">EHF Amount (ex-tax, MEC OD&gt;90)</div><div class="kpi-val">' + fmtNum(totalEHF) + '</div><div class="kpi-sub">' + curr + ' &nbsp;·&nbsp; ' + ehfCnt + ' doc(s)</div></div>';
+    html += '<div class="kpi yellow"><div class="kpi-label">Potential EHF by Q-end</div><div class="kpi-val">' + fmtNum(totalPot) + '</div><div class="kpi-sub">' + curr + ' &nbsp;·&nbsp; ' + potCnt + ' doc(s)</div></div>';
+    html += '</div>';
+
+    // Legend
+    html += '<div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#FFD0D0"></div>EHF — MEC OD &gt;90 days</div><div class="legend-item"><div class="legend-dot" style="background:#FFF8C0"></div>Potential EHF — QEC OD &gt;90, MEC OD ≤90</div></div>';
+
+    // Table
+    html += '<div class="tbl-wrap"><table class="tbl"><thead><tr>';
+    var cols = ['LOB','Customer','Customer Name','Ref. document number',
+                'AR amount with VAT','Doc currency','OD days by M-end','OD days by Q-end',
+                'Potential EHF concession impact by Q-end','EHF amount',
+                'Unblock type','Payment Plan'];
+    cols.forEach(function(h){ html += '<th>' + escHtml(h) + '</th>'; });
+    html += '</tr></thead><tbody>';
+
+    rws.forEach(function(r) {
+      var cls = r.ehfAmt > 0 ? 'ehf-red' : (r.potential > 0 ? 'ehf-yellow' : '');
+      html += '<tr class="' + cls + '">';
+      html += '<td>' + escHtml(r.lob) + '</td>';
+      html += '<td>' + escHtml(r.customer) + '</td>';
+      html += '<td>' + escHtml(r.custNm) + '</td>';
+      html += '<td>' + escHtml(r.docNum) + '</td>';
+      html += '<td class="num">' + fmtNum(r.arAmt) + '</td>';
+      html += '<td>' + escHtml(r.curr) + '</td>';
+      html += '<td class="num">' + r.mecOd + '</td>';
+      html += '<td class="num">' + r.qecOd + '</td>';
+      html += '<td class="num">' + (r.potential > 0 ? fmtNum(r.potential) : '0.00') + '</td>';
+      html += '<td class="num">' + (r.ehfAmt    > 0 ? fmtNum(r.ehfAmt)    : '0.00') + '</td>';
+      html += '<td>' + escHtml(r.unblock) + '</td>';
+      html += '<td>' + escHtml(r.payPlan) + '</td>';
+      html += '</tr>';
+    });
+
+    // Total row
+    html += '<tr class="total-row">';
+    html += '<td colspan="4" style="font-weight:700">TOTAL</td>';
+    html += '<td class="num">' + fmtNum(totalAR) + '</td>';
+    html += '<td>' + escHtml(curr) + '</td>';
+    html += '<td></td><td></td>';
+    html += '<td class="num">' + fmtNum(totalPot) + '</td>';
+    html += '<td class="num">' + fmtNum(totalEHF) + '</td>';
+    html += '<td colspan="2"></td>';
+    html += '</tr>';
+
+    html += '</tbody></table></div>';
+    html += '</div>';
+  });
+
+  document.getElementById('resultsArea').innerHTML = html;
+}
+</script>
+</body>
+</html>
