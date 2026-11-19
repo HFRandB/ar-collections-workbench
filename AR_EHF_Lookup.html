@@ -468,8 +468,8 @@ function runLookup() {
     html+='<div class="cust-sub">Sold-to: <strong>'+escHtml(st)+'</strong> &nbsp;&middot;&nbsp; '+rws.length+' document(s) &nbsp;&middot;&nbsp; '+curr+'</div>';
     html+='<div class="summary-bar">'
       +'<div class="kpi"><div class="kpi-label">Total AR (with VAT)</div><div class="kpi-val">'+fmtNum(tAR)+'</div><div class="kpi-sub">'+curr+'</div></div>'
-      +'<div class="kpi red"><div class="kpi-label">Potential EHF by M-end (OD&gt;90)</div><div class="kpi-val">'+fmtNum(tMec)+'</div><div class="kpi-sub">'+curr+' &middot; '+mCnt+' doc(s)</div></div>'
-      +'<div class="kpi yellow"><div class="kpi-label">Potential EHF by Q-end (OD&gt;90)</div><div class="kpi-val">'+fmtNum(tQec)+'</div><div class="kpi-sub">'+curr+' &middot; '+qCnt+' doc(s)</div></div>'
+      +'<div class="kpi red"><div class="kpi-label">Potential EHF by M-end (OD&gt;90)</div><div class="kpi-val" id="kpi-mec-'+gi+'">'+fmtNum(tMec)+'</div><div class="kpi-sub" id="kpi-mec-sub-'+gi+'">'+curr+' &middot; '+mCnt+' doc(s)</div></div>'
+      +'<div class="kpi yellow"><div class="kpi-label">Potential EHF by Q-end (OD&gt;90)</div><div class="kpi-val" id="kpi-qec-'+gi+'">'+fmtNum(tQec)+'</div><div class="kpi-sub" id="kpi-qec-sub-'+gi+'">'+curr+' &middot; '+qCnt+' doc(s)</div></div>'
       +'</div>';
     html+='<div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#FFD0D0"></div>EHF by M-end</div></div>';
     html+='<div class="tbl-wrap"><table class="tbl"><thead><tr>';
@@ -513,8 +513,8 @@ function runLookup() {
       +'<td class="num">'+fmtNum(tAR)+'</td>'
       +'<td>'+escHtml(curr)+'</td>'
       +'<td></td><td></td>'
-      +'<td class="num">'+fmtNum(tQec)+'</td>'
-      +'<td class="num">'+fmtNum(tMec)+'</td>'
+      +'<td class="num" id="total-qec-'+gi+'">'+fmtNum(tQec)+'</td>'
+      +'<td class="num" id="total-mec-'+gi+'">'+fmtNum(tMec)+'</td>'
       +'<td colspan="2"></td></tr>';
     html+='</tbody></table></div></div>';
   });
@@ -572,6 +572,19 @@ function updatePayPlan(gi,ri,val) {
     var nc=r.dispute?'disputed':(r.phase2?'phase2':(r.mecImpact>0?'ehf-red':(r.qecImpact>0?'ehf-yellow':'')));
     trEl.className=nc;
   }
+  // Update TOTAL row + KPI tiles
+  var rws=lastResults[gi].rows;
+  var curr=rws[0]?rws[0].curr:'';
+  var newTMec=Math.round(rws.reduce(function(s,x){return s+x.mecImpact;},0)*100)/100;
+  var newTQec=Math.round(rws.reduce(function(s,x){return s+x.qecImpact;},0)*100)/100;
+  var mCnt=rws.filter(function(x){return x.mecImpact>0;}).length;
+  var qCnt=rws.filter(function(x){return x.qecImpact>0;}).length;
+  var tmEl=document.getElementById('total-mec-'+gi); if(tmEl) tmEl.textContent=fmtNum(newTMec);
+  var tqEl=document.getElementById('total-qec-'+gi); if(tqEl) tqEl.textContent=fmtNum(newTQec);
+  var kmEl=document.getElementById('kpi-mec-'+gi); if(kmEl) kmEl.textContent=fmtNum(newTMec);
+  var kqEl=document.getElementById('kpi-qec-'+gi); if(kqEl) kqEl.textContent=fmtNum(newTQec);
+  var kmsEl=document.getElementById('kpi-mec-sub-'+gi); if(kmsEl) kmsEl.textContent=curr+' \u00b7 '+mCnt+' doc(s)';
+  var kqsEl=document.getElementById('kpi-qec-sub-'+gi); if(kqsEl) kqsEl.textContent=curr+' \u00b7 '+qCnt+' doc(s)';
 }
 </script>
 </body>
